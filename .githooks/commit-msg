@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 
-AI_TRAILER = re.compile(r"^(co-authored-by:.*(claude|anthropic|openai|copilot|chatgpt)|claude-session:)", re.I | re.M)
+AI_TRAILER = re.compile(r"^(co-authored-by:.*(claude|anthropic|openai|copilot|chatgpt|codex|gemini|cursor|aider|windsurf|codeium|devin)|claude-session:)", re.I | re.M)
 SESSION_URL = re.compile(r"claude\.ai/code/session_", re.I)
 
 
@@ -36,6 +36,8 @@ def problems(message: str, terms: list[str]) -> list[str]:
 def main(argv: list[str]) -> int:
     message = pathlib.Path(argv[1]).read_text(encoding="utf-8")
     cfg = local_config()
+    if not cfg.exists():
+        print(f"commit-msg: no local config at {cfg}; instance terms are not checked", file=sys.stderr)
     terms = json.loads(cfg.read_text()).get("neutrality_terms", []) if cfg.exists() else []
     found = problems(message, terms)
     for p in found:

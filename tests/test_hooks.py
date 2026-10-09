@@ -37,6 +37,9 @@ def test_plain_message_passes(run_hook):
         "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
         "co-authored-by: Some Bot <bot@anthropic.com>",
         "Claude-Session: https://claude.ai/code/session_abc",
+        "Co-authored-by: Gemini <gemini-code-assist@google.com>",
+        "Co-authored-by: Cursor Agent <cursoragent@cursor.com>",
+        "Co-authored-by: aider (gpt-4o) <noreply@aider.chat>",
     ],
 )
 def test_ai_trailers_are_rejected(run_hook, trailer):
@@ -62,3 +65,12 @@ def test_git_comment_lines_are_ignored(run_hook):
 def test_hooks_are_executable():
     for name in ("commit-msg", "pre-commit"):
         assert os.access(HOOKS / name, os.X_OK), name
+
+
+def test_a_missing_local_config_is_announced(tmp_path):
+    msg = tmp_path / "COMMIT_EDITMSG"
+    msg.write_text("Add x\n")
+    env = {**os.environ, "NEONFIN_LOCAL_CONFIG": str(tmp_path / "absent.json")}
+    r = subprocess.run([sys.executable, str(HOOKS / "commit-msg"), str(msg)], capture_output=True, text=True, env=env)
+    assert r.returncode == 0
+    assert "instance terms are not checked" in r.stderr
