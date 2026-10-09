@@ -1,12 +1,13 @@
 """Whether the skin meets the spec's gates against vanilla Jellyfin (spec section 5).
 
 usage: python -m harness.gates VANILLA_RUN SKIN_RUN [--scope home,movies]
-       python -m harness.gates --bench BENCH_RUN [SKIN_CAPTURE_RUN ...] [--scope home,movies]
+       python -m harness.gates --bench BENCH_RUN [--bench BENCH_RUN ...] [SKIN_CAPTURE_RUN ...] [--scope home,movies]
 
 Performance and glass apply to every route captured; Jellyfin blue and text
 contrast apply only to the routes in scope (the pages the milestone styles).
 A bench run (harness.bench) carries paired vanilla and skin trials; capture
-runs next to it carry the glass, blue and contrast checks.
+runs next to it carry the glass, blue and contrast checks. A later bench replaces the cells
+it measured again, so one cell can be re-measured without re-running the rest.
 """
 
 from __future__ import annotations
@@ -141,13 +142,19 @@ def _summary(run: str) -> dict:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("runs", nargs="*", help="VANILLA SKIN, or with --bench the skin capture runs")
-    ap.add_argument("--bench", help="a harness.bench run: speed comes from its paired trials")
+    ap.add_argument("--bench", action="append", help="a harness.bench run, repeatable: speed comes from its paired trials")
     ap.add_argument("--scope", default="home")
     args = ap.parse_args(argv)
     scope = set(args.scope.split(","))
     if args.bench:
-        bench = json.loads((pathlib.Path(args.bench) / "bench.json").read_text())
+        benches = [json.loads((pathlib.Path(b) / "bench.json").read_text()) for b in args.bench]
+        bench = {**benches[0], "cells": {cell: c for b in benches for cell, c in b["cells"].items()}}
+        print(f"{len(bench['cells'])} cells from {len(benches)} bench{'es' if len(benches) > 1 else ''}")
         fails = evaluate_bench(bench)
+        for b in benches[1:]:
+            for key in ("server_version", "browser_version"):
+                if b.get(key) != bench.get(key):
+                    fails.append(f"benches differ in {key}: {bench.get(key)} vs {b.get(key)}")
         for run in args.runs:
             capture = _summary(run)
             if capture.get("css_mode") == "vanilla":

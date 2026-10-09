@@ -177,3 +177,16 @@ def test_gates_cli_judges_a_bench_and_skin_captures(tmp_path, capsys):
     assert gates.main(["--bench", str(tmp_path / "b"), str(tmp_path / "c")]) == 1
     out = capsys.readouterr().out
     assert "desktop/home: 5 live glass surfaces" in out and "gates: 1 failure(s)" in out
+
+
+def test_a_later_bench_replaces_the_cells_it_measured_again(tmp_path, capsys):
+    import json
+
+    for name, cells in (
+        ("b1", {"all/desktop/home": [pair(10, 20)] * 4, "all/phone/home": [pair(10, 10.5)] * 4}),
+        ("b2", {"all/desktop/home": [pair(10, 10.5)] * 4}),
+    ):
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "bench.json").write_text(json.dumps(bench({k: {"pairs": v} for k, v in cells.items()})))
+    assert gates.main(["--bench", str(tmp_path / "b1"), "--bench", str(tmp_path / "b2")]) == 0
+    assert "2 cells from 2 benches" in capsys.readouterr().out
