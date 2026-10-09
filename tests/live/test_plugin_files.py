@@ -33,8 +33,14 @@ def test_header_reads_over_a_white_hero(open_page, tmp_path):
         " #slides-container .backdrop-container > * { visibility: hidden !important; }"
     )
     page.wait_for_timeout(200)
+    reach = page.evaluate(
+        """() => { const b = document.querySelector('#slides-container .slide.active .backdrop-container');
+      return [getComputedStyle(b).backgroundColor, Math.round(b.getBoundingClientRect().top)]; }"""
+    )
+    assert reach == ["rgb(255, 255, 255)", 0]
+    assert page.locator(f"{NAV} > .MuiButton-root >> visible=true").count() > 0
     fails = checks.contrast_failures(page, "home", tmp_path / "hero.png")
-    assert [f for f in fails if f["label"].startswith("a") and "MuiButton" in f["label"]] == []
+    assert [f for f in fails if "MuiButton" in f["label"]] == []
 
 
 def test_without_media_bar_home_starts_below_the_capsules(open_page):
@@ -55,6 +61,7 @@ def test_enhanced_buttons_sit_inside_the_actions_capsule(open_page, style):
 
 @pytest.mark.parametrize("plugin_state", ["all", "without:jellyfin-enhanced"])
 def test_actions_stay_one_right_aligned_capsule(open_page, style, plugin_state):
+    assert open_page("home", "desktop", plugin_state).locator(ACTIONS).count() == 1
     page = open_page("home", "desktop", plugin_state)
     nav, act = style(page, NAV)["rect"], style(page, ACTIONS)["rect"]
     assert nav[2] < 720 and act[0] > nav[0] + nav[2] and act[0] + act[2] > 1440 - 120
@@ -65,3 +72,19 @@ def test_language_flags_are_rounded(open_page, style):
     if f is None:
         pytest.skip("no language flags on this server's home")
     assert f["border-top-left-radius"] == "3px"
+
+
+def test_enhanced_tray_buttons_brighten_on_hover(open_page, color):
+    page = open_page("home", "desktop", "all", variant="hover")
+    button = page.locator(".je-header-buttons-tray .headerButton >> visible=true").first
+    button.hover()
+    page.wait_for_timeout(300)
+    assert color(button.evaluate("(b) => getComputedStyle(b).color"))[3] > 0.9
+    page.mouse.move(0, 0)
+
+
+def test_phone_hero_keeps_its_top_undimmed(open_page):
+    # Phones draw the header solid, so nothing needs dimming under it.
+    page = open_page("home", "phone", "all")
+    layers = page.evaluate("getComputedStyle(document.querySelector('#slides-container .slide.active .gradient-overlay')).backgroundImage")
+    assert not layers.startswith("linear-gradient(rgba(5, 6, 10, 0.72)")
