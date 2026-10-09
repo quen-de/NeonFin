@@ -49,3 +49,10 @@ def test_repository_files_name_nothing_from_the_instance():
         if h:
             found[rel] = h
     assert not found, f"instance terms in: {found}"
+
+
+def test_built_stylesheet_names_nothing_from_the_instance():
+    import build
+
+    terms = neutrality_terms()
+    assert hits(build.assemble(), terms) == []
