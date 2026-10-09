@@ -13,7 +13,7 @@ import urllib.request
 from playwright.sync_api import sync_playwright
 
 import build
-from harness import collect, config, cssbundle, perf, plugins, session
+from harness import checks, collect, config, cssbundle, perf, plugins, session
 from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
 
 RUNS = pathlib.Path(__file__).resolve().parent / "runs"
@@ -57,7 +57,16 @@ def capture_profile(browser, cfg, prof, routes, override, effective, outdir, sum
         snap = collect.styles(p, volatile)
         write_gz(outdir / prof.name / f"{route.name}.styles.json.gz", snap)
         hit |= set(collect.matched(p, unique))
-        summary["routes"][key] = {"settled": settled, "elements": len(snap), "backdrop_elements": collect.backdrop_count(snap)}
+        glass = checks.glass_elements(p)
+        summary["routes"][key] = {
+            "settled": settled,
+            "elements": len(snap),
+            "backdrop_elements": collect.backdrop_count(snap),
+            "glass": len(glass),
+            "glass_elements": glass,
+            "blue": checks.blue_hits(p),
+            "contrast_failures": checks.contrast_failures(p, route.name, outdir / prof.name / f"{route.name}.contrast.png"),
+        }
     summary["css"]["rules"] = n_rules
     summary["css"]["selectors"] = len(unique)
     summary["css"]["matched_share"][prof.name] = round(len(hit) / len(unique), 4) if unique else 0
@@ -90,7 +99,7 @@ def perf_profile(browser, cfg, prof, state, override, trials, plugins_off):
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--label", required=True)
-    ap.add_argument("--css", choices=("live", "dist"), required=True)
+    ap.add_argument("--css", choices=("live", "dist", "vanilla"), required=True)
     ap.add_argument("--profiles", default="desktop,phone")
     ap.add_argument("--routes", default=",".join(r.name for r in ROUTES))
     ap.add_argument("--trials", type=int, default=5)
@@ -111,6 +120,8 @@ def main(argv: list[str] | None = None) -> int:
         served = build.build()
         sha, dirty = build.parse_header(served)
         override = session.Override(served)
+    elif args.css == "vanilla":
+        served, sha, dirty, override = "", None, None, session.Override("")
     else:
         served, sha, dirty, override = branding["custom_css"], None, None, None
     effective = cssbundle.strip_imports(served)
@@ -145,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     if override is not None:
         summary["intercept_hits"] = override.hits
         if override.hits == 0:
-            summary["failures"].append("dist mode: the CSS intercept was never hit")
+            summary["failures"].append(f"{args.css} mode: the CSS intercept was never hit")
     (outdir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(f"{outdir}: {len(summary['routes'])} captures, {len(summary['failures'])} failures")
     for f in summary["failures"]:
