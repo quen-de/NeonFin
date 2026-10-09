@@ -1,0 +1,20 @@
+/* Ambient: the city light behind every page, painted once on a fixed layer. */
+.backgroundContainer {
+  background:
+    radial-gradient(36vmax 28vmax at 90% 4%, color-mix(in srgb, var(--nf-neon) 34%, transparent), transparent 70%),
+    radial-gradient(30vmax 24vmax at 6% 60%, color-mix(in srgb, var(--nf-teal) 16%, transparent), transparent 70%),
+    radial-gradient(26vmax 20vmax at 70% 100%, color-mix(in srgb, var(--nf-neon) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--nf-ink-2), var(--nf-ink) 60%);
+}
+
+/* With a backdrop: let its colour reach the page instead of Jellyfin's 86% gray. */
+.backgroundContainer.withBackdrop {
+  opacity: 0.5;
+  background: linear-gradient(180deg, rgba(5, 6, 10, 0.2), var(--nf-ink) 80%);
+}
+
+/* The backdrop itself is blurred once, never live. */
+.backdropImage {
+  filter: blur(36px) saturate(1.7) brightness(0.95);
+  transform: scale(1.18);
+}

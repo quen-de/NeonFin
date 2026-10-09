@@ -46,3 +46,9 @@ A change is judged against plain Jellyfin on the same server, in the same plugin
 `--plugins` takes `all`, `none` or `without:<name>[,<name>]` (names in `harness/plugins.py`):
 the harness aborts a plugin's requests so the page renders as if it were not installed.
 `uv run python -m harness.sheet harness/runs/skin` writes a contact sheet per device.
+
+## Live tests
+
+`uv run pytest -m live` runs `tests/live/` against your server with the local build
+injected (same env vars and local config as the harness). They are skipped without them,
+and never run in CI or the pre-commit hook.

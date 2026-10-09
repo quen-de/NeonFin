@@ -1,0 +1,52 @@
+/* Base: type, the page ground, and the browser surfaces we did not draw. */
+html,
+body,
+button,
+input,
+select,
+textarea,
+.MuiTypography-root,
+.MuiButtonBase-root,
+.MuiInputBase-root,
+.MuiMenuItem-root {
+  font-family: var(--nf-ui);
+}
+
+html {
+  background-color: var(--nf-ink);
+  color: var(--nf-text);
+  color-scheme: dark;
+  caret-color: var(--nf-neon);
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  scrollbar-width: thin;
+}
+
+::selection {
+  background-color: var(--nf-neon-deep);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18) padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+/* MUI and legacy buttons remove the outline; the ring must win everywhere. */
+:focus-visible {
+  outline: 2px solid var(--nf-neon) !important;
+  outline-offset: 2px;
+}
+
+.mdl-spinner__layer {
+  border-color: var(--nf-neon);
+}
