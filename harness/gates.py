@@ -173,6 +173,11 @@ def evaluate_evidence(benches: list[dict], captures: dict[str, dict], scope: set
     """Failures and notes for benches plus skin captures (keyed by run name): one clean build,
     every speed cell benched and every route captured for each plugin state."""
     fails = [f for b in benches for f in _provenance("bench", b)]
+    fails += [
+        "a bench in which the skin CSS never reached the page"
+        for b in benches
+        if b.get("css_mode") == "dist" and not b.get("intercept_hits")
+    ]
     shas = sorted({b.get("skin_sha") for b in benches}, key=str)
     if len(shas) > 1:
         fails.append(f"benches measured different builds: {', '.join(map(str, shas))}")

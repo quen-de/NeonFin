@@ -36,6 +36,8 @@ def test_environment_warnings():
     assert compare.environment_warnings(sa, dict(sa)) == []
     w = compare.environment_warnings(sa, {"browser_version": "155.0", "server_version": "12.2.0"})
     assert len(w) == 1 and "browser_version" in w[0]
+    w = compare.environment_warnings(sa, sa | {"show_volatile": True})
+    assert len(w) == 1 and "show_volatile" in w[0]
 
 
 def write_run(d, snap, color):

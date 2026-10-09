@@ -34,3 +34,19 @@ def test_runs_go_side_by_side_and_report_each_exit_code():
     codes = captures.run_all(cmds, jobs=4)
     assert time.monotonic() - t0 < 2.0
     assert {label: code for label, (code, _) in codes.items()} == {"r0": 0, "r1": 1, "r2": 0, "r3": 1}
+
+
+def test_a_repeated_plugin_state_runs_once():
+    assert [label for label, _ in captures.commands("m2", ["dist"], ["all", "all"], [])] == ["m2-dist-all"]
+
+
+def test_a_failed_run_reports_its_count_and_first_failures():
+    out = "\n".join(["runs/x: 20 captures, 9 failures", *[f"  FAIL desktop/r{i}: never became visible" for i in range(9)]])
+    report = captures.report(out)
+    assert report.splitlines()[0] == "runs/x: 20 captures, 9 failures"
+    assert "FAIL desktop/r0" in report and "FAIL desktop/r8" not in report and "5 more" in report
+
+
+def test_a_crashed_run_reports_its_last_lines():
+    out = "\n".join(["Traceback (most recent call last):", *[f"  line {i}" for i in range(8)], "RuntimeError: boom"])
+    assert captures.report(out).splitlines()[-1] == "RuntimeError: boom"

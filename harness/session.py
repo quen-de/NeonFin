@@ -220,17 +220,21 @@ def decode_images(page) -> int:
     return page.evaluate(DECODE_JS)
 
 
-REVEAL_JS = """async () => {
+REVEAL_JS = """async (maxSteps) => {
   const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-  for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight) { scrollTo(0, y); await frame(); }
-  scrollTo(0, 0);
+  for (let i = 0, y = 0; i < maxSteps && y < document.documentElement.scrollHeight; i++, y += innerHeight) {
+    scrollTo({ top: y, behavior: 'instant' });
+    await frame();
+  }
+  scrollTo({ top: 0, behavior: 'instant' });
   await frame();
 }"""
 
 
-def reveal_lazy(page) -> None:
-    """Scroll through the page once so lazy loaders fill what a full-page capture shows."""
-    page.evaluate(REVEAL_JS)
+def reveal_lazy(page, max_steps: int = 40) -> None:
+    """Scroll through the page once so lazy loaders fill what a full-page capture shows; a page
+    that keeps growing stops after max_steps viewports."""
+    page.evaluate(REVEAL_JS, max_steps)
 
 
 def screenshot(page, route, volatile, path) -> None:

@@ -50,9 +50,21 @@ def run_cell(trial, lim: dict[str, float], max_pairs: int) -> list[dict]:
 def describe(cell: str, pairs: list[dict], lim: dict[str, float]) -> str:
     med = {side: {m: statistics.median(p[side][m] for p in pairs) for m in (*lim, "anchor_ms")} for side in ("vanilla", "skin")}
     v, s = med["vanilla"], med["skin"]
-    ratios = "  ".join(f"{m.removesuffix('_ms')} {v[m]:.1f}->{s[m]:.1f} ({s[m] / v[m]:.2f}x)" for m in lim)
+    ratios = "  ".join(f"{m.removesuffix('_ms')} {v[m]:.1f}->{s[m]:.1f} ({gates._ratio(s[m], v[m]):.2f}x)" for m in lim)
     verdict = gates.decide(pairs, lim) or "judged on medians"
     return f"{cell:34} {len(pairs)} pairs  {ratios}  ready {v['anchor_ms']:.0f}->{s['anchor_ms']:.0f}  {verdict}"
+
+
+def run_cells(todo, trial_for, out: dict, save) -> None:
+    """Bench each (state, profile, route) and save after every cell, so a failure later on
+    keeps the cells already measured."""
+    for state, prof_name, route_name in todo:
+        cell = f"{state}/{prof_name}/{route_name}"
+        lim = gates.limits(state, prof_name, route_name)
+        pairs = run_cell(trial_for(state, prof_name, route_name), lim, out["max_pairs"])
+        out["cells"][cell] = {"pairs": pairs}
+        save(out)
+        print(describe(cell, pairs, lim), flush=True)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -94,27 +106,27 @@ def main(argv: list[str] | None = None) -> int:
         "cells": {},
     }
     t0 = time.monotonic()
+
+    def save(o):
+        o["seconds"] = round(time.monotonic() - t0)
+        o["intercept_hits"] = skin.hits if skin else None
+        (outdir / "bench.json").write_text(json.dumps(o, indent=1) + "\n")
+
     with lock.hold(timed=True), sync_playwright() as pw:
         browser = session.launch(pw)
         out["browser_version"] = browser.version
         logins = {}
-        for state, prof_name, route_name in cells(states, args.profiles.split(","), args.routes.split(",")):
+        sides = {"vanilla": vanilla, "skin": skin}
+
+        def trial_for(state, prof_name, route_name):
             prof, route = PROFILES[prof_name], by_name[route_name]
             if prof_name not in logins:
                 logins[prof_name] = session.login_state(browser, cfg, prof)
-            sides = {"vanilla": vanilla, "skin": skin}
+            return lambda side, i: perf.page_trial(browser, cfg, prof, route, logins[prof_name], sides[side], offs[state])
 
-            def trial(side, i, prof=prof, route=route, state=state):
-                return perf.page_trial(browser, cfg, prof, route, logins[prof.name], sides[side], offs[state])
-
-            cell = f"{state}/{prof_name}/{route_name}"
-            lim = gates.limits(state, prof_name, route_name)
-            pairs = run_cell(trial, lim, args.trials)
-            out["cells"][cell] = {"pairs": pairs}
-            print(describe(cell, pairs, lim), flush=True)
+        run_cells(cells(states, args.profiles.split(","), args.routes.split(",")), trial_for, out, save)
         browser.close()
-    out["seconds"] = round(time.monotonic() - t0)
-    (outdir / "bench.json").write_text(json.dumps(out, indent=1) + "\n")
+    save(out)
     fails = gates.evaluate_bench(out)
     for f in fails:
         print("FAIL", f)

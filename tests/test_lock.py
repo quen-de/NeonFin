@@ -1,3 +1,4 @@
+import pathlib
 import threading
 import time
 
@@ -40,3 +41,17 @@ def test_a_timed_run_waits_for_untimed_work(tmp_path):
         t.start()
         time.sleep(0.3)
         assert said == ["waiting for other harness runs to finish"]
+
+
+def test_the_lock_spans_every_checkout_of_the_repo():
+    import tempfile
+
+    assert lock.LOCK.parent == pathlib.Path(tempfile.gettempdir())
+
+
+def test_without_file_locks_the_run_says_it_may_overlap(tmp_path, monkeypatch):
+    monkeypatch.setattr(lock, "fcntl", None)
+    said = []
+    with lock.hold(timed=True, path=tmp_path / "timing.lock", notify=said.append):
+        pass
+    assert said == ["no file locks on this system: timed runs may overlap other harness runs"]

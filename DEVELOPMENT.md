@@ -56,7 +56,8 @@ each benched state, nothing built from uncommitted CSS. Accepted exceptions to t
 ratios live in `harness/gates.py`, each with its own ceiling.
 
 Captures are not timed, so `harness.captures` runs them side by side (`--jobs`, default 4).
-Timed work runs alone: a timed run waits for captures to finish and captures wait for it.
+Timed work runs alone, across every checkout on the machine: a timed run waits for captures to
+finish and captures wait for it. Without file locks (Windows) the harness only warns.
 
 `--plugins` takes `all`, `none` or `without:<name>[,<name>]` (names in `harness/plugins.py`),
 and repeats for several states: the harness aborts a plugin's requests so the page renders

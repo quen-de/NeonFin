@@ -70,7 +70,7 @@ def perf_deltas(pa: dict, pb: dict) -> list[dict]:
 def environment_warnings(sa: dict, sb: dict) -> list[str]:
     return [
         f"{k} differs ({sa.get(k)} vs {sb.get(k)}): diffs may come from it, not from the CSS"
-        for k in ("browser_version", "server_version")
+        for k in ("browser_version", "server_version", "show_volatile")
         if sa.get(k) != sb.get(k)
     ]
 

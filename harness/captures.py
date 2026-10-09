@@ -12,6 +12,8 @@ import concurrent.futures
 import subprocess
 import sys
 
+from harness import lock
+
 
 def slug(state: str) -> str:
     return "no-" + state.removeprefix("without:").replace(",", "-") if state.startswith("without:") else state
@@ -19,8 +21,8 @@ def slug(state: str) -> str:
 
 def commands(prefix: str, css_modes: list[str], states: list[str], extra: list[str]) -> list[tuple[str, list[str]]]:
     out = []
-    for css in css_modes:
-        for state in states:
+    for css in dict.fromkeys(css_modes):
+        for state in dict.fromkeys(states):
             label = f"{prefix}-{css}-{slug(state)}"
             out.append(
                 (label, [sys.executable, "-m", "harness.run", "--label", label, "--css", css, "--plugins", state, "--no-perf", *extra])
@@ -28,12 +30,23 @@ def commands(prefix: str, css_modes: list[str], states: list[str], extra: list[s
     return out
 
 
+def report(output: str, most: int = 4) -> str:
+    """A failed run's count line and first failures, or the last lines when it crashed."""
+    lines = output.strip().splitlines()
+    count = [line for line in lines if " captures, " in line][-1:]
+    fails = [line.strip() for line in lines if line.strip().startswith("FAIL")]
+    if not count and not fails:
+        return "\n".join(lines[-5:])
+    more = [f"... and {len(fails) - most} more"] if len(fails) > most else []
+    return "\n".join(count + fails[:most] + more)
+
+
 def run_all(cmds: list[tuple[str, list[str]]], jobs: int) -> dict[str, tuple[int, str]]:
-    """Exit code and output tail of every command, at most jobs at a time."""
+    """Exit code and report of every command, at most jobs at a time."""
 
     def one(argv):
         r = subprocess.run(argv, capture_output=True, text=True)
-        return r.returncode, "\n".join((r.stdout + r.stderr).strip().splitlines()[-5:])
+        return r.returncode, report(r.stdout + r.stderr)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
         futures = {label: pool.submit(one, argv) for label, argv in cmds}
@@ -53,7 +66,9 @@ def main(argv: list[str] | None = None) -> int:
     states = args.plugins or ["all", "none"]
     extra = [*(["--profiles", args.profiles] if args.profiles else []), *(["--routes", args.routes] if args.routes else [])]
     extra += ["--show-volatile"] if args.show_volatile else []
-    results = run_all(commands(args.label, args.css.split(","), states, extra), args.jobs)
+    # The runs take the shared lock themselves; holding it here too shows the wait, if any.
+    with lock.hold(timed=False):
+        results = run_all(commands(args.label, args.css.split(","), states, extra), args.jobs)
     for label, (code, tail) in results.items():
         print(f"{'ok  ' if code == 0 else 'FAIL'} {label}")
         if code:

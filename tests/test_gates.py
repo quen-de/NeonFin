@@ -143,6 +143,7 @@ def bench(cells, **extra):
         "css_mode": "dist",
         "skin_sha": "abc",
         "skin_dirty": False,
+        "intercept_hits": 9,
         "server_version": "12.0",
         "browser_version": "1",
         "cells": cells,
@@ -268,3 +269,8 @@ def test_benches_and_captures_come_from_one_clean_build(tmp_path, capsys):
 
 def test_the_exception_ceilings_sit_just_above_what_was_measured():
     assert gates.limits("all", "desktop", "home") == {"recalc_style_ms": 1.9, "task_ms": 1.24}
+
+
+def test_a_bench_whose_skin_never_reached_the_page_fails(tmp_path, capsys):
+    code, out = judge(tmp_path, [bench(full_cells("all", CLEAR), intercept_hits=0)], [capture("all")], capsys)
+    assert code == 1 and "the skin CSS never reached the page" in out

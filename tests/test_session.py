@@ -321,3 +321,19 @@ def test_full_page_screenshots_load_lazy_content_first(browser, tmp_path):
     ctx.close()
     assert Image.open(path).convert("RGB").getpixel((50, 3050)) == (255, 0, 0)
     assert top == 0
+
+
+GROWING_PAGE = """<body style="margin:0"><div id=feed style="height:3000px"></div><script>
+addEventListener('scroll', () => { const f = document.getElementById('feed');
+  if (f.offsetHeight < 400000) f.style.height = (f.offsetHeight + 2000) + 'px'; });
+</script></body>"""
+
+
+def test_the_lazy_reveal_stops_on_a_page_that_grows_as_it_scrolls(browser):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content(GROWING_PAGE)
+    t0 = time.monotonic()
+    session.reveal_lazy(page)
+    took, top = time.monotonic() - t0, page.evaluate("scrollY")
+    ctx.close()
+    assert took < 5 and top == 0
