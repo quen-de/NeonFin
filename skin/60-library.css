@@ -1,0 +1,53 @@
+/* Library toolbar: Play All is the title page's Play, a neon tube; shuffle a round tinted
+   button beside it. MUI's grouped buttons are squared off at (0,3,0); these win at (0,4,0). */
+.MuiToolbar-root .MuiButtonGroup-contained {
+  gap: 8px;
+  box-shadow: none;
+}
+
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained {
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:first-child {
+  padding: 0 16px;
+  color: #fff;
+  font-weight: 600;
+  text-transform: none;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  box-shadow: var(--nf-tube);
+}
+
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:first-child:hover {
+  background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent);
+}
+
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:not(:first-child) {
+  width: 34px;
+  min-width: 34px;
+  padding: 0;
+  color: var(--nf-text);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:not(:first-child):hover {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* The item count reads as a quiet label, not a control. */
+.MuiToolbar-root .MuiChip-filled {
+  color: var(--nf-text-2);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* The dot that marks an active filter. */
+.MuiToolbar-root .MuiBadge-dot {
+  background-color: var(--nf-neon);
+}
