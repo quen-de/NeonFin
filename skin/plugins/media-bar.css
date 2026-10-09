@@ -7,17 +7,19 @@
 }
 
 /* Desktop capsules are glass: dim the hero under them so the header reads over any slide.
-   The title, details and plot keep to the left column, so the artwork stays dim behind them. */
+   The title, details and plot keep to the left column, dimmed just enough for full-white text
+   to pass AA over a white slide; the artwork shows from mid-screen. */
 .layout-desktop #slides-container .gradient-overlay {
   background:
     linear-gradient(180deg, rgba(5, 6, 10, 0.72) 0, rgba(5, 6, 10, 0.6) 56px, transparent 160px),
-    linear-gradient(90deg, rgba(5, 6, 10, 0.88) 0%, rgba(5, 6, 10, 0.78) 40%, rgba(5, 6, 10, 0.3) 58%, transparent 74%),
-    linear-gradient(0deg, var(--nf-ink) 0%, rgba(5, 6, 10, 0.4) 30%, transparent 55%) !important;
+    linear-gradient(90deg, rgba(5, 6, 10, 0.66) 0%, rgba(5, 6, 10, 0.62) 38%, rgba(5, 6, 10, 0.14) 54%, transparent 66%),
+    linear-gradient(0deg, var(--nf-ink) 0%, rgba(5, 6, 10, 0.25) 20%, transparent 40%) !important;
 }
 
+/* The plugin sets its own text colour at higher specificity. */
 #slides-container .plot,
 #slides-container .spec-line {
-  color: var(--nf-text-2);
+  color: var(--nf-text) !important;
 }
 
 /* The plot keeps to the dimmed column: three narrower lines hold what two wide ones did. */
@@ -61,7 +63,7 @@
 }
 
 .layout-mobile #slides-container .slide-content {
-  background-color: rgba(9, 10, 18, 0.82) !important;
+  background-color: rgba(9, 10, 18, 0.64) !important;
   box-shadow: inset 0 1px 0 var(--nf-rim);
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;

@@ -168,3 +168,81 @@ def test_discover_cards_keep_their_type_badges(open_page):
     if not badges:
         pytest.skip("no Home Screen Sections Discover row on this server")
     assert all(b not in ("none", '""') for b in badges), badges
+
+
+BADGE = """(sel) => { const b = document.querySelector(sel); if (!b) return null;
+  const box = b.closest('.cardIndicators'), s = b.closest('.cardScalable');
+  const r = b.getBoundingClientRect(), c = s.getBoundingClientRect(), bc = getComputedStyle(box), cs = getComputedStyle(b);
+  return { top: r.top - c.top, right: c.right - r.right, corner: bc.borderTopRightRadius, clip: bc.overflow,
+           round: cs.borderTopLeftRadius, bg: cs.backgroundColor, blur: cs.backdropFilter, w: r.width, h: r.height }; }"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_unplayed_counts_are_crimson_glass_tabs_in_the_corner(open_page, color, profile):
+    got = open_page("series", profile, "none").evaluate(BADGE, ".itemsContainer .card .cardIndicators .countIndicator")
+    if got is None:
+        pytest.skip("no unplayed counts on this server's shows")
+    assert got["top"] == pytest.approx(0, abs=0.5) and got["right"] == pytest.approx(0, abs=0.5)
+    assert got["corner"] == "12px" and got["clip"] == "hidden"  # the tab follows the card's corner
+    assert got["round"] == "0px" and got["w"] >= got["h"]  # a tab, not a disc
+    r, g, b, a = color(got["bg"])
+    assert r > 2 * max(g, b) and 0.5 < a < 1  # crimson, see-through
+    assert got["blur"] == "none"  # no live glass on hundreds of cards
+
+
+GAPS = """() => {
+  const secs = [...document.querySelectorAll('.homeSectionsContainer > .verticalSection')]
+    .filter((s) => s.querySelector('.card') && s.getBoundingClientRect().height > 0);
+  const out = [];
+  for (let i = 0; i + 1 < secs.length; i++) {
+    const last = [...secs[i].querySelectorAll('.cardBox')].pop(), t = secs[i + 1].querySelector('.sectionTitle');
+    const box = t && (t.closest('.sectionTitleContainer') || t);
+    if (!box || box.getBoundingClientRect().width <= 1) continue;
+    out.push(Math.round(t.getBoundingClientRect().top - last.getBoundingClientRect().bottom));
+  }
+  return out;
+}"""
+
+
+@pytest.mark.parametrize("plugin_state", ["all", "none"])
+def test_rows_sit_closer_on_phones(open_page, plugin_state):
+    gaps = open_page("home", "phone", plugin_state).evaluate(GAPS)
+    assert gaps and all(36 <= g <= 62 for g in gaps), gaps
+
+
+def test_rows_keep_their_generous_separation_on_desktop(open_page):
+    gaps = open_page("home", "desktop", "all").evaluate(GAPS)
+    assert gaps and all(g >= 80 for g in gaps), gaps
+
+
+@pytest.mark.parametrize("route, profile", [("home", "desktop"), ("home", "phone"), ("movies", "desktop")])
+def test_the_placeholder_under_the_artwork_takes_its_corners(open_page, route, profile):
+    # Jellyfin paints a gray placeholder under each poster; with a smaller radius its corners
+    # poke out past the artwork's.
+    radii = open_page(route, profile, "none").evaluate(
+        """() => [...document.querySelectorAll('.card .cardBox:not(.visualCardBox) .cardPadder')].slice(0, 8)
+      .map((p) => [p, p.parentElement.querySelector('.cardImageContainer')].map((e) => getComputedStyle(e).borderTopLeftRadius))"""
+    )
+    assert radii and all(a == b == "12px" for a, b in radii), radii
+
+
+MY_MEDIA = """() => {
+  const s = [...document.querySelectorAll('.homeSectionsContainer > .verticalSection')]
+    .find((x) => x.querySelector('.card[data-type="CollectionFolder"]'));
+  if (!s) return null;
+  const t = s.querySelector('.sectionTitle'), cs = getComputedStyle(t);
+  const box = (t.closest('.sectionTitleContainer') || t).getBoundingClientRect();
+  return { text: t.textContent.trim(), w: box.width, h: box.height, display: cs.display, visibility: cs.visibility,
+           cards: [...s.querySelectorAll('.card')].filter((c) => c.getBoundingClientRect().width > 0).length };
+}"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+@pytest.mark.parametrize("plugin_state", ["all", "none"])
+def test_my_media_keeps_its_row_but_not_its_title(open_page, profile, plugin_state):
+    got = open_page("home", profile, plugin_state).evaluate(MY_MEDIA)
+    if got is None:
+        pytest.skip("no My Media row on this user's home")
+    assert got["cards"] > 0
+    assert got["w"] <= 1 and got["h"] <= 1  # nothing on screen
+    assert got["text"] and got["display"] != "none" and got["visibility"] == "visible"  # still read out

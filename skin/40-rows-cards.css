@@ -34,10 +34,37 @@
   margin-bottom: 2.2em;
 }
 
+/* My Media is the row of library tiles: the tiles name themselves, so its title leaves the
+   screen but stays for screen readers. */
+.homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) > .sectionTitleContainer,
+.homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) > .sectionTitle {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Room for the lift and the ring's glow inside the scroller. */
 .verticalSection .emby-scroller {
   padding-top: 12px;
   padding-bottom: 16px;
+}
+
+/* Phones show one row at a time: rows sit closer, and touch lights no ring to make room for. */
+.layout-mobile .homeSectionsContainer > .verticalSection {
+  margin-bottom: 1.1em;
+}
+
+.layout-mobile .homeSectionsContainer .sectionTitleContainer-cards {
+  padding-top: 10px;
+}
+
+.layout-mobile .verticalSection .emby-scroller {
+  padding-bottom: 10px;
 }
 
 .emby-scrollbuttons-button {
@@ -62,8 +89,11 @@
   box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.9);
 }
 
+/* Jellyfin rounds its gray placeholder under the artwork at (0,3,0); with a smaller radius
+   its corners would poke out past the artwork's. */
 .card .cardImageContainer,
 .card .cardPadder,
+.cardBox:not(.visualCardBox) .cardPadder,
 .card .blurhash-canvas,
 .card .cardOverlayContainer {
   border-radius: var(--nf-radius-card);
@@ -149,11 +179,44 @@
   box-shadow: var(--nf-tube);
 }
 
-.countIndicator,
-.playedIndicator {
+/* Counts and the watched check: one crimson glass tab in the card's corner. Tinted, not
+   blurred: a library page shows hundreds of them. Jellyfin places the box per direction. */
+.card .cardScalable .cardIndicators {
+  top: 0;
+  right: 0;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 0 var(--nf-radius-card) 0 10px;
+}
+
+[dir="rtl"] .card .cardScalable .cardIndicators {
+  right: auto;
+  left: 0;
+  border-radius: var(--nf-radius-card) 0 10px 0;
+}
+
+.cardIndicators .indicator {
+  width: auto;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 0;
   color: #fff;
-  background-color: var(--nf-neon);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  font-weight: 700;
+  background-color: color-mix(in srgb, var(--nf-neon) 52%, rgba(8, 9, 14, 0.42));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 1px -1px 0 color-mix(in srgb, var(--nf-neon) 60%, transparent);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.cardIndicators .indicator .material-icons,
+.cardIndicators .indicator svg {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
 }
 
 .itemProgressBar {

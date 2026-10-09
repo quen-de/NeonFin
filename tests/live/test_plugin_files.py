@@ -117,3 +117,49 @@ def test_the_plot_keeps_to_the_dimmed_column(open_page, viewport):
       return [r.right, innerWidth, p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)]; }"""
     )
     assert 2 <= lines <= 3.01 and right <= 0.4 * width, (right, width, lines)
+
+
+def _hero_light(page, tmp_path, x_frac):
+    """Mean brightness of the white slide beside the plot, text hidden: how much artwork shows."""
+    from PIL import Image
+
+    box = page.evaluate(
+        "() => { const b = document.querySelector('#slides-container .slide.active .plot').getBoundingClientRect();"
+        " return [b.left, b.top, b.width, b.height]; }"
+    )
+    x, y = (box[0] + box[2] * x_frac) if x_frac <= 1 else x_frac, box[1] + box[3] / 2
+    page.screenshot(
+        path=str(tmp_path / "light.png"), style="#slides-container .slide.active .plot-container { visibility: hidden !important; }"
+    )
+    dpr = page.evaluate("devicePixelRatio")
+    im = (
+        Image.open(tmp_path / "light.png")
+        .convert("L")
+        .crop((round((x - 3) * dpr), round((y - 3) * dpr), round((x + 3) * dpr), round((y + 3) * dpr)))
+    )
+    px = list(getattr(im, "get_flattened_data", im.getdata)())
+    return sum(px) / len(px)
+
+
+def test_the_desktop_hero_shows_more_of_the_artwork(open_page, tmp_path):
+    page = open_page("home", "desktop", "all", variant="white-hero")
+    page.add_style_tag(
+        content="#slides-container .backdrop-container { background: #fff !important; }"
+        " #slides-container .backdrop-container > * { visibility: hidden !important; }"
+    )
+    page.wait_for_timeout(200)
+    assert _hero_light(page, tmp_path, 0.85) >= 85  # under the end of the plot
+    assert _hero_light(page, tmp_path, 720) >= 170  # mid-screen, beside the text column
+
+
+def test_the_phone_hero_panel_lets_the_artwork_through(open_page, style, color):
+    page = open_page("home", "phone", "all")
+    panel = style(page, "#slides-container .slide.active .slide-content", "background-color")
+    assert color(panel["background-color"])[3] <= 0.66
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_hero_text_is_primary_white(open_page, style, color, profile):
+    page = open_page("home", profile, "all")
+    for sel in ("#slides-container .slide.active .plot", "#slides-container .slide.active .spec-line"):
+        assert color(style(page, sel, "color")["color"])[3] >= 0.9, sel
