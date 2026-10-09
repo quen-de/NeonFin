@@ -67,3 +67,13 @@ def test_contrast_flags_colours_it_cannot_read(page, tmp_path, monkeypatch):
       <p class=odd style="color:lab(95% 0 0);margin:0;font-size:16px">Odd</p></body>""")
     fails = checks.contrast_failures(page, "t", tmp_path / "c.png")
     assert [(f["text"], f["ratio"]) for f in fails] == [("Odd", None)]
+
+
+def test_contrast_ignores_icons_inside_the_text(page, tmp_path, monkeypatch):
+    # A yellow star beside a rating is not the background the digits sit on.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".rating",))
+    page.set_content("""<body style="margin:0;background:#000">
+      <p class=rating style="display:inline-block;color:#fff;margin:0;font-size:16px"><span class=material-icons
+        style="display:inline-block;width:16px;height:16px;background:#ffd400"></span><svg width=16 height=16>
+        <rect width=16 height=16 fill="#ffd400"/></svg>7.1</p></body>""")
+    assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []

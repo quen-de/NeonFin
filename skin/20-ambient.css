@@ -7,10 +7,18 @@
     linear-gradient(180deg, var(--nf-ink-2), var(--nf-ink) 60%);
 }
 
-/* With a backdrop: let its colour reach the page instead of Jellyfin's 86% gray. */
+/* With a backdrop: let its colour reach the page instead of Jellyfin's 86% gray. The top
+   band dims it under the glass capsules, as on the hero, so the header reads over any
+   backdrop. Jellyfin fades the layer to 86%, which would thin the band. */
 .backgroundContainer.withBackdrop {
-  opacity: 0.5;
-  background: linear-gradient(180deg, rgba(5, 6, 10, 0.2), var(--nf-ink) 80%);
+  opacity: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 6, 10, 0.72) 0,
+    rgba(5, 6, 10, 0.6) 56px,
+    rgba(5, 6, 10, 0.1) 160px,
+    rgba(5, 6, 10, 0.5) 80%
+  );
 }
 
 /* The backdrop itself is blurred once, never live. */

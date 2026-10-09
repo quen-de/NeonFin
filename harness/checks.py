@@ -11,9 +11,22 @@ JS = pathlib.Path(__file__).resolve().parent / "js"
 
 # Text that must stay readable over whatever is behind it, by route name; "*"
 # applies to every route. Selectors of absent elements are simply skipped.
+# Title pages put their text straight on the backdrop.
+TITLE_TEXT = (
+    ".detailRibbon .nameContainer > h1",
+    # A critic rating paints its own icon as its background: unmeasurable, and set like the rest.
+    ".detailRibbon .itemMiscInfo-primary > .mediaInfoItem:not(.mediaInfoCriticRating)",
+    ".trackSelections .selectLabel",
+    ".detailPagePrimaryContainer .overview",
+    ".itemGenres",
+    ".itemTags",
+)
 TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "*": (".MuiAppBar-root > .MuiToolbar-root:first-child .MuiButton-root",),
     "home": ("#slides-container .slide.active .plot", "#slides-container .slide.active .spec-line"),
+    "movie": TITLE_TEXT,
+    "show": TITLE_TEXT,
+    "season": TITLE_TEXT,
 }
 
 
@@ -65,7 +78,10 @@ def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
     if not items:
         return []
     hide = ", ".join(selectors) + " { color: transparent !important; text-shadow: none !important; }"
-    hide += ", ".join(f"{s} img" for s in selectors) + " { visibility: hidden !important; }"
+    # Icons beside the text (a rating's star) are not the background it sits on.
+    hide += (
+        ", ".join(f"{s} {icon}" for s in selectors for icon in ("img", "svg", ".material-icons")) + " { visibility: hidden !important; }"
+    )
     page.screenshot(path=str(shot_path), style=hide, animations="disabled")
     img = Image.open(shot_path).convert("RGB")
     dpr = page.evaluate("devicePixelRatio")

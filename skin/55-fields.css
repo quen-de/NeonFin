@@ -1,0 +1,51 @@
+/* Dropdowns: tinted fields with a rim, the same in legacy and MUI forms. A disabled select
+   with one choice stays plain text. */
+select.emby-select-withcolor:not([disabled]) {
+  color: var(--nf-text);
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    background-color var(--nf-fast) var(--nf-ease),
+    border-color var(--nf-fast) var(--nf-ease);
+}
+
+select.emby-select-withcolor:not([disabled]):hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+select.emby-select-withcolor:not([disabled]):focus {
+  border-color: color-mix(in srgb, var(--nf-neon) 80%, transparent);
+}
+
+.emby-select-withcolor > option {
+  color: var(--nf-text);
+  background-color: var(--nf-ink-2);
+}
+
+.selectArrowContainer .selectArrow {
+  color: var(--nf-text-2);
+}
+
+/* MUI draws its fields from emotion styles injected after this sheet. */
+.MuiFilledInput-root {
+  border-radius: 10px !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  transition: box-shadow var(--nf-fast) var(--nf-ease);
+}
+
+.MuiFilledInput-root:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiFilledInput-root.Mui-focused {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-neon) 80%, transparent);
+}
+
+.MuiFilledInput-root::before,
+.MuiFilledInput-root::after {
+  display: none;
+}
