@@ -1,0 +1,117 @@
+/* Header: no bar. Navigation and actions float as two glass capsules. */
+.MuiAppBar-root {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child {
+  gap: 10px;
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  height: 42px;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: var(--nf-chrome-tint);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--nf-chrome-edge);
+}
+
+/* Items are pills inside the capsules. */
+.MuiAppBar-root > .MuiToolbar-root:first-child > :is(.MuiStack-root, .MuiBox-root:not(:last-child)) > .MuiButtonBase-root {
+  height: 34px;
+  min-height: 0;
+  margin: 0;
+  border-radius: 999px;
+  color: var(--nf-text-2);
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: none;
+  transition:
+    background-color var(--nf-fast) var(--nf-ease),
+    color var(--nf-fast) var(--nf-ease);
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButton-root {
+  flex: 0 0 auto;
+  padding: 0 12px;
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) > .MuiIconButton-root {
+  width: 34px;
+  padding: 0;
+}
+
+.MuiAppBar-root > .MuiToolbar-root:first-child > :is(.MuiStack-root, .MuiBox-root:not(:last-child)) > .MuiButtonBase-root:hover {
+  color: var(--nf-text);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Where you are: a crimson pill, no glow. Glow belongs to Play. */
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButtonBase-root.MuiButton-textPrimary,
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButtonBase-root.MuiButton-textPrimary:hover {
+  color: #fff;
+  background-color: var(--nf-selected);
+  box-shadow: var(--nf-selected-edge);
+}
+
+/* The avatar sits outside the capsules. */
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:last-child .MuiIconButton-root {
+  padding: 4px;
+}
+
+.MuiAppBar-root .MuiAvatar-root {
+  color: var(--nf-text);
+  background-color: var(--nf-oxblood);
+  box-shadow: 0 0 0 1px var(--nf-rim);
+}
+
+/* Phones: the same shapes, solid. */
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  background-color: var(--nf-chrome-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root:first-child {
+  width: 42px;
+  height: 42px;
+  background-color: var(--nf-chrome-solid);
+  box-shadow: var(--nf-chrome-edge);
+}
+
+/* Drawer: solid, the current section as the crimson pill. */
+.MuiDrawer-paper {
+  background-color: var(--nf-ink-2) !important;
+  background-image: none !important;
+  box-shadow: inset -1px 0 0 var(--nf-rim);
+}
+
+.MuiDrawer-paper .MuiListItemButton-root {
+  margin: 2px 8px;
+  border-radius: 999px;
+}
+
+.MuiDrawer-paper .MuiListItemButton-root.Mui-selected {
+  background-color: var(--nf-selected);
+  box-shadow: var(--nf-selected-edge);
+}
