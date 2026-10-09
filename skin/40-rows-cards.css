@@ -1,6 +1,6 @@
-/* Rows: every title is a lit sign. */
-.sectionTitleContainer .sectionTitle {
-  margin: 0;
+/* Rows: every title is a lit sign, whether it sits in a title container or bare in its row. */
+.sectionTitleContainer .sectionTitle,
+.verticalSection > .sectionTitle-cards {
   font-family: var(--nf-sign-font);
   font-weight: 800;
   font-size: 2.1rem;
@@ -12,7 +12,12 @@
   text-shadow: var(--nf-sign-glow);
 }
 
-.layout-mobile .sectionTitleContainer .sectionTitle {
+.sectionTitleContainer .sectionTitle {
+  margin: 0;
+}
+
+.layout-mobile .sectionTitleContainer .sectionTitle,
+.layout-mobile .verticalSection > .sectionTitle-cards {
   font-size: 1.5rem;
 }
 

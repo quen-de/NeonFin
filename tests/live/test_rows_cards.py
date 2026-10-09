@@ -29,15 +29,30 @@ def test_row_titles_are_lit_signs(open_page, style, profile, rem, plugin_state):
     assert page.evaluate("[...document.fonts].some((f) => f.family.replace(/\"/g, '') === 'NeonFin Sign' && f.status === 'loaded')")
 
 
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+@pytest.mark.parametrize("plugin_state", ["all", "none"])
+def test_every_visible_home_row_title_is_a_sign(open_page, profile, plugin_state):
+    # Jellyfin renders some row titles bare inside the section, others inside a title container.
+    page = open_page("home", profile, plugin_state)
+    fonts = page.evaluate(
+        """() => [...document.querySelectorAll('.verticalSection .sectionTitle')]
+      .filter((e) => e.getBoundingClientRect().width > 0)
+      .map((e) => getComputedStyle(e).fontFamily)"""
+    )
+    assert fonts and all(f.startswith('"NeonFin Sign"') for f in fonts), fonts
+
+
 def test_long_row_titles_wrap_on_phones(open_page):
     page = open_page("home", "phone", "none", variant="long-title")
-    right = page.evaluate(
-        """(sel) => { const t = document.querySelector(sel);
+    got = page.evaluate(
+        """(sel) => { const t = [...document.querySelectorAll(sel)].find((e) => e.getBoundingClientRect().width > 0);
       t.textContent = 'Récemment ajoutés dans Documentaires et séries';
-      return t.getBoundingClientRect().right; }""",
+      const row = t.closest('.sectionTitleContainer') || t.parentElement;
+      return { width: t.getBoundingClientRect().width, right: Math.max(t.getBoundingClientRect().right, row.getBoundingClientRect().right),
+               overflow: document.documentElement.scrollWidth - innerWidth }; }""",
         SIGN,
     )
-    assert right <= 412
+    assert got["width"] > 0 and got["right"] <= 412 and got["overflow"] <= 0
 
 
 def test_cards_have_rounded_artwork_a_hairline_and_a_hidden_ring(open_page):
