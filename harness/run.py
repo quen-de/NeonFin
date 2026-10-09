@@ -36,7 +36,13 @@ def write_gz(path: pathlib.Path, data) -> None:
         json.dump(data, f, sort_keys=True)
 
 
-def capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off):
+def shot_hidden(volatile, show_volatile: bool) -> tuple:
+    """What a screenshot hides: the volatile parts keep pixel diffs stable, but a contact
+    sheet for review has to show them (the hero slideshow above all)."""
+    return () if show_volatile else tuple(volatile)
+
+
+def capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off, show_volatile=False):
     volatile = cfg.volatile
     state = session.login_state(browser, cfg, prof)
     ctx, page = session.new_page(browser, prof, state, override, plugins_off)
@@ -53,7 +59,7 @@ def capture_profile(browser, cfg, prof, routes, override, effective, outdir, sum
         except session.RouteError as e:
             summary["failures"].append(f"{key}: {e}")
             continue
-        session.screenshot(p, route, volatile, outdir / prof.name / f"{route.name}.png")
+        session.screenshot(p, route, shot_hidden(volatile, show_volatile), outdir / prof.name / f"{route.name}.png")
         snap = collect.styles(p, volatile)
         write_gz(outdir / prof.name / f"{route.name}.styles.json.gz", snap)
         hit |= set(collect.matched(p, unique))
@@ -102,8 +108,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--css", choices=("live", "dist", "vanilla"), required=True)
     ap.add_argument("--profiles", default="desktop,phone")
     ap.add_argument("--routes", default=",".join(r.name for r in ROUTES))
-    ap.add_argument("--trials", type=int, default=5)
+    ap.add_argument("--trials", type=int, default=7)
     ap.add_argument("--no-perf", action="store_true")
+    ap.add_argument("--show-volatile", action="store_true", help="keep the volatile parts (the hero) in screenshots, for contact sheets")
     ap.add_argument("--plugins", default="all", help="all, none, or without:<name>[,<name>]")
     args = ap.parse_args(argv)
     try:
@@ -142,6 +149,8 @@ def main(argv: list[str] | None = None) -> int:
         },
         "routes": {},
         "perf": {},
+        "trials": None if args.no_perf else args.trials,
+        "show_volatile": args.show_volatile,
         "failures": [],
     }
     with sync_playwright() as pw:
@@ -149,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
         summary["browser_version"] = browser.version
         for name in args.profiles.split(","):
             prof = PROFILES[name]
-            state = capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off)
+            state = capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off, args.show_volatile)
             if not args.no_perf:
                 summary["perf"][name] = perf_profile(browser, cfg, prof, state, override, args.trials, plugins_off)
         browser.close()

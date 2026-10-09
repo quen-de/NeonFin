@@ -10,6 +10,7 @@ def summary(css_mode="dist", perf=None, routes=None, **extra):
         "perf": perf or {},
         "routes": routes or {},
         "failures": [],
+        "trials": 7,
         **extra,
     }
 
@@ -64,3 +65,21 @@ def test_runs_must_be_comparable():
     assert any("plugins differs" in f for f in fails)
     fails = gates.evaluate(summary("dist"), summary("vanilla"), set())
     assert any("not a vanilla run" in f for f in fails) and any("second run is vanilla" in f for f in fails)
+
+
+def test_a_skin_run_missing_a_measured_route_fails():
+    vanilla = summary("vanilla", perf(20, 400, 1000))
+    assert gates.evaluate(vanilla, summary(perf={}), set()) == ["desktop/home: no skin performance to compare"]
+
+
+def test_trials_must_be_recorded_equal_and_at_least_seven():
+    v = perf(20, 400, 1000)
+    assert gates.evaluate(summary("vanilla", v, trials=7), summary(perf=v, trials=5), set()) == [
+        "trials: 7 vs 5, both must be at least 7 and equal"
+    ]
+    assert gates.evaluate(summary("vanilla", v, trials=5), summary(perf=v, trials=5), set()) == [
+        "trials: 5 vs 5, both must be at least 7 and equal"
+    ]
+    assert gates.evaluate(summary("vanilla", v, trials=None), summary(perf=v), set()) == [
+        "trials: None vs 7, both must be at least 7 and equal"
+    ]

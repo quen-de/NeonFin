@@ -17,6 +17,7 @@ GLASS_BUDGET = {"desktop": 3, "phone": 0}
 MENU_STATES = {"usermenu", "select", "actionsheet"}
 RECALC_RATIO = 1.3
 TASK_RATIO = 1.15
+MIN_TRIALS = 7
 
 
 def evaluate(vanilla: dict, skin: dict, scope: set[str]) -> list[str]:
@@ -28,9 +29,18 @@ def evaluate(vanilla: dict, skin: dict, scope: set[str]) -> list[str]:
     for key in ("plugins", "server_version", "browser_version"):
         if vanilla.get(key) != skin.get(key):
             fails.append(f"{key} differs: {vanilla.get(key)} vs {skin.get(key)}")
-    for prof, routes in skin.get("perf", {}).items():
+    v_perf, s_perf = vanilla.get("perf", {}), skin.get("perf", {})
+    if v_perf or s_perf:
+        vt, st = vanilla.get("trials"), skin.get("trials")
+        if vt is None or st is None or vt != st or st < MIN_TRIALS:
+            fails.append(f"trials: {vt} vs {st}, both must be at least {MIN_TRIALS} and equal")
+    for prof, routes in v_perf.items():
+        for route in routes:
+            if route not in s_perf.get(prof, {}):
+                fails.append(f"{prof}/{route}: no skin performance to compare")
+    for prof, routes in s_perf.items():
         for route, m in routes.items():
-            v = vanilla.get("perf", {}).get(prof, {}).get(route)
+            v = v_perf.get(prof, {}).get(route)
             where = f"{prof}/{route}"
             if not v:
                 fails.append(f"{where}: no vanilla performance to compare")
