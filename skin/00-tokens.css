@@ -3,10 +3,10 @@
   --nf-ink: #05060a;
   --nf-ink-2: #090b12;
   --nf-neon: #ff2448;
-  --nf-neon-deep: #b3122e;
-  --nf-oxblood: #4a0a16;
+  --nf-neon-deep: color-mix(in srgb, var(--nf-neon) 70%, black);
+  --nf-oxblood: color-mix(in srgb, var(--nf-neon) 29%, black);
   --nf-teal: #19d3c5;
-  --nf-sign: #ffe3e7;
+  --nf-sign: color-mix(in srgb, var(--nf-neon) 12%, white);
   --nf-text: rgba(246, 243, 240, 0.94);
   --nf-text-2: rgba(246, 243, 240, 0.62);
   --nf-rim: rgba(255, 255, 255, 0.16);

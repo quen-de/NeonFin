@@ -27,3 +27,18 @@ def test_keyboard_focus_draws_the_crimson_ring(open_page, color):
       return [document.activeElement.tagName, cs.outlineStyle, cs.outlineWidth, cs.outlineColor]; }""")
     assert ring[0] != "BODY"
     assert ring[1:3] == ["solid", "2px"] and color(ring[3])[:3] == (255, 36, 72)
+
+
+def test_one_accent_override_recolours_the_derived_tokens(open_page, color):
+    # README: overriding --nf-neon alone restyles the skin, so nothing crimson may be hard-coded.
+    page = open_page("home", "desktop", "none", variant="accent")
+    # Jellyfin inserts the skin's sheet after this tag; html:root stands in for "after the skin".
+    page.add_style_tag(content="html:root { --nf-neon: #3da9fc; }")
+    got = page.evaluate(
+        """() => { const p = document.createElement('div'); document.body.append(p); const out = {};
+      for (const t of ['--nf-neon-deep', '--nf-oxblood', '--nf-sign']) { p.style.color = `var(${t})`; out[t] = getComputedStyle(p).color; }
+      p.remove(); return out; }"""
+    )
+    for token, value in got.items():
+        r, g, b, _ = color(value)
+        assert b > r, f"{token} stays crimson: {value}"
