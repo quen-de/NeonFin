@@ -6,7 +6,7 @@
   const testable = (sel) => sel.split(',').map((p) => p.trim()
       .replace(/::?(before|after|placeholder|selection|marker|backdrop|-webkit-[a-z-]+|-moz-[a-z-]+)(\([^)]*\))?/g, '')
       .replace(/::[a-zA-Z-]+(\([^)]*\))?/g, '')
-      .replace(/:(hover|focus|focus-within|focus-visible|active|visited|target|placeholder-shown|checked|disabled|indeterminate)\b/g, ''))
+      .replace(/:(hover|focus-within|focus-visible|focus|active|visited|target|placeholder-shown|checked|disabled|indeterminate)(?![\w-])/g, ''))
     .filter(Boolean).join(',');
   const style = document.createElement('style');
   style.media = 'not all';

@@ -296,3 +296,28 @@ def test_new_page_can_switch_a_plugin_off(browser, server, off, loaded):
     page.wait_for_load_state("load")
     assert page.evaluate("window.mb ?? null") == loaded
     ctx.close()
+
+
+LAZY_PAGE = """<html><body style="margin:0;background:#000">
+<style>#late { width: 100px; height: 100px; } #late.loaded { background: rgb(255, 0, 0); }</style>
+<div style="height:3000px"></div><div id=late></div>
+<script>
+new IntersectionObserver((es, o) => es.forEach((e) => {
+  if (e.isIntersecting) { e.target.classList.add('loaded'); o.unobserve(e.target); } }))
+  .observe(document.getElementById('late'));
+</script></body></html>"""
+
+
+def test_full_page_screenshots_load_lazy_content_first(browser, tmp_path):
+    from PIL import Image
+
+    from harness.profiles import Route
+
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content(LAZY_PAGE)
+    path = tmp_path / "lazy.png"
+    session.screenshot(page, Route("x", "", "body"), [], path)
+    top = page.evaluate("scrollY")
+    ctx.close()
+    assert Image.open(path).convert("RGB").getpixel((50, 3050)) == (255, 0, 0)
+    assert top == 0

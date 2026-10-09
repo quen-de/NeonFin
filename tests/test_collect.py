@@ -60,3 +60,9 @@ def test_styles_keys_survive_portal_reordering(page):
     page.set_content(b_html)
     b = {v["label"]: k for k, v in collect.styles(page, []).items()}
     assert a == b
+
+
+def test_css_selectors_keep_focus_within_and_focus_visible_whole(page):
+    page.set_content("<div class=card><a class=x></a></div>")
+    _, sels = collect.css_selectors(page, ".card:focus-within .x{a:1}.x:focus-visible{b:2}")
+    assert sels == [".card .x", ".x"]

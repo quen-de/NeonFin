@@ -71,9 +71,12 @@ def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
     dpr = page.evaluate("devicePixelRatio")
     failures = []
     for item in items:
+        need = 3.0 if item["large"] else 4.5
+        if item["color"] is None:
+            failures.append({"label": item["label"], "text": item["text"], "ratio": None, "need": need, "colour": item["raw"]})
+            continue
         bg = brightest_decile(img, item["rect"], dpr)
         ratio = contrast_ratio(blend(item["color"], bg), bg)
-        need = 3.0 if item["large"] else 4.5
         if ratio < need:
             failures.append({"label": item["label"], "text": item["text"], "ratio": round(ratio, 2), "need": need})
     return failures

@@ -58,3 +58,12 @@ def test_contrast_failures_end_to_end(page, tmp_path, monkeypatch):
       <p class=bad style="color:#bbb;margin:0;font-size:16px">Faint</p></body>""")
     fails = checks.contrast_failures(page, "t", tmp_path / "c.png")
     assert [f["text"] for f in fails] == ["Faint"]
+
+
+def test_contrast_flags_colours_it_cannot_read(page, tmp_path, monkeypatch):
+    # An unreadable colour must fail, not pass as white.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".odd",))
+    page.set_content("""<body style="margin:0;background:#000">
+      <p class=odd style="color:lab(95% 0 0);margin:0;font-size:16px">Odd</p></body>""")
+    fails = checks.contrast_failures(page, "t", tmp_path / "c.png")
+    assert [(f["text"], f["ratio"]) for f in fails] == [("Odd", None)]

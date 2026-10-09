@@ -220,6 +220,19 @@ def decode_images(page) -> int:
     return page.evaluate(DECODE_JS)
 
 
+REVEAL_JS = """async () => {
+  const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight) { scrollTo(0, y); await frame(); }
+  scrollTo(0, 0);
+  await frame();
+}"""
+
+
+def reveal_lazy(page) -> None:
+    """Scroll through the page once so lazy loaders fill what a full-page capture shows."""
+    page.evaluate(REVEAL_JS)
+
+
 def screenshot(page, route, volatile, path) -> None:
     # Hide volatile subtrees instead of masking them: a mask is painted on top
     # and would cover the menus and tooltips the state routes exist to show.
@@ -230,6 +243,8 @@ def screenshot(page, route, volatile, path) -> None:
         # resizes it and moves them.
         page.screenshot(path=path, style=hide, animations="disabled")
         return
+    reveal_lazy(page)
+    decode_images(page)
     # Horizontal scrollers inflate the content width past what body
     # overflow-x:hidden ever lets a user see, so clip to the viewport width.
     height = page.evaluate("() => document.documentElement.scrollHeight")

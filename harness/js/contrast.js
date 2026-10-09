@@ -6,7 +6,7 @@
     if (m) return [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]];
     m = v && v.match(/color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: \/ ([\d.]+))?\)/);
     if (m) return [m[1] * 255, m[2] * 255, m[3] * 255, m[4] === undefined ? 1 : +m[4]];
-    return [255, 255, 255, 1];
+    return null; // a colour space this check cannot read: reported, never assumed
   };
   const name = (e) => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') +
     [...e.classList].filter((c) => !c.startsWith('css-')).slice(0, 3).map((c) => '.' + c).join('');
@@ -21,7 +21,7 @@
       if (cs.visibility === 'hidden' || cs.opacity === '0') continue;
       const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10);
       out.push({
-        label: name(el), text: text.slice(0, 40), color: rgba(cs.color),
+        label: name(el), text: text.slice(0, 40), color: rgba(cs.color), raw: cs.color,
         rect: [Math.max(0, r.left), Math.max(0, r.top), Math.min(innerWidth, r.right), Math.min(innerHeight, r.bottom)],
         large: size >= 24 || (size >= 18.66 && weight >= 700),
       });
