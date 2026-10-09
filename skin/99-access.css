@@ -1,0 +1,21 @@
+/* Accessibility: solid instead of glass, still instead of moving. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+  .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+    background-color: var(--nf-ink-2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card .cardScalable,
+  .card .cardScalable::before {
+    transition: none;
+  }
+
+  .card:hover .cardScalable,
+  .card:focus-within .cardScalable {
+    transform: none;
+  }
+}
