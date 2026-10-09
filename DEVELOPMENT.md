@@ -51,4 +51,5 @@ the harness aborts a plugin's requests so the page renders as if it were not ins
 
 `uv run pytest -m live` runs `tests/live/` against your server with the local build
 injected (same env vars and local config as the harness). They are skipped without them,
-and never run in CI or the pre-commit hook.
+and never run in CI or the pre-commit hook. Run them in their own pytest process: their
+session-wide browser blocks the browsers the offline tests start for themselves.

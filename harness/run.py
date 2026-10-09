@@ -137,8 +137,8 @@ def main(argv: list[str] | None = None) -> int:
         "plugins": args.plugins,
         "css_mode": args.css,
         "date": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-        "fork_sha": sha,
-        "fork_dirty": dirty,
+        "skin_sha": sha,
+        "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
         "branding_response": {k: branding[k] for k in ("wire_bytes", "encoding")},
         "css": {

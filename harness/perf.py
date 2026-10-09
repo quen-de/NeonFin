@@ -6,12 +6,12 @@ import math
 import statistics
 
 RAF_START = """() => {
-  window.__gf = { rec: true, frames: [] };
+  window.__nf = { rec: true, frames: [] };
   let last = performance.now();
-  const tick = (t) => { window.__gf.frames.push(t - last); last = t; if (window.__gf.rec) requestAnimationFrame(tick); };
+  const tick = (t) => { window.__nf.frames.push(t - last); last = t; if (window.__nf.rec) requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
 }"""
-RAF_STOP = "() => { window.__gf.rec = false; return window.__gf.frames.slice(1); }"
+RAF_STOP = "() => { window.__nf.rec = false; return window.__nf.frames.slice(1); }"
 CDP = {"RecalcStyleDuration": "recalc_style_ms", "LayoutDuration": "layout_ms", "TaskDuration": "task_ms", "ScriptDuration": "script_ms"}
 
 

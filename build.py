@@ -73,7 +73,7 @@ def assemble(root: pathlib.Path | None = None) -> str:
     return font_face(root) + "\n".join(parts[name] for name in names)
 
 
-def fork_state(root: pathlib.Path) -> tuple[str, bool]:
+def repo_state(root: pathlib.Path) -> tuple[str, bool]:
     try:
         sha = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
         dirty = subprocess.run(["git", "-C", str(root), "status", "--porcelain"], capture_output=True, text=True, check=True).stdout.strip()
@@ -93,7 +93,7 @@ def parse_header(css: str) -> tuple[str, bool] | None:
 
 def build(root: pathlib.Path | None = None) -> str:
     root = root or ROOT
-    sha, dirty = fork_state(root)
+    sha, dirty = repo_state(root)
     return header(sha, dirty) + assemble(root)
 
 

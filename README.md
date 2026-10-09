@@ -16,7 +16,7 @@ Status: early development, not ready for use.
 1. `python3 build.py` writes `dist/neonfin.css`.
 2. Paste its contents into the Custom CSS field of your server's branding settings.
 
-Jellyfin 12, modern layout, desktop browsers and phones. TV apps do not load custom CSS.
+Jellyfin 12, modern layout, desktop browsers and phones. The legacy layout is not styled for, and TV apps do not load custom CSS.
 
 ## Change the accent
 
