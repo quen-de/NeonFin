@@ -15,6 +15,11 @@
   scrollbar-width: none;
 }
 
+/* Safari before 18.2 ignores scrollbar-width. */
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root::-webkit-scrollbar {
+  display: none;
+}
+
 .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
   display: flex;
   flex: 0 0 auto;
@@ -85,7 +90,8 @@
   box-shadow: 0 0 0 1px var(--nf-rim);
 }
 
-/* Phones: the same shapes, solid. */
+/* Phones and tablets: the same shapes, solid. Wide mobile layouts show the navigation too. */
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
 .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
   background-color: var(--nf-chrome-solid);
   -webkit-backdrop-filter: none;

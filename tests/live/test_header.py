@@ -1,5 +1,7 @@
 import pytest
 
+from harness import checks
+
 pytestmark = pytest.mark.live
 
 NAV = ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root"
@@ -65,3 +67,9 @@ def test_phone_drawer_is_solid_with_a_crimson_current_section(open_page, style, 
     sel = style(page, ".MuiDrawer-paper .Mui-selected", "background-color")
     assert sel is not None and color(sel["background-color"])[:3] == (255, 36, 72)
     page.keyboard.press("Escape")
+
+
+def test_phone_header_stays_solid_at_tablet_width(open_page, style):
+    page = open_page("home", "phone", "none", viewport=(1024, 768))
+    assert style(page, NAV, "backdrop-filter")["backdrop-filter"] == "none"
+    assert checks.glass_elements(page) == []
