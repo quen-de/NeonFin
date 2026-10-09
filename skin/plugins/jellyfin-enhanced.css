@@ -1,0 +1,35 @@
+/* plugin: Jellyfin Enhanced; roots: .je- */
+/* The plugin marks Jellyfin's own actions box; keep it content-width so the core capsule holds. */
+.je-header-actions-host {
+  flex: 0 0 auto !important;
+}
+
+.je-header-buttons-tray {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The plugin sizes its buttons with !important at (0,3,0), injected after this sheet. */
+.MuiToolbar-root .je-header-buttons-tray .headerButton.paper-icon-button-light {
+  width: 34px !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  color: var(--nf-text-2);
+  transition:
+    background-color var(--nf-fast) var(--nf-ease),
+    color var(--nf-fast) var(--nf-ease);
+}
+
+.je-header-buttons-tray .headerButton:hover {
+  color: var(--nf-text);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.je-tag-host .language-flag {
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
