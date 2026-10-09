@@ -8,7 +8,11 @@
   }
 
   .actionSheet,
-  .MuiPopover-paper {
+  .MuiPopover-paper,
+  .layout-mobile .actionSheet,
+  .layout-mobile .MuiPopover-paper,
+  .transparentDocument .actionSheet,
+  .transparentDocument .MuiPopover-paper {
     background-color: var(--nf-ink-2) !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;

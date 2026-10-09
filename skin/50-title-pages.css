@@ -23,7 +23,7 @@
   background: linear-gradient(180deg, rgba(5, 6, 10, 0.72), rgba(5, 6, 10, 0.82) 480px);
 }
 
-/* Phones show the backdrop in the page: it fades out into the page's backdrop. */
+/* The in-page backdrop (phones, and the desktop banner when enabled) fades into the page. */
 .itemBackdrop {
   -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
   mask-image: linear-gradient(180deg, #000 55%, transparent);
@@ -39,7 +39,11 @@
   text-shadow: var(--nf-sign-glow);
 }
 
+/* Desktop clips the title to its box for the ellipsis: the padding makes room for the glow
+   inside the box, the margin keeps the title where it was. */
 .layout-desktop .detailRibbon .nameContainer > h1 {
+  margin: -0.6em;
+  padding: 0.6em;
   font-size: 2.6rem;
   line-height: 1.05;
 }

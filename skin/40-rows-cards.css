@@ -179,7 +179,15 @@
   box-shadow: var(--nf-tube);
 }
 
-/* Counts and the watched check: one crimson glass tab in the card's corner. Tinted, not
+/* Counts and the watched check: crimson wherever Jellyfin shows them, lists included. */
+.countIndicator,
+.playedIndicator {
+  color: #fff;
+  background-color: var(--nf-neon);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* On cards they become one crimson glass tab in the corner. Tinted, not
    blurred: a library page shows hundreds of them. Jellyfin places the box per direction. */
 .card .cardScalable .cardIndicators {
   top: 0;

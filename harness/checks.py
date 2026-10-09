@@ -14,8 +14,7 @@ JS = pathlib.Path(__file__).resolve().parent / "js"
 # Title pages put their text straight on the backdrop.
 TITLE_TEXT = (
     ".detailRibbon .nameContainer > h1",
-    # A critic rating paints its own icon as its background: unmeasurable, and set like the rest.
-    ".detailRibbon .itemMiscInfo-primary > .mediaInfoItem:not(.mediaInfoCriticRating)",
+    ".detailRibbon .itemMiscInfo-primary > .mediaInfoItem",
     ".trackSelections .selectLabel",
     ".detailPagePrimaryContainer .overview",
     ".itemGenres",
@@ -27,6 +26,8 @@ TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "movie": TITLE_TEXT,
     "show": TITLE_TEXT,
     "season": TITLE_TEXT,
+    "usermenu": ("#app-user-menu .MuiMenuItem-root",),
+    "actionsheet": (".actionSheet .actionSheetItemText", ".actionSheet .actionSheetItemAsideText"),
 }
 
 
@@ -82,6 +83,8 @@ def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
     hide += (
         ", ".join(f"{s} {icon}" for s in selectors for icon in ("img", "svg", ".material-icons")) + " { visibility: hidden !important; }"
     )
+    # A critic rating paints its icon as its own background.
+    hide += ".mediaInfoCriticRating { background-image: none !important; }"
     page.screenshot(path=str(shot_path), style=hide, animations="disabled")
     img = Image.open(shot_path).convert("RGB")
     dpr = page.evaluate("devicePixelRatio")

@@ -16,8 +16,16 @@ select.emby-select-withcolor:not([disabled]):hover {
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-select.emby-select-withcolor:not([disabled]):focus {
-  border-color: color-mix(in srgb, var(--nf-neon) 80%, transparent);
+/* Jellyfin's focus blue is !important on the field and plain on its label. */
+select.emby-select-withcolor:not([disabled]):focus,
+.emby-input:focus {
+  border-color: color-mix(in srgb, var(--nf-neon) 80%, transparent) !important;
+}
+
+.selectLabelFocused,
+.inputLabelFocused,
+.MuiFormLabel-root.MuiInputLabel-root.Mui-focused {
+  color: var(--nf-neon);
 }
 
 .emby-select-withcolor > option {

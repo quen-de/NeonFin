@@ -1,5 +1,7 @@
 /* Menus and action sheets: glass over pages on desktop, a solid cool smoke on phones and
-   over video, where blur would cost frames and the picture behind is moving. */
+   over video, where blur would cost frames and the picture behind is moving. Action sheets
+   open over a dimmed page; MUI menus do not, so they carry a denser tint for AA over a
+   white hero. */
 .actionSheet,
 .MuiPopover-paper {
   border-radius: var(--nf-radius-menu) !important;
@@ -10,6 +12,10 @@
   box-shadow:
     var(--nf-chrome-edge),
     0 18px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+.MuiPopover-paper {
+  background-color: rgba(18, 20, 32, 0.72) !important;
 }
 
 .layout-mobile .actionSheet,

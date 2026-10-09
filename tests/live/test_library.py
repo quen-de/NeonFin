@@ -17,6 +17,12 @@ def test_no_jellyfin_blue_on_libraries(open_page, profile, route):
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_no_jellyfin_blue_on_search(open_page, profile):
+    # The search field opens focused.
+    assert checks.blue_hits(open_page("search", profile, "none")) == {}
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
 def test_play_all_is_the_neon_tube_and_shuffle_a_round_tinted_button(open_page, color, profile):
     buttons = open_page("movies", profile, "none").evaluate(GROUP)
     assert len(buttons) >= 2, buttons

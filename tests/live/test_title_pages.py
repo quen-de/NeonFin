@@ -7,10 +7,9 @@ from harness import checks
 pytestmark = pytest.mark.live
 
 # Desktop shows the backdrop behind the page and leaves the in-page one empty; phones fill it.
-WHITE_BACKDROP = (
-    ".backdropImage, .itemBackdrop[style*='url('] { background: #fff !important; filter: none !important; }"
-    " .detailLogo { visibility: hidden !important; }"
-)
+WHITE_BACKDROP = ".backdropImage, .itemBackdrop[style*='url('] { background: #fff !important; filter: none !important; }"
+PAINTED = """() => [...document.querySelectorAll('.backdropImage.displayingBackdropImage, .itemBackdrop[style*="url("]')]
+  .filter((e) => e.getBoundingClientRect().height > 0).map((e) => getComputedStyle(e).backgroundColor)"""
 PANEL_PAINT = """(sel) => { const e = document.querySelector(sel); const cs = getComputedStyle(e);
   return [cs.backgroundColor, cs.backgroundImage, getComputedStyle(e, '::before').backgroundImage]; }"""
 
@@ -33,6 +32,7 @@ def test_title_page_text_reads_over_a_white_backdrop(open_page, tmp_path, profil
     page = open_page("movie", profile, "none", variant="white-backdrop")
     page.add_style_tag(content=WHITE_BACKDROP)
     page.wait_for_timeout(300)
+    assert "rgb(255, 255, 255)" in page.evaluate(PAINTED)
     labels = page.evaluate("(sels) => sels.filter((s) => document.querySelector(s))", list(checks.TEXT_TARGETS["movie"]))
     assert len(labels) >= 4, labels
     assert checks.contrast_failures(page, "movie", tmp_path / "white.png") == []
@@ -44,6 +44,52 @@ def test_the_title_is_a_lit_sign(open_page, style, profile, route):
     s = style(open_page(route, profile, "none"), ".detailRibbon .nameContainer > h1", "font-family", "text-transform", "text-shadow")
     assert s["font-family"].startswith('"NeonFin Sign"') and s["text-transform"] == "uppercase"
     assert s["text-shadow"].count("px") >= 9
+
+
+GLOW = """() => { const h = document.querySelector('.detailRibbon .nameContainer > h1');
+  const range = document.createRange(); range.selectNodeContents(h); const t = range.getBoundingClientRect();
+  return { above: { x: t.left, y: t.top - 6, width: Math.min(t.width, 300), height: 5 },
+           before: { x: t.left - 6, y: t.top + t.height / 4, width: 5, height: t.height / 2 } }; }"""
+
+
+@pytest.mark.parametrize("route", ["movie", "show"])
+def test_the_sign_glow_is_not_cut_off(open_page, tmp_path, route):
+    # Jellyfin clips the desktop title to its box for the ellipsis; the glow must still spill
+    # past the box, not end in a hard edge.
+    from PIL import Image
+
+    page = open_page(route, "desktop", "none", variant="black-backdrop")
+    page.add_style_tag(content=".backdropImage { background: #000 !important; }")
+    page.wait_for_timeout(300)
+    for side, clip in page.evaluate(GLOW).items():
+        page.screenshot(path=str(tmp_path / f"{side}.png"), clip=clip, animations="disabled")
+        im = Image.open(tmp_path / f"{side}.png").convert("RGB")
+        px = list(getattr(im, "get_flattened_data", im.getdata)())
+        # An unclipped title (a season's) measures 14 here; a clipped one nothing at all.
+        assert max(r - max(g, b) for r, g, b in px) >= 8, side
+
+
+def test_watched_checks_outside_cards_stay_crimson(open_page, color):
+    # Lists (episodes, playlists) show the watched check outside the card tab. The test
+    # library may have nothing watched, so add one in Jellyfin's list markup.
+    page = open_page("season", "desktop", "none", variant="list-check")
+    bg = page.evaluate("""() => { const box = document.createElement('div'); box.className = 'listItemIndicators';
+      box.innerHTML = '<div class="playedIndicator indicator"><span class="material-icons indicatorIcon check"></span></div>';
+      document.querySelector('.detailPageWrapperContainer').prepend(box);
+      return getComputedStyle(box.firstChild).backgroundColor; }""")
+    r, g, b, a = color(bg)
+    assert r > 2 * max(g, b) and a > 0.5, bg
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_a_focused_track_select_is_crimson_not_blue(open_page, color, profile):
+    page = open_page("movie", profile, "none", variant="focused-select")
+    page.locator(".trackSelections select:not([disabled]) >> visible=true").first.focus()
+    page.wait_for_timeout(300)
+    assert checks.blue_hits(page) == {}
+    edge = page.evaluate("() => getComputedStyle(document.activeElement).borderTopColor")
+    r, g, b, _ = color(edge)
+    assert r > 2 * max(g, b), edge
 
 
 BUTTONS = """() => [...document.querySelectorAll('.mainDetailButtons > .detailButton')].filter((b) => b.offsetParent).map((b) => {
