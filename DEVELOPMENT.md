@@ -48,9 +48,12 @@ Speed comes from a paired bench, the other checks from capture-only runs:
 The bench alternates vanilla and skin trials in one process, so drift between runs cannot
 tilt the comparison, and stops a cell (plugin state, profile, route) once its verdict is
 clear, after at least four pairs; a close call gets the full seven. While iterating on one
-cost, bench just that cell: `--profiles desktop --routes home`; `--bench` repeats in
-`harness.gates`, and a later bench replaces the cells it measured. Accepted exceptions to the
-speed ratios live in `harness/gates.py`, each with its own ceiling.
+cost, bench just that cell: `--profiles desktop --routes home`. `--bench` repeats in
+`harness.gates`: benches of one build pool their pairs, so a borderline cell can be measured
+further without losing the pairs it has. The gate passes only on complete evidence from one
+committed build: every speed cell for all plugins on and off, a capture of every route for
+each benched state, nothing built from uncommitted CSS. Accepted exceptions to the speed
+ratios live in `harness/gates.py`, each with its own ceiling.
 
 Captures are not timed, so `harness.captures` runs them side by side (`--jobs`, default 4).
 Timed work runs alone: a timed run waits for captures to finish and captures wait for it.

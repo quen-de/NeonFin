@@ -6,8 +6,11 @@ usage: python -m harness.gates VANILLA_RUN SKIN_RUN [--scope home,movies]
 Performance and glass apply to every route captured; Jellyfin blue and text
 contrast apply only to the routes in scope (the pages the milestone styles).
 A bench run (harness.bench) carries paired vanilla and skin trials; capture
-runs next to it carry the glass, blue and contrast checks. A later bench replaces the cells
-it measured again, so one cell can be re-measured without re-running the rest.
+runs next to it carry the glass, blue and contrast checks. Every benched state needs its
+captures, every route captured, and all plugins on and off need every speed cell benched,
+all from one clean build. Several benches
+of that build pool their pairs, so a borderline cell can be measured further without
+re-running the rest and without dropping the pairs it already has.
 """
 
 from __future__ import annotations
@@ -18,7 +21,12 @@ import pathlib
 import statistics
 import sys
 
+from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
+
 GLASS_BUDGET = {"desktop": 3, "phone": 0}
+# Speed is gated with every plugin on and every plugin off (spec 7.2); a state with one
+# plugin removed is checked by captures alone.
+SPEED_STATES = {"all", "none"}
 MENU_STATES = {"usermenu", "select", "actionsheet"}
 RECALC_RATIO = 1.3
 TASK_RATIO = 1.15
@@ -28,7 +36,9 @@ MIN_TRIALS = 7
 # 2026-10-09: a plugin-built desktop home restyles 1.6x to 1.8x vanilla while scrolling (the
 # card ring and lift, a taller page, about 12% more per restyled element) with frames
 # unchanged: 0 dropped, p95 16.7 ms. Cutting the card treatment only reaches 1.29x.
-EXCEPTIONS = {("all", "desktop", "home"): {"recalc_style_ms": 2.0, "task_ms": 1.25}}
+# The ceilings sit about 7% above the worst medians measured (1.77x, 1.18x): close enough to
+# catch a real step up, far enough that run-to-run spread (1.61x to 1.77x) does not trip it.
+EXCEPTIONS = {("all", "desktop", "home"): {"recalc_style_ms": 1.9, "task_ms": 1.24}}
 # Early decisions in paired benches, after MIN_DECIDED pairs: a cell fails once every pair is
 # over a limit and the median pair over it by MARGIN; it passes once, on every metric, every
 # pair is within the limit and the median pair within it by MARGIN. Were the true ratio on
@@ -139,30 +149,79 @@ def _summary(run: str) -> dict:
     return json.loads((pathlib.Path(run) / "summary.json").read_text())
 
 
+def _provenance(what: str, run: dict) -> list[str]:
+    if run.get("css_mode") == "live":
+        return [f"a {what} of live CSS, not the build"]
+    if run.get("skin_dirty") is not False:
+        return [f"a {what} of uncommitted CSS"]
+    return []
+
+
+def pool(benches: list[dict]) -> tuple[dict, list[str]]:
+    """One bench holding every cell's pairs from all the benches, and a note per pooled cell."""
+    cells: dict[str, list[dict]] = {}
+    sources: dict[str, int] = {}
+    for b in benches:
+        for cell, c in b["cells"].items():
+            cells.setdefault(cell, []).extend(c["pairs"])
+            sources[cell] = sources.get(cell, 0) + 1
+    notes = [f"{cell}: {len(cells[cell])} pairs pooled from {n} benches" for cell, n in sources.items() if n > 1]
+    return {**benches[0], "cells": {cell: {"pairs": p} for cell, p in cells.items()}}, notes
+
+
+def evaluate_evidence(benches: list[dict], captures: dict[str, dict], scope: set[str]) -> tuple[list[str], list[str]]:
+    """Failures and notes for benches plus skin captures (keyed by run name): one clean build,
+    every speed cell benched and every route captured for each plugin state."""
+    fails = [f for b in benches for f in _provenance("bench", b)]
+    shas = sorted({b.get("skin_sha") for b in benches}, key=str)
+    if len(shas) > 1:
+        fails.append(f"benches measured different builds: {', '.join(map(str, shas))}")
+    for b in benches[1:]:
+        for key in ("server_version", "browser_version"):
+            if b.get(key) != benches[0].get(key):
+                fails.append(f"benches differ in {key}: {benches[0].get(key)} vs {b.get(key)}")
+    bench, notes = pool(benches)
+    fails += evaluate_bench(bench)
+    benched = {cell.split("/")[0] for cell in bench["cells"]}
+    for state in sorted(benched):
+        fails += [f"{state}/{p}/{r}: not benched" for p in PROFILES for r in PERF_ROUTES if f"{state}/{p}/{r}" not in bench["cells"]]
+    if not captures:
+        return fails + ["no capture runs: glass, blue and contrast unchecked"], notes
+    captured = {c.get("plugins") for c in captures.values()}
+    fails += [f"{s}: benched but never captured" for s in sorted(benched - captured, key=str)]
+    fails += [f"{s}: captured but never benched" for s in sorted((captured & SPEED_STATES) - benched, key=str)]
+    for run, capture in captures.items():
+        state = capture.get("plugins")
+        if capture.get("css_mode") == "vanilla":
+            fails.append(f"{run}: a vanilla capture has no skin checks")
+            continue
+        fails += [f"{run}: {f}" for f in _provenance("capture", capture)]
+        if capture.get("skin_sha") != shas[0]:
+            fails.append(f"{run}: captured build {capture.get('skin_sha')}, benched {shas[0]}")
+        for key in ("server_version", "browser_version"):
+            if capture.get(key) != bench.get(key):
+                fails.append(f"{run}: {key} differs from the bench: {capture.get(key)} vs {bench.get(key)}")
+        fails += [
+            f"{state}: no capture of {p}/{r.name}" for p in PROFILES for r in ROUTES if f"{p}/{r.name}" not in capture.get("routes", {})
+        ]
+        fails += [f"{state}: {f}" for f in route_failures(capture, scope)]
+    return fails, notes
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("runs", nargs="*", help="VANILLA SKIN, or with --bench the skin capture runs")
-    ap.add_argument("--bench", action="append", help="a harness.bench run, repeatable: speed comes from its paired trials")
+    ap.add_argument(
+        "--bench", action="append", help="a harness.bench run, repeatable: speed comes from its paired trials, pooled across benches"
+    )
     ap.add_argument("--scope", default="home")
     args = ap.parse_args(argv)
     scope = set(args.scope.split(","))
     if args.bench:
         benches = [json.loads((pathlib.Path(b) / "bench.json").read_text()) for b in args.bench]
-        bench = {**benches[0], "cells": {cell: c for b in benches for cell, c in b["cells"].items()}}
-        print(f"{len(bench['cells'])} cells from {len(benches)} bench{'es' if len(benches) > 1 else ''}")
-        fails = evaluate_bench(bench)
-        for b in benches[1:]:
-            for key in ("server_version", "browser_version"):
-                if b.get(key) != bench.get(key):
-                    fails.append(f"benches differ in {key}: {bench.get(key)} vs {b.get(key)}")
-        for run in args.runs:
-            capture = _summary(run)
-            if capture.get("css_mode") == "vanilla":
-                fails.append(f"{run}: a vanilla capture has no skin checks")
-            for key in ("server_version", "browser_version"):
-                if capture.get(key) != bench.get(key):
-                    fails.append(f"{run}: {key} differs from the bench: {capture.get(key)} vs {bench.get(key)}")
-            fails += [f"{capture.get('plugins')}: {f}" if len(args.runs) > 1 else f for f in route_failures(capture, scope)]
+        fails, notes = evaluate_evidence(benches, {pathlib.Path(r).name: _summary(r) for r in args.runs}, scope)
+        for n in notes:
+            print(n)
     elif len(args.runs) == 2:
         fails = evaluate(_summary(args.runs[0]), _summary(args.runs[1]), scope)
     else:

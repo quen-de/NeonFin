@@ -139,7 +139,15 @@ def test_page_ready_slower_than_every_vanilla_load_decides_a_fail():
 
 
 def bench(cells, **extra):
-    return {"css_mode": "dist", "server_version": "12.0", "browser_version": "1", "cells": cells, **extra}
+    return {
+        "css_mode": "dist",
+        "skin_sha": "abc",
+        "skin_dirty": False,
+        "server_version": "12.0",
+        "browser_version": "1",
+        "cells": cells,
+        **extra,
+    }
 
 
 def test_bench_cells_decided_early_need_no_more_pairs():
@@ -166,27 +174,97 @@ def test_bench_cells_use_the_accepted_exception():
     assert len(gates.evaluate_bench(bench({"none/desktop/home": {"pairs": pairs}}))) == 2
 
 
-def test_gates_cli_judges_a_bench_and_skin_captures(tmp_path, capsys):
+def full_cells(state, pairs):
+    return {f"{state}/{p}/{r}": {"pairs": pairs} for p in ("desktop", "phone") for r in ("home", "movies", "series")}
+
+
+def capture(state, **extra):
+    from harness.profiles import ROUTES
+
+    routes = {f"{p}/{r.name}": {"glass": 0, "blue": {}, "contrast_failures": []} for p in ("desktop", "phone") for r in ROUTES}
+    return summary(**{"plugins": state, "routes": routes, "perf": {}, "trials": None, "skin_sha": "abc", "skin_dirty": False, **extra})
+
+
+def judge(tmp_path, benches, captures, capsys):
     import json
 
-    (tmp_path / "b").mkdir()
-    (tmp_path / "b" / "bench.json").write_text(json.dumps(bench({"all/desktop/home": {"pairs": [pair(10, 10.5)] * 4}})))
-    (tmp_path / "c").mkdir()
-    routes = {"desktop/home": {"glass": 5, "blue": {}, "contrast_failures": []}}
-    (tmp_path / "c" / "summary.json").write_text(json.dumps(summary(routes=routes, perf={})))
-    assert gates.main(["--bench", str(tmp_path / "b"), str(tmp_path / "c")]) == 1
-    out = capsys.readouterr().out
-    assert "desktop/home: 5 live glass surfaces" in out and "gates: 1 failure(s)" in out
+    args = []
+    for i, b in enumerate(benches):
+        (tmp_path / f"b{i}").mkdir()
+        (tmp_path / f"b{i}" / "bench.json").write_text(json.dumps(b))
+        args += ["--bench", str(tmp_path / f"b{i}")]
+    for i, c in enumerate(captures):
+        (tmp_path / f"c{i}").mkdir()
+        (tmp_path / f"c{i}" / "summary.json").write_text(json.dumps(c))
+        args.append(str(tmp_path / f"c{i}"))
+    code = gates.main(args)
+    return code, capsys.readouterr().out
 
 
-def test_a_later_bench_replaces_the_cells_it_measured_again(tmp_path, capsys):
-    import json
+CLEAR = [pair(10, 10.5)] * 4
 
-    for name, cells in (
-        ("b1", {"all/desktop/home": [pair(10, 20)] * 4, "all/phone/home": [pair(10, 10.5)] * 4}),
-        ("b2", {"all/desktop/home": [pair(10, 10.5)] * 4}),
-    ):
-        (tmp_path / name).mkdir()
-        (tmp_path / name / "bench.json").write_text(json.dumps(bench({k: {"pairs": v} for k, v in cells.items()})))
-    assert gates.main(["--bench", str(tmp_path / "b1"), "--bench", str(tmp_path / "b2")]) == 0
-    assert "2 cells from 2 benches" in capsys.readouterr().out
+
+def test_a_bench_with_captures_for_every_state_passes(tmp_path, capsys):
+    code, out = judge(tmp_path, [bench(full_cells("all", CLEAR) | full_cells("none", CLEAR))], [capture("all"), capture("none")], capsys)
+    assert code == 0 and "gates: pass" in out
+
+
+def test_a_bench_alone_never_passes(tmp_path, capsys):
+    code, out = judge(tmp_path, [bench(full_cells("all", CLEAR))], [], capsys)
+    assert code == 1 and "no capture runs: glass, blue and contrast unchecked" in out
+
+
+def test_every_cell_of_a_benched_state_is_needed(tmp_path, capsys):
+    cells = full_cells("all", CLEAR)
+    del cells["all/phone/series"]
+    code, out = judge(tmp_path, [bench(cells)], [capture("all")], capsys)
+    assert code == 1 and "all/phone/series: not benched" in out
+
+
+def test_benched_states_are_captured_and_all_on_and_off_are_benched(tmp_path, capsys):
+    # Speed is gated with every plugin on and every plugin off (spec 7.2); a state with one
+    # plugin removed needs captures only.
+    both = bench(full_cells("all", CLEAR) | full_cells("none", CLEAR))
+    code, out = judge(tmp_path, [both], [capture("all"), capture("without:media-bar")], capsys)
+    assert code == 1 and "none: benched but never captured" in out and "without:media-bar" not in out
+    (tmp_path / "2").mkdir()
+    code, out = judge(tmp_path / "2", [bench(full_cells("all", CLEAR))], [capture("all"), capture("none")], capsys)
+    assert code == 1 and "none: captured but never benched" in out
+    (tmp_path / "3").mkdir()
+    code, out = judge(tmp_path / "3", [bench(full_cells("all", CLEAR))], [capture("all"), capture("without:media-bar")], capsys)
+    assert code == 0, out
+
+
+def test_a_capture_must_cover_every_route(tmp_path, capsys):
+    c = capture("all")
+    del c["routes"]["phone/osd"]
+    code, out = judge(tmp_path, [bench(full_cells("all", CLEAR))], [c], capsys)
+    assert code == 1 and "all: no capture of phone/osd" in out
+
+
+def test_benches_of_one_build_pool_their_pairs(tmp_path, capsys):
+    first = full_cells("all", CLEAR)
+    first["all/desktop/movies"] = {"pairs": [pair(10, 13.5), pair(10, 12.5)] * 2}
+    second = {"all/desktop/movies": {"pairs": [pair(10, 12.4), pair(10, 12.6), pair(10, 12.5)]}}
+    code, out = judge(tmp_path, [bench(first), bench(second)], [capture("all")], capsys)
+    assert code == 0
+    assert "all/desktop/movies: 7 pairs pooled from 2 benches" in out
+
+
+def test_benches_and_captures_come_from_one_clean_build(tmp_path, capsys):
+    cells = full_cells("all", CLEAR)
+    cases = [
+        ([bench(cells), bench({}, skin_sha="def")], [capture("all")], "benches measured different builds: abc, def"),
+        ([bench(cells, skin_dirty=True)], [capture("all")], "a bench of uncommitted CSS"),
+        ([bench(cells, css_mode="live")], [capture("all")], "a bench of live CSS, not the build"),
+        ([bench(cells)], [capture("all", skin_sha="def")], "captured build def, benched abc"),
+        ([bench(cells)], [capture("all", skin_dirty=True)], "a capture of uncommitted CSS"),
+    ]
+    for i, (benches, captures, message) in enumerate(cases):
+        (tmp_path / str(i)).mkdir()
+        code, out = judge(tmp_path / str(i), benches, captures, capsys)
+        assert code == 1 and message in out, (message, out)
+
+
+def test_the_exception_ceilings_sit_just_above_what_was_measured():
+    assert gates.limits("all", "desktop", "home") == {"recalc_style_ms": 1.9, "task_ms": 1.24}
