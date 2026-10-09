@@ -34,3 +34,15 @@ nothing is ever written to the server.
 3. `uv run python -m harness.run --label NAME --css dist` captures every route on desktop and
    phone into `harness/runs/NAME/` (`--css live` uses the server's own custom CSS).
 4. `uv run python -m harness.compare harness/runs/A harness/runs/B` diffs two runs.
+
+## Gates
+
+A change is judged against plain Jellyfin on the same server, in the same plugin state:
+
+    uv run python -m harness.run --label base --css vanilla --plugins all --trials 7
+    uv run python -m harness.run --label skin --css dist --plugins all --trials 7
+    uv run python -m harness.gates harness/runs/base harness/runs/skin --scope home
+
+`--plugins` takes `all`, `none` or `without:<name>[,<name>]` (names in `harness/plugins.py`):
+the harness aborts a plugin's requests so the page renders as if it were not installed.
+`uv run python -m harness.sheet harness/runs/skin` writes a contact sheet per device.
