@@ -116,10 +116,6 @@ def test_keyboard_focus_draws_one_ring(open_page):
     assert target.evaluate("(a) => [a.matches(':focus-visible'), getComputedStyle(a).outlineStyle]") == [True, "none"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Jellyfin's .card { contain: content } clips the glow 5px above a lifted card; lifting it costs paint containment on every card",
-)
 def test_the_ring_glow_fades_out_instead_of_being_cut(open_page, rows, tmp_path):
     page = open_page("home", "desktop", "none", variant="hover")
     card = page.locator(f"{CARD} >> visible=true").nth(1)

@@ -88,8 +88,14 @@
 }
 
 /* Pointer hover lifts at once: a gliding lift restyles the card on every frame while rows
-   scroll under a still pointer. Touch screens keep no hover state at all. */
+   scroll under a still pointer. Touch screens keep no hover state at all. Jellyfin
+   paint-contains every card, which would cut the ring's glow at the card's edge, so only
+   the lit card lets its paint out. */
 @media (hover: hover) {
+  .card:hover {
+    contain: layout style;
+  }
+
   .card:hover .cardScalable {
     transform: translateY(-4px);
   }
@@ -97,6 +103,11 @@
   .card:hover .cardScalable::after {
     opacity: 1;
   }
+}
+
+/* Keyboard focus lights the card the same way, and glides. */
+.card:focus-within {
+  contain: layout style;
 }
 
 .card:focus-within .cardScalable {
