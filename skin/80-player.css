@@ -1,0 +1,20 @@
+/* Player and now-playing bars: the played part is crimson, the handle white so it reads on
+   the crimson and on the track. */
+.mdl-slider {
+  color: var(--nf-neon);
+}
+
+.mdl-slider-background-lower,
+.sliderMarker.watched {
+  background-color: var(--nf-neon);
+}
+
+.mdl-slider::-webkit-slider-thumb {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.mdl-slider::-moz-range-thumb {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}

@@ -12,6 +12,9 @@ GLASS_ALLOWLIST = frozenset(
     {
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root",
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child)",
+        # Menus, desktop pages only: phones and the player turn it off.
+        ".actionSheet",
+        ".MuiPopover-paper",
     }
 )
 PLUGIN_DIR = "skin/plugins/"

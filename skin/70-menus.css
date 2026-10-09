@@ -1,0 +1,53 @@
+/* Menus and action sheets: glass over pages on desktop, a solid cool smoke on phones and
+   over video, where blur would cost frames and the picture behind is moving. */
+.actionSheet,
+.MuiPopover-paper {
+  border-radius: var(--nf-radius-menu) !important;
+  background-color: rgba(18, 20, 32, 0.55) !important;
+  background-image: none !important;
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  box-shadow:
+    var(--nf-chrome-edge),
+    0 18px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+.layout-mobile .actionSheet,
+.layout-mobile .MuiPopover-paper,
+.transparentDocument .actionSheet,
+.transparentDocument .MuiPopover-paper {
+  background-color: rgba(12, 13, 21, 0.96) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.actionSheetMenuItem {
+  border-radius: 8px;
+}
+
+.actionSheetMenuItem:hover,
+.actionSheetMenuItem:focus-visible,
+.MuiPopover-paper .MuiMenuItem-root:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Only the current choice is lit; the other icons recede. */
+.actionSheetMenuItem .actionsheetMenuItemIcon {
+  color: var(--nf-text-2);
+}
+
+.actionSheetMenuItem .actionsheetMenuItemIcon.check {
+  color: var(--nf-neon);
+}
+
+.actionSheetItemAsideText {
+  color: var(--nf-text-2);
+}
+
+/* MUI marks the current choice in its blue at (0,3,0). */
+.MuiPopover-paper .MuiMenuItem-root.Mui-selected,
+.MuiPopover-paper .MuiMenuItem-root.Mui-selected:hover,
+.MuiPopover-paper .MuiMenuItem-root.Mui-selected.Mui-focusVisible {
+  background-color: var(--nf-selected);
+  box-shadow: var(--nf-selected-edge);
+}
