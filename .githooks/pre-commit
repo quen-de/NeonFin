@@ -1,0 +1,3 @@
+#!/bin/sh
+# Offline tests, the neutrality check among them, pass before any commit.
+exec uv run --quiet pytest -q
