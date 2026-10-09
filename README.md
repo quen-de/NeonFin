@@ -18,6 +18,13 @@ Status: early development, not ready for use.
 
 Jellyfin 12, modern layout, desktop browsers and phones. The legacy layout is not styled for, and TV apps do not load custom CSS.
 
+## Plugin notes
+
+Media Bar shows one dot per slide only while it has no more slides than dots. With more
+slides, each dot stands for a run of them, so the lit dot stays put for several slides.
+That is the plugin's design, not the skin. Raise its maximum number of dots to the number
+of slides, or lower the number of slides, to give each slide its own dot.
+
 ## Change the accent
 
 Add this after the skin in Custom CSS:
