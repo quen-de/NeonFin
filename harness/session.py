@@ -7,6 +7,7 @@ import time
 import weakref
 from dataclasses import dataclass
 
+from harness import plugins
 from harness.states import STATES
 
 
@@ -76,10 +77,12 @@ def _track_requests(page) -> None:
     _pending[page] = pending
 
 
-def new_page(browser, profile, state, override: Override | None):
+def new_page(browser, profile, state, override: Override | None, plugins_off: frozenset[str] = frozenset()):
     ctx = browser.new_context(storage_state=state, service_workers="block", timezone_id=TIMEZONE, locale=LOCALE, **profile.context)
     ctx.add_init_script(FREEZE_DATE_JS)
     ctx.route(PLAYBACK_REPORTS, _swallow_report)
+    if plugins_off:
+        ctx.route(lambda url: plugins.blocks(url, plugins_off), lambda route: route.abort())
     if override is not None:
         # jellyfin-web 12 reads custom CSS from the CustomCss field of
         # /Branding/Configuration (components/CustomCss.tsx). /Branding/Css is

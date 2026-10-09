@@ -13,7 +13,7 @@ import urllib.request
 from playwright.sync_api import sync_playwright
 
 import build
-from harness import collect, config, cssbundle, perf, session
+from harness import collect, config, cssbundle, perf, plugins, session
 from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
 
 RUNS = pathlib.Path(__file__).resolve().parent / "runs"
@@ -36,11 +36,11 @@ def write_gz(path: pathlib.Path, data) -> None:
         json.dump(data, f, sort_keys=True)
 
 
-def capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary):
+def capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off):
     volatile = cfg.volatile
     state = session.login_state(browser, cfg, prof)
-    ctx, page = session.new_page(browser, prof, state, override)
-    anon_ctx, anon_page = session.new_page(browser, prof, None, override)
+    ctx, page = session.new_page(browser, prof, state, override, plugins_off)
+    anon_ctx, anon_page = session.new_page(browser, prof, None, override, plugins_off)
     n_rules, selectors = collect.css_selectors(page, effective)
     unique = sorted(set(selectors))
     hit: set[int] = set()
@@ -66,14 +66,14 @@ def capture_profile(browser, cfg, prof, routes, override, effective, outdir, sum
     return state
 
 
-def perf_profile(browser, cfg, prof, state, override, trials):
+def perf_profile(browser, cfg, prof, state, override, trials, plugins_off):
     by_name = {r.name: r for r in ROUTES}
     out = {}
     for name in PERF_ROUTES:
         route = by_name[name]
         results = []
         for i in range(trials + 1):  # trial 0 warms caches and is discarded
-            ctx, page = session.new_page(browser, prof, state, override)
+            ctx, page = session.new_page(browser, prof, state, override, plugins_off)
             cdp = ctx.new_cdp_session(page)
             cdp.send("Performance.enable")
             cdp.send("Emulation.setCPUThrottlingRate", {"rate": prof.cpu_throttle})
@@ -95,7 +95,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--routes", default=",".join(r.name for r in ROUTES))
     ap.add_argument("--trials", type=int, default=5)
     ap.add_argument("--no-perf", action="store_true")
+    ap.add_argument("--plugins", default="all", help="all, none, or without:<name>[,<name>]")
     args = ap.parse_args(argv)
+    try:
+        plugins_off = plugins.parse_state(args.plugins)
+    except plugins.PluginStateError as e:
+        ap.error(str(e))
 
     cfg = config.load()
     wanted = args.routes.split(",")
@@ -111,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     effective = cssbundle.strip_imports(served)
     summary = {
         "label": args.label,
+        "plugins": args.plugins,
         "css_mode": args.css,
         "date": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
         "fork_sha": sha,
@@ -132,9 +138,9 @@ def main(argv: list[str] | None = None) -> int:
         summary["browser_version"] = browser.version
         for name in args.profiles.split(","):
             prof = PROFILES[name]
-            state = capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary)
+            state = capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off)
             if not args.no_perf:
-                summary["perf"][name] = perf_profile(browser, cfg, prof, state, override, args.trials)
+                summary["perf"][name] = perf_profile(browser, cfg, prof, state, override, args.trials, plugins_off)
         browser.close()
     if override is not None:
         summary["intercept_hits"] = override.hits
