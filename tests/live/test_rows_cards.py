@@ -56,6 +56,28 @@ def test_hover_lifts_the_card_and_lights_the_ring_without_dimming_others(open_pa
     page.mouse.move(0, 0)
 
 
+def test_pointer_hover_lifts_at_once(open_page):
+    # A gliding lift restyles the card on every frame while rows scroll under a still pointer.
+    page = open_page("home", "desktop", "none", variant="hover")
+    card = first_card(page)
+    card.hover()
+    got = card.evaluate(
+        "(c) => { const s = getComputedStyle(c.querySelector('.cardScalable')); return [s.transform, s.transitionDuration]; }"
+    )
+    assert got == ["matrix(1, 0, 0, 1, 0, -4)", "0s"]
+    page.mouse.move(0, 0)
+
+
+def test_touch_screens_keep_no_hover_lift(open_page):
+    page = open_page("home", "phone", "none", variant="hover")
+    card = first_card(page)
+    card.hover()
+    page.wait_for_timeout(400)
+    s = card.evaluate(CARD_STATE)
+    assert s["transform"] == "none" and s["ring"] == "0"
+    page.mouse.move(0, 0)
+
+
 def test_keyboard_focus_matches_hover(open_page):
     page = open_page("home", "desktop", "none", variant="focus")
     card = first_card(page)
@@ -63,6 +85,7 @@ def test_keyboard_focus_matches_hover(open_page):
     page.wait_for_timeout(400)
     s = card.evaluate(CARD_STATE)
     assert s["transform"] == "matrix(1, 0, 0, 1, 0, -4)" and s["ring"] == "1"
+    assert card.evaluate("(c) => getComputedStyle(c.querySelector('.cardScalable')).transitionDuration") == "0.18s"
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])

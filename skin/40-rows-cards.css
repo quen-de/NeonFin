@@ -53,7 +53,6 @@
 .card .cardScalable {
   border-radius: var(--nf-radius-card);
   box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.9);
-  transition: transform var(--nf-fast) var(--nf-ease);
 }
 
 .card .cardImageContainer,
@@ -87,12 +86,23 @@
   transition: opacity var(--nf-fast) var(--nf-ease);
 }
 
-.card:hover .cardScalable,
-.card:focus-within .cardScalable {
-  transform: translateY(-4px);
+/* Pointer hover lifts at once: a gliding lift restyles the card on every frame while rows
+   scroll under a still pointer. Touch screens keep no hover state at all. */
+@media (hover: hover) {
+  .card:hover .cardScalable {
+    transform: translateY(-4px);
+  }
+
+  .card:hover .cardScalable::before {
+    opacity: 1;
+  }
 }
 
-.card:hover .cardScalable::before,
+.card:focus-within .cardScalable {
+  transform: translateY(-4px);
+  transition: transform var(--nf-fast) var(--nf-ease);
+}
+
 .card:focus-within .cardScalable::before {
   opacity: 1;
 }
