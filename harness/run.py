@@ -13,7 +13,7 @@ import urllib.request
 from playwright.sync_api import sync_playwright
 
 import build
-from harness import checks, collect, config, cssbundle, perf, plugins, session
+from harness import checks, collect, config, cssbundle, lock, perf, plugins, session
 from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
 
 RUNS = pathlib.Path(__file__).resolve().parent / "runs"
@@ -88,14 +88,7 @@ def perf_profile(browser, cfg, prof, state, override, trials, plugins_off):
         route = by_name[name]
         results = []
         for i in range(trials + 1):  # trial 0 warms caches and is discarded
-            ctx, page = session.new_page(browser, prof, state, override, plugins_off)
-            cdp = ctx.new_cdp_session(page)
-            cdp.send("Performance.enable")
-            cdp.send("Emulation.setCPUThrottlingRate", {"rate": prof.cpu_throttle})
-            anchor_ms = session.navigate(page, session.route_url(cfg, route), route.anchor)
-            session.settle(page, cfg.volatile)
-            r = perf.scroll_trial(page, cdp, prof.context["viewport"]) | {"anchor_ms": round(anchor_ms, 1)}
-            ctx.close()
+            r = perf.page_trial(browser, cfg, prof, route, state, override, plugins_off)
             if i:
                 results.append(r)
         out[name] = perf.aggregate(results)
@@ -153,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
         "show_volatile": args.show_volatile,
         "failures": [],
     }
-    with sync_playwright() as pw:
+    with lock.hold(timed=not args.no_perf), sync_playwright() as pw:
         browser = session.launch(pw)
         summary["browser_version"] = browser.version
         for name in args.profiles.split(","):

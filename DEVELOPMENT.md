@@ -37,14 +37,27 @@ nothing is ever written to the server.
 
 ## Gates
 
-A change is judged against plain Jellyfin on the same server, in the same plugin state:
+A change is judged against plain Jellyfin on the same server, in the same plugin state.
+Speed comes from a paired bench, the other checks from capture-only runs:
 
-    uv run python -m harness.run --label base --css vanilla --plugins all --trials 7
-    uv run python -m harness.run --label skin --css dist --plugins all --trials 7
-    uv run python -m harness.gates harness/runs/base harness/runs/skin --scope home
+    uv run python -m harness.bench --label speed --plugins all --plugins none
+    uv run python -m harness.captures --label checks --plugins all --plugins none
+    uv run python -m harness.gates --bench harness/runs/speed \
+        harness/runs/checks-dist-all harness/runs/checks-dist-none --scope home
 
-`--plugins` takes `all`, `none` or `without:<name>[,<name>]` (names in `harness/plugins.py`):
-the harness aborts a plugin's requests so the page renders as if it were not installed.
+The bench alternates vanilla and skin trials in one process, so drift between runs cannot
+tilt the comparison, and stops a cell (plugin state, profile, route) once its verdict is
+clear, after at least four pairs; a close call gets the full seven. While iterating on one
+cost, bench just that cell: `--profiles desktop --routes home`. Accepted exceptions to the
+speed ratios live in `harness/gates.py`, each with its own ceiling.
+
+Captures are not timed, so `harness.captures` runs them side by side (`--jobs`, default 4).
+Timed work runs alone: a timed run waits for captures to finish and captures wait for it.
+
+`--plugins` takes `all`, `none` or `without:<name>[,<name>]` (names in `harness/plugins.py`),
+and repeats for several states: the harness aborts a plugin's requests so the page renders
+as if it were not installed. `harness.run` still captures and times one CSS mode in one go,
+and `harness.gates VANILLA_RUN SKIN_RUN` still judges two such runs.
 `uv run python -m harness.sheet harness/runs/skin` writes a contact sheet per device.
 
 ## Live tests

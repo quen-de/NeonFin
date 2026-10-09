@@ -47,6 +47,22 @@ def read_metrics(cdp) -> dict:
     return {m["name"]: m["value"] for m in cdp.send("Performance.getMetrics")["metrics"]}
 
 
+def page_trial(browser, cfg, prof, route, state, override, plugins_off) -> dict:
+    """One timed trial in a fresh context: full load, settle, then the scroll."""
+    from harness import session
+
+    ctx, page = session.new_page(browser, prof, state, override, plugins_off)
+    try:
+        cdp = ctx.new_cdp_session(page)
+        cdp.send("Performance.enable")
+        cdp.send("Emulation.setCPUThrottlingRate", {"rate": prof.cpu_throttle})
+        anchor_ms = session.navigate(page, session.route_url(cfg, route), route.anchor)
+        session.settle(page, cfg.volatile)
+        return scroll_trial(page, cdp, prof.context["viewport"]) | {"anchor_ms": round(anchor_ms, 1)}
+    finally:
+        ctx.close()
+
+
 def scroll_trial(page, cdp, viewport, steps: int = 30, dy: int = 200, gap_ms: int = 50) -> dict:
     page.mouse.move(viewport["width"] / 2, viewport["height"] / 2)
     m0 = read_metrics(cdp)
