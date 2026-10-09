@@ -38,9 +38,11 @@ def test_avatar_is_oxblood(open_page, style, color):
     assert color(s["background-color"]) == (74, 10, 21, 1.0)  # oxblood, derived from the accent
 
 
-def test_capsules_never_overlap_on_a_narrow_desktop(open_page, style):
-    # Many sections and every plugin's buttons: the navigation must shrink and scroll, never push.
-    page = open_page("home", "desktop", "all", viewport=(1024, 768), variant="many-sections")
+@pytest.mark.parametrize("plugin_state", ["all", "none"])
+def test_capsules_never_overlap_on_a_narrow_desktop(open_page, style, plugin_state):
+    # Many sections, with and without the plugins' buttons: the navigation must shrink and
+    # scroll, never push.
+    page = open_page("home", "desktop", plugin_state, viewport=(1024, 768), variant="many-sections")
     page.evaluate(
         """(sel) => { const nav = document.querySelector(sel), pill = nav.querySelector('.MuiButton-root');
       for (let i = 0; i < 12; i++) nav.append(pill.cloneNode(true)); }""",
@@ -48,6 +50,7 @@ def test_capsules_never_overlap_on_a_narrow_desktop(open_page, style):
     )
     page.wait_for_timeout(100)
     nav, act = style(page, NAV)["rect"], style(page, ACTIONS)["rect"]
+    assert abs(nav[1] - act[1]) < 4, (nav, act)  # one row: the actions never wrap below
     assert nav[0] + nav[2] <= act[0]
     assert page.evaluate("(sel) => { const n = document.querySelector(sel); return n.scrollWidth > n.clientWidth; }", NAV)
 

@@ -84,13 +84,13 @@
   pointer-events: none;
   box-shadow: var(--nf-ring);
   opacity: 0;
-  transition: opacity var(--nf-fast) var(--nf-ease);
 }
 
 /* Pointer hover lifts at once: a gliding lift restyles the card on every frame while rows
    scroll under a still pointer. Touch screens keep no hover state at all. Jellyfin
    paint-contains every card, which would cut the ring's glow at the card's edge, so only
-   the lit card lets its paint out. */
+   the lit card lets its paint out. Containment returns the moment the card goes dark, so
+   the ring fades in but goes out at once rather than fading with its glow cut. */
 @media (hover: hover) {
   .card:hover {
     contain: layout style;
@@ -102,6 +102,7 @@
 
   .card:hover .cardScalable::after {
     opacity: 1;
+    transition: opacity var(--nf-fast) var(--nf-ease);
   }
 }
 
@@ -117,6 +118,7 @@
 
 .card:focus-within .cardScalable::after {
   opacity: 1;
+  transition: opacity var(--nf-fast) var(--nf-ease);
 }
 
 /* The ring marks the focused card; the global outline would draw a second one. Forced

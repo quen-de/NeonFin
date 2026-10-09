@@ -4,7 +4,10 @@
   box-shadow: none !important;
 }
 
+/* Jellyfin's toolbar wraps, which would drop the actions to a second row instead of letting
+   the navigation shrink and scroll. */
 .MuiAppBar-root > .MuiToolbar-root:first-child {
+  flex-wrap: nowrap;
   gap: 10px;
 }
 

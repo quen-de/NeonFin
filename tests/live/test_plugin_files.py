@@ -43,11 +43,12 @@ def test_header_reads_over_a_white_hero(open_page, tmp_path):
     assert [f for f in fails if "MuiButton" in f["label"]] == []
 
 
-@pytest.mark.parametrize("profile", ["desktop", "phone"])
-def test_hero_text_reads_over_a_white_slide(open_page, tmp_path, profile):
+# Media Bar shows the plot from about 1100px wide; 1280 is the narrowest common desktop with it.
+@pytest.mark.parametrize("profile, viewport", [("desktop", None), ("desktop", (1280, 800)), ("phone", None)])
+def test_hero_text_reads_over_a_white_slide(open_page, tmp_path, profile, viewport):
     # The plot and the details line sit on the artwork itself, so they too must pass AA over
     # the brightest slide the hero can show.
-    page = open_page("home", profile, "all", variant="white-hero")
+    page = open_page("home", profile, "all", viewport=viewport, variant="white-hero")
     page.add_style_tag(
         content="#slides-container .backdrop-container { background: #fff !important; }"
         " #slides-container .backdrop-container > * { visibility: hidden !important; }"
@@ -100,5 +101,19 @@ def test_enhanced_tray_buttons_brighten_on_hover(open_page, color):
 def test_phone_hero_keeps_its_top_undimmed(open_page):
     # Phones draw the header solid, so nothing needs dimming under it.
     page = open_page("home", "phone", "all")
-    layers = page.evaluate("getComputedStyle(document.querySelector('#slides-container .slide.active .gradient-overlay')).backgroundImage")
-    assert not layers.startswith("linear-gradient(rgba(5, 6, 10, 0.72)")
+    overlay = "getComputedStyle(document.querySelector('#slides-container .slide.active .gradient-overlay')).backgroundImage"
+    desktop = open_page("home", "desktop", "all").evaluate(overlay)
+    phone = page.evaluate(overlay)
+    # The left and bottom fades only; desktop adds the top fade under its glass capsules.
+    assert phone.count("linear-gradient(") == 2 and desktop.count("linear-gradient(") == 3
+
+
+@pytest.mark.parametrize("viewport", [None, (1280, 800)])
+def test_the_plot_keeps_to_the_dimmed_column(open_page, viewport):
+    # At most three lines, ending before the left fade starts to clear (40% of the width).
+    page = open_page("home", "desktop", "all", viewport=viewport)
+    right, width, lines = page.evaluate(
+        """() => { const p = document.querySelector('#slides-container .slide.active .plot'), r = p.getBoundingClientRect();
+      return [r.right, innerWidth, p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)]; }"""
+    )
+    assert 2 <= lines <= 3.01 and right <= 0.4 * width, (right, width, lines)

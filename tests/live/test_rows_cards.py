@@ -119,16 +119,28 @@ def test_keyboard_focus_draws_one_ring(open_page):
 def test_the_ring_glow_fades_out_instead_of_being_cut(open_page, rows, tmp_path):
     page = open_page("home", "desktop", "none", variant="hover")
     card = page.locator(f"{CARD} >> visible=true").nth(1)
+    box = card.locator(".cardScalable").bounding_box()
+    clip = {"x": box["x"] + box["width"] * 0.3, "y": box["y"] - 34, "width": box["width"] * 0.4, "height": 28}
+    page.screenshot(path=str(tmp_path / "unlit.png"), clip=clip)
     card.hover()
     page.wait_for_timeout(300)
-    box = card.locator(".cardScalable").bounding_box()
-    shot = tmp_path / "glow.png"
-    page.screenshot(
-        path=str(shot), clip={"x": box["x"] + box["width"] * 0.3, "y": box["y"] - 30, "width": box["width"] * 0.4, "height": 28}
-    )
+    page.screenshot(path=str(tmp_path / "glow.png"), clip=clip)
     page.mouse.move(0, 0)
-    reds = [round(r) for r, _, _ in rows(shot)]
-    assert max(b - a for a, b in zip(reds, reds[1:])) < 25, reds
+    unlit = [round(r) for r, _, _ in rows(tmp_path / "unlit.png")]
+    reds = [round(r) for r, _, _ in rows(tmp_path / "glow.png")]
+    assert max(r - u for r, u in zip(reds, unlit)) >= 15, (unlit, reds)  # the glow is there
+    assert max(b - a for a, b in zip(reds, reds[1:])) < 25, reds  # and fades, no step
+
+
+def test_the_ring_goes_out_at_once_with_the_glow(open_page):
+    # Leaving a card brings Jellyfin's paint containment straight back, which would cut a
+    # fading glow at the card's edge, so the ring goes out at once.
+    page = open_page("home", "desktop", "none", variant="unhover")
+    card = page.locator(f"{CARD} >> visible=true").nth(1)
+    card.hover()
+    page.wait_for_timeout(300)
+    page.mouse.move(0, 0)
+    assert card.locator(".cardScalable").evaluate("(s) => getComputedStyle(s, '::after').opacity") == "0"
 
 
 def test_plugin_badges_on_cards_survive_the_ring(open_page):

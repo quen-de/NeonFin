@@ -10,7 +10,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card .cardScalable,
-  .card .cardScalable::after {
+  .card:hover .cardScalable::after,
+  .card:focus-within .cardScalable::after {
     transition: none;
   }
 
