@@ -10,7 +10,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card .cardScalable,
-  .card .cardScalable::before {
+  .card .cardScalable::after {
     transition: none;
   }
 

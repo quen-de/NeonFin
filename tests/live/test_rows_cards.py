@@ -9,7 +9,7 @@ CARD = ".homeSectionsContainer .emby-scroller .card"
 CARD_STATE = """(card) => {
   const s = card.querySelector('.cardScalable'), cs = getComputedStyle(s);
   return { transform: cs.transform, radius: cs.borderTopLeftRadius, opacity: cs.opacity,
-           ring: getComputedStyle(s, '::before').opacity, edge: getComputedStyle(s, '::after').boxShadow };
+           ring: getComputedStyle(s, '::after').opacity, edge: getComputedStyle(s.querySelector('.cardImageContainer')).boxShadow };
 }"""
 
 
@@ -133,3 +133,30 @@ def test_the_ring_glow_fades_out_instead_of_being_cut(open_page, rows, tmp_path)
     page.mouse.move(0, 0)
     reds = [round(r) for r, _, _ in rows(shot)]
     assert max(b - a for a, b in zip(reds, reds[1:])) < 25, reds
+
+
+def test_plugin_badges_on_cards_survive_the_ring(open_page):
+    # Plugins draw badges on .cardScalable::before (Home Screen Sections' Discover row does),
+    # so the skin leaves that pseudo-element alone.
+    page = open_page("home", "desktop", "none", variant="badge")
+    page.add_style_tag(content=".nf-test-badge::before { content: 'Badge'; position: absolute; background-color: rgb(0, 0, 255); }")
+    card = first_card(page)
+    card.locator(".cardScalable").evaluate("(s) => s.classList.add('nf-test-badge')")
+    card.hover()
+    page.wait_for_timeout(300)
+    got = card.locator(".cardScalable").evaluate(
+        "(s) => { const b = getComputedStyle(s, '::before'); return [b.content, b.width === getComputedStyle(s).width]; }"
+    )
+    page.mouse.move(0, 0)
+    assert got == ['"Badge"', False]
+
+
+def test_discover_cards_keep_their_type_badges(open_page):
+    page = open_page("home", "desktop", "all")
+    badges = page.evaluate(
+        """() => [...document.querySelectorAll('.cardScalable[class*="discoverCard-"]')].slice(0, 6)
+      .map((s) => getComputedStyle(s, '::before').content)"""
+    )
+    if not badges:
+        pytest.skip("no Home Screen Sections Discover row on this server")
+    assert all(b not in ("none", '""') for b in badges), badges

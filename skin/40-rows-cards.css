@@ -54,7 +54,9 @@
   background-color: rgba(255, 255, 255, 0.14);
 }
 
-/* Cards: rounded artwork, a hairline edge, a neon ring drawn once and revealed. */
+/* Cards: rounded artwork, a hairline edge, a neon ring drawn once and revealed. The ring
+   takes ::after and the hairline sits on the artwork itself: plugins draw badges on
+   .cardScalable::before, so the skin leaves it alone. */
 .card .cardScalable {
   border-radius: var(--nf-radius-card);
   box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.9);
@@ -67,19 +69,13 @@
   border-radius: var(--nf-radius-card);
 }
 
-.card .cardScalable::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  pointer-events: none;
+.card .cardImageContainer {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-.card .cardScalable::before {
+.card .cardScalable::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -98,7 +94,7 @@
     transform: translateY(-4px);
   }
 
-  .card:hover .cardScalable::before {
+  .card:hover .cardScalable::after {
     opacity: 1;
   }
 }
@@ -108,7 +104,7 @@
   transition: transform var(--nf-fast) var(--nf-ease);
 }
 
-.card:focus-within .cardScalable::before {
+.card:focus-within .cardScalable::after {
   opacity: 1;
 }
 
