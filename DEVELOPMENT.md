@@ -21,3 +21,16 @@
 `harness/config.local.json` is gitignored. Its `neutrality_terms` list names what must never
 appear in the repository: your server's name, host names, people, addresses. The neutrality
 test checks every tracked file against it.
+
+## The harness
+
+The harness renders real pages of a Jellyfin 12 server with your local build injected, so
+nothing is ever written to the server.
+
+1. Create a dedicated Jellyfin user for it, then export:
+   `JELLYFIN_URL`, `JELLYFIN_THEME_USER`, `JELLYFIN_THEME_PASSWORD`.
+2. `uv run python -m harness.discover` writes `harness/config.local.json` with the items the
+   routes need. It keeps any other keys you add (such as `neutrality_terms`).
+3. `uv run python -m harness.run --label NAME --css dist` captures every route on desktop and
+   phone into `harness/runs/NAME/` (`--css live` uses the server's own custom CSS).
+4. `uv run python -m harness.compare harness/runs/A harness/runs/B` diffs two runs.

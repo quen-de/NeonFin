@@ -1,0 +1,14 @@
+{
+  "items": {
+    "user_id": "the harness account's user id",
+    "movies_library": "library id",
+    "series_library": "library id",
+    "movie": "item id",
+    "series": "item id",
+    "season": "item id",
+    "playable": "item id of a video the harness account may play"
+  },
+  "search_term": "the",
+  "volatile": ["#slides-container", "#randomItemButton .je-dice-face"],
+  "neutrality_terms": ["words that must never appear in the repository"]
+}

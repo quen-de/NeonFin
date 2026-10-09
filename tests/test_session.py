@@ -1,0 +1,285 @@
+import json
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+import pytest
+from playwright.sync_api import sync_playwright
+
+from harness import session
+from harness.profiles import PROFILES
+
+
+def test_patch_branding_replaces_only_custom_css():
+    body = json.dumps({"LoginDisclaimer": "hi", "CustomCss": "old", "SplashscreenEnabled": False}).encode()
+    out = json.loads(session.patch_branding(body, ".new{}"))
+    assert out == {"LoginDisclaimer": "hi", "CustomCss": ".new{}", "SplashscreenEnabled": False}
+
+
+class _Handler(BaseHTTPRequestHandler):
+    posts: list[str] = []
+
+    def log_message(self, *a):
+        pass
+
+    def do_POST(self):
+        _Handler.posts.append(self.path)
+        self.send_response(204)
+        self.end_headers()
+
+    def do_GET(self):
+        if self.path.startswith("/pixel.svg"):
+            body, ctype = b"<svg xmlns='http://www.w3.org/2000/svg' width='4' height='3'/>", "image/svg+xml"
+        elif self.path == "/lazyimg":
+            # Far off-screen inside a horizontal scroller: native lazy loading
+            # decides by a network-dependent distance, so it varies per run.
+            body, ctype = (
+                (
+                    b"<html><body><div style='width:400px;overflow:hidden;white-space:nowrap'>"
+                    b"<div style='display:inline-block;width:30000px'></div>"
+                    b"<img id=flag loading=lazy src='/pixel.svg'></div></body></html>"
+                ),
+                "text/html",
+            )
+        elif self.path == "/hang":
+            time.sleep(30)
+            body, ctype = b"late", "text/plain"
+        elif self.path == "/hangpage":
+            body, ctype = b"<html><body><script>fetch('/hang')</script></body></html>", "text/html"
+        elif self.path == "/slow":
+            time.sleep(1.5)
+            body, ctype = b"ok", "text/plain"
+        elif self.path == "/slowpage":
+            # Like a lazy image row: DOM busy past networkidle, then a slow fetch
+            # with no DOM change until it lands. Only network tracking sees it.
+            body, ctype = (
+                (
+                    b"<html><body><div id=b></div><script>let n = 0; const tick = setInterval(() => {"
+                    b"document.getElementById('b').textContent = ++n; if (n === 9) { clearInterval(tick);"
+                    b"fetch('/slow').then(r => r.text()).then(t => { window.done = t; }); } }, 100)"
+                    b"</script></body></html>"
+                ),
+                "text/html",
+            )
+        elif self.path.startswith("/Branding/Configuration"):
+            body, ctype = json.dumps({"CustomCss": "live", "LoginDisclaimer": ""}).encode(), "application/json"
+        else:
+            body = (
+                b"<html><body><div id=out></div><script>"
+                b"fetch('/Branding/Configuration').then(r=>r.json())"
+                b".then(j=>{document.getElementById('out').textContent=j.CustomCss})"
+                b"</script></body></html>"
+            )
+            ctype = "text/html"
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.end_headers()
+        self.wfile.write(body)
+
+
+@pytest.fixture(scope="module")
+def server():
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    yield f"http://127.0.0.1:{srv.server_address[1]}"
+    srv.shutdown()
+
+
+@pytest.fixture(scope="module")
+def browser():
+    with sync_playwright() as pw:
+        b = session.launch(pw)
+        yield b
+        b.close()
+
+
+def test_override_patches_branding_and_counts_hits(browser, server):
+    override = session.Override(".dist{}")
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, override)
+    page.goto(server + "/")
+    page.wait_for_function("document.getElementById('out').textContent.length > 0")
+    assert page.text_content("#out") == ".dist{}"
+    assert override.hits == 1
+    ctx.close()
+
+
+def test_navigate_raises_when_anchor_missing(browser, server):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    with pytest.raises(session.RouteError):
+        session.navigate(page, server + "/", ".homeSectionsContainer", timeout_ms=1_500)
+    ctx.close()
+
+
+def test_settle_ignores_volatile_churn(browser):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content(
+        "<div id=slides><span>0</span></div><div id=still></div>"
+        "<script>let n=0;setInterval(()=>{document.querySelector('#slides span').textContent=++n},50)</script>"
+    )
+    t0 = time.monotonic()
+    assert session.settle(page, ["#slides"], quiet_ms=300, cap_ms=5_000) is True
+    assert time.monotonic() - t0 < 3
+    ctx.close()
+
+
+def test_settle_gives_up_at_cap(browser):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content("<div id=busy>0</div><script>let n=0;setInterval(()=>{document.getElementById('busy').textContent=++n},50)</script>")
+    assert session.settle(page, [], quiet_ms=300, cap_ms=1_500) is False
+    ctx.close()
+
+
+def test_open_route_turns_failed_state_action_into_route_error(browser, server, monkeypatch):
+    from harness.config import Config
+    from harness.profiles import Route
+
+    def broken(page):
+        page.locator("#does-not-exist").click(timeout=500)
+
+    monkeypatch.setitem(session.STATES, "broken", broken)
+    cfg = Config(url=server, user="u", password="p", items={})
+    route = Route("x", "", "#out", ready="#out", state="broken")
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    monkeypatch.setattr(session, "route_url", lambda cfg, route: cfg.url + "/")
+    page.set_default_timeout(2_000)
+    with pytest.raises(session.RouteError, match="state broken failed"):
+        session.open_route(page, cfg, route, [])
+    ctx.close()
+
+
+SHOT_PAGE = """<html><body style="margin:0;overflow-x:hidden;background:#000">
+<div id=slides style="height:400px;background:#f00"></div>
+<div style="display:flex;width:5000px;height:1600px;background:#000"></div>
+<div id=menu style="position:fixed;bottom:0;right:0;width:100px;height:100px;background:#0f0"></div>
+<div id=pop style="position:fixed;top:10px;left:10px;width:50px;height:50px;background:#00f"></div>
+</body></html>"""
+
+
+def _shoot(browser, tmp_path, route):
+    from PIL import Image
+
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content(SHOT_PAGE)
+    path = tmp_path / f"{route.name}.png"
+    session.screenshot(page, route, ["#slides"], path)
+    ctx.close()
+    return Image.open(path).convert("RGB")
+
+
+def test_screenshot_content_route_is_full_height_but_viewport_wide(browser, tmp_path):
+    from harness.profiles import Route
+
+    im = _shoot(browser, tmp_path, Route("x", "", "#menu"))
+    # body overflow-x:hidden means no user ever sees past 1440 px.
+    assert im.size == (1440, 2000)
+
+
+def test_screenshot_state_route_is_viewport_only(browser, tmp_path):
+    from harness.profiles import Route
+
+    im = _shoot(browser, tmp_path, Route("x", "", "#menu", state="usermenu"))
+    assert im.size == (1440, 900)
+    assert im.getpixel((1390, 850)) == (0, 255, 0)  # fixed overlay at the viewport bottom
+
+
+def test_screenshot_hides_volatile_without_covering_overlays(browser, tmp_path):
+    from harness.profiles import Route
+
+    im = _shoot(browser, tmp_path, Route("x", "", "#menu", state="usermenu"))
+    assert im.getpixel((35, 35)) == (0, 0, 255)  # overlay above the volatile area stays visible
+    assert im.getpixel((700, 200)) == (0, 0, 0)  # volatile area itself is blank, not painted over
+
+
+def test_settle_waits_for_requests_in_flight(browser, server):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/slowpage")
+    session.settle(page, [], quiet_ms=300, cap_ms=5_000)
+    assert page.evaluate("window.done") == "ok"
+    ctx.close()
+
+
+def test_new_page_freezes_date_and_pins_timezone(browser):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto("about:blank")
+    page.wait_for_timeout(50)
+    got = page.evaluate("""() => [Date.now(), new Date().getTime(), new Date(0).getTime(),
+        typeof Date(), new Date() instanceof Date, Intl.DateTimeFormat().resolvedOptions().timeZone]""")
+    assert got == [session.FIXED_NOW_MS, session.FIXED_NOW_MS, 0, "string", True, "UTC"]
+    ctx.close()
+
+
+def test_new_page_never_reports_playback_to_the_server(browser, server):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/")
+    _Handler.posts.clear()
+    status = page.evaluate("""() => Promise.all(['/Sessions/Playing', '/Sessions/Playing/Progress',
+        '/Sessions/Playing/Stopped'].map(u => fetch(u, {method: 'POST'}).then(r => r.status)))""")
+    assert status == [204, 204, 204]
+    assert _Handler.posts == []
+    ctx.close()
+
+
+def test_prime_loads_every_lazy_element_and_returns_to_top(browser):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content("""<body style="margin:0"><div style="height:6000px"></div><div id=lazy>x</div>
+<script>new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && (e.target.dataset.loaded = 1)))
+.observe(document.getElementById('lazy'))</script></body>""")
+    session.prime(page)
+    assert page.evaluate("[document.getElementById('lazy').dataset.loaded, scrollY]") == ["1", 0]
+    ctx.close()
+
+
+def test_navigate_forgets_requests_of_the_previous_document(browser, server):
+    # A request cut off by navigation may never report failure; it must not
+    # keep the next page unsettled until the cap.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/hangpage")
+    page.wait_for_timeout(200)
+    session.navigate(page, server + "/", "#out")
+    t0 = time.monotonic()
+    assert session.settle(page, [], quiet_ms=300, cap_ms=3_000) is True
+    assert time.monotonic() - t0 < 2.5
+    ctx.close()
+
+
+def test_prime_loads_native_lazy_images_however_far_off_screen(browser, server):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/lazyimg")
+    session.prime(page)
+    session.settle(page, [], quiet_ms=300, cap_ms=3_000)
+    assert page.evaluate("document.getElementById('flag').naturalWidth") == 4
+    ctx.close()
+
+
+def test_screenshot_leaves_out_blurhash_placeholders(browser, tmp_path):
+    # Their pixels are decoded off-thread and drawn with no DOM change, so
+    # whether one is drawn at capture time is timing, not theme.
+    from PIL import Image
+
+    from harness.profiles import Route
+
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content("""<body style="margin:0;background:#000"><canvas class=blurhash-canvas width=50 height=50></canvas>
+<script>const c = document.querySelector('canvas').getContext('2d'); c.fillStyle = '#f00'; c.fillRect(0, 0, 50, 50);</script></body>""")
+    session.screenshot(page, Route("x", "", "body", state="s"), [], tmp_path / "b.png")
+    assert Image.open(tmp_path / "b.png").convert("RGB").getpixel((25, 25)) == (0, 0, 0)
+    ctx.close()
+
+
+def test_frozen_clock_moves_only_when_the_harness_advances_it(browser):
+    # Apps throttle on Date deltas (the OSD slider ignores updates < 700 ms
+    # apart), so a capture step must be able to let time pass on purpose.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto("about:blank")
+    page.evaluate("window.__harnessAdvanceClock(1000)")
+    assert page.evaluate("[Date.now(), new Date().getTime()]") == [session.FIXED_NOW_MS + 1000] * 2
+    ctx.close()
+
+
+def test_decode_images_waits_for_background_and_img_sources(browser, server):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/")
+    page.set_content(f"""<div style="width:40px;height:30px;background-image:url('{server}/pixel.svg')"></div>
+<img src="{server}/pixel.svg?b">""")
+    assert session.decode_images(page) == 2
+    ctx.close()
