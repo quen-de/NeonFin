@@ -12,8 +12,25 @@ import re
 import subprocess
 import sys
 
-AI_TRAILER = re.compile(r"^(co-authored-by:.*(claude|anthropic|openai|copilot|chatgpt|codex|gemini|cursor|aider|windsurf|codeium|devin)|claude-session:)", re.I | re.M)
-SESSION_URL = re.compile(r"claude\.ai/code/session_", re.I)
+CO_AUTHOR = re.compile(r"^co-authored-by:\s*(?P<name>[^<\n]*?)\s*(?:<(?P<email>[^>\n]*)>)?\s*$", re.I | re.M)
+# Judged on the whole name or the address, so people who share a first name with an
+# assistant (Claude, Devin) can still be credited.
+ASSISTANT_NAME = re.compile(
+    r"^(claude( (code|opus|sonnet|haiku|fable)\b.*)?|copilot|chatgpt|codex|gemini( code assist)?|cursor( agent)?"
+    r"|aider\b.*|windsurf|codeium|devin( ai)?)$",
+    re.I,
+)
+ASSISTANT_DOMAIN = re.compile(r"@(.*\.)?(anthropic\.com|openai\.com|cursor\.com|aider\.chat|codeium\.com|windsurf\.com|devin\.ai|cognition\.ai)$", re.I)
+BOT_ADDRESS = re.compile(r"\[bot\]@|^gemini-code-assist@", re.I)
+SESSION = re.compile(r"^claude-session:|claude\.ai/code/session_", re.I | re.M)
+
+
+def assistant_trailer(body: str) -> bool:
+    for m in CO_AUTHOR.finditer(body):
+        email = m["email"] or ""
+        if ASSISTANT_NAME.match(m["name"]) or ASSISTANT_DOMAIN.search(email) or BOT_ADDRESS.search(email):
+            return True
+    return bool(SESSION.search(body))
 
 
 def local_config() -> pathlib.Path:
@@ -26,7 +43,7 @@ def local_config() -> pathlib.Path:
 def problems(message: str, terms: list[str]) -> list[str]:
     body = "\n".join(line for line in message.splitlines() if not line.startswith("#"))
     found = []
-    if AI_TRAILER.search(body) or SESSION_URL.search(body):
+    if assistant_trailer(body):
         found.append("AI attribution trailer")
     low = body.lower()
     found += [f"instance term {t!r}" for t in terms if t.lower() in low]
