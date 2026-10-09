@@ -6,17 +6,24 @@
     linear-gradient(0deg, var(--nf-ink) 0%, rgba(5, 6, 10, 0.4) 30%, transparent 55%) !important;
 }
 
-/* Desktop capsules are glass: dim the hero under them so the header reads over any slide. */
+/* Desktop capsules are glass: dim the hero under them so the header reads over any slide.
+   The title, details and plot keep to the left column, so the artwork stays dim behind them. */
 .layout-desktop #slides-container .gradient-overlay {
   background:
     linear-gradient(180deg, rgba(5, 6, 10, 0.72) 0, rgba(5, 6, 10, 0.6) 56px, transparent 160px),
-    linear-gradient(90deg, rgba(5, 6, 10, 0.85) 0%, rgba(5, 6, 10, 0.35) 45%, transparent 70%),
+    linear-gradient(90deg, rgba(5, 6, 10, 0.88) 0%, rgba(5, 6, 10, 0.78) 40%, rgba(5, 6, 10, 0.3) 58%, transparent 74%),
     linear-gradient(0deg, var(--nf-ink) 0%, rgba(5, 6, 10, 0.4) 30%, transparent 55%) !important;
 }
 
 #slides-container .plot,
 #slides-container .spec-line {
   color: var(--nf-text-2);
+}
+
+/* The plot keeps to the dimmed column: three narrower lines hold what two wide ones did. */
+.layout-desktop #slides-container .plot {
+  max-width: 34vw;
+  -webkit-line-clamp: 3;
 }
 
 #slides-container .spec-rail {

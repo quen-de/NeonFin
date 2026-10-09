@@ -43,6 +43,20 @@ def test_header_reads_over_a_white_hero(open_page, tmp_path):
     assert [f for f in fails if "MuiButton" in f["label"]] == []
 
 
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_hero_text_reads_over_a_white_slide(open_page, tmp_path, profile):
+    # The plot and the details line sit on the artwork itself, so they too must pass AA over
+    # the brightest slide the hero can show.
+    page = open_page("home", profile, "all", variant="white-hero")
+    page.add_style_tag(
+        content="#slides-container .backdrop-container { background: #fff !important; }"
+        " #slides-container .backdrop-container > * { visibility: hidden !important; }"
+    )
+    page.wait_for_timeout(200)
+    assert page.locator("#slides-container .slide.active .plot >> visible=true").count() == 1
+    assert checks.contrast_failures(page, "home", tmp_path / "hero.png") == []
+
+
 def test_without_media_bar_home_starts_below_the_capsules(open_page):
     page = open_page("home", "desktop", "without:media-bar")
     top = page.evaluate("""() => document.querySelector(
