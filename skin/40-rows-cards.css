@@ -112,6 +112,14 @@
   opacity: 1;
 }
 
+/* The ring marks the focused card; the global outline would draw a second one. Forced
+   colours drop box shadows, so there the outline stays. */
+@media (forced-colors: none) {
+  .card .cardImageContainer:focus-visible {
+    outline: none !important;
+  }
+}
+
 .cardText {
   color: var(--nf-text-2);
 }

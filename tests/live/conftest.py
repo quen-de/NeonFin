@@ -95,3 +95,18 @@ def style():
 @pytest.fixture(scope="session")
 def color():
     return color_of
+
+
+def rows_of(path) -> list[tuple[float, float, float]]:
+    """Mean colour of each pixel row of an image."""
+    from PIL import Image
+
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    data = list(getattr(im, "get_flattened_data", im.getdata)())
+    return [tuple(sum(p[i] for p in data[y * w : (y + 1) * w]) / w for i in range(3)) for y in range(h)]
+
+
+@pytest.fixture(scope="session")
+def rows():
+    return rows_of

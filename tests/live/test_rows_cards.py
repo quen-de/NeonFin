@@ -107,3 +107,29 @@ def test_keyboard_focus_matches_hover(open_page):
 @pytest.mark.parametrize("plugin_state", ["all", "none"])
 def test_no_jellyfin_blue_on_home(open_page, profile, plugin_state):
     assert checks.blue_hits(open_page("home", profile, plugin_state)) == {}
+
+
+def test_keyboard_focus_draws_one_ring(open_page):
+    page = open_page("home", "desktop", "none", variant="focus")
+    target = first_card(page).locator(".cardImageContainer")
+    target.focus()
+    assert target.evaluate("(a) => [a.matches(':focus-visible'), getComputedStyle(a).outlineStyle]") == [True, "none"]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="Jellyfin's .card { contain: content } clips the glow 5px above a lifted card; lifting it costs paint containment on every card",
+)
+def test_the_ring_glow_fades_out_instead_of_being_cut(open_page, rows, tmp_path):
+    page = open_page("home", "desktop", "none", variant="hover")
+    card = page.locator(f"{CARD} >> visible=true").nth(1)
+    card.hover()
+    page.wait_for_timeout(300)
+    box = card.locator(".cardScalable").bounding_box()
+    shot = tmp_path / "glow.png"
+    page.screenshot(
+        path=str(shot), clip={"x": box["x"] + box["width"] * 0.3, "y": box["y"] - 30, "width": box["width"] * 0.4, "height": 28}
+    )
+    page.mouse.move(0, 0)
+    reds = [round(r) for r, _, _ in rows(shot)]
+    assert max(b - a for a, b in zip(reds, reds[1:])) < 25, reds

@@ -17,5 +17,6 @@
   .card:hover .cardScalable,
   .card:focus-within .cardScalable {
     transform: none;
+    transition: none;
   }
 }
