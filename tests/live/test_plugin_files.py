@@ -25,6 +25,18 @@ def test_media_bar_play_is_a_neon_tube_and_the_active_dot_is_crimson(open_page, 
     assert color(dot["background-color"]) == (255, 36, 72, 1.0)
 
 
+def test_header_reads_over_a_white_hero(open_page, tmp_path):
+    # The worst slide the hero can show: the capsules' text must still pass AA over it.
+    page = open_page("home", "desktop", "all", variant="white-hero")
+    page.add_style_tag(
+        content="#slides-container .backdrop-container { background: #fff !important; }"
+        " #slides-container .backdrop-container > * { visibility: hidden !important; }"
+    )
+    page.wait_for_timeout(200)
+    fails = checks.contrast_failures(page, "home", tmp_path / "hero.png")
+    assert [f for f in fails if f["label"].startswith("a") and "MuiButton" in f["label"]] == []
+
+
 def test_without_media_bar_home_starts_below_the_capsules(open_page):
     page = open_page("home", "desktop", "without:media-bar")
     top = page.evaluate("""() => document.querySelector(
