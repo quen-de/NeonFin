@@ -1,0 +1,136 @@
+/* Rows: every title is a lit sign. */
+.sectionTitleContainer .sectionTitle {
+  margin: 0;
+  font-family: var(--nf-sign-font);
+  font-weight: 800;
+  font-size: 2.1rem;
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: normal;
+  color: var(--nf-sign);
+  text-shadow: var(--nf-sign-glow);
+}
+
+.layout-mobile .sectionTitleContainer .sectionTitle {
+  font-size: 1.5rem;
+}
+
+.sectionTitleTextButton {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.sectionTitleContainer .material-icons {
+  color: var(--nf-text-2);
+}
+
+.homeSectionsContainer > .verticalSection {
+  margin-bottom: 2.2em;
+}
+
+/* Room for the lift and the ring's glow inside the scroller. */
+.verticalSection .emby-scroller {
+  padding-top: 12px;
+  padding-bottom: 16px;
+}
+
+.emby-scrollbuttons-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--nf-text);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+
+.emby-scrollbuttons-button:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Cards: rounded artwork, a hairline edge, a neon ring drawn once and revealed. */
+.card .cardScalable {
+  border-radius: var(--nf-radius-card);
+  box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.9);
+  transition: transform var(--nf-fast) var(--nf-ease);
+}
+
+.card .cardImageContainer,
+.card .cardPadder,
+.card .blurhash-canvas,
+.card .cardOverlayContainer {
+  border-radius: var(--nf-radius-card);
+}
+
+.card .cardScalable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.card .cardScalable::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: var(--nf-ring);
+  opacity: 0;
+  transition: opacity var(--nf-fast) var(--nf-ease);
+}
+
+.card:hover .cardScalable,
+.card:focus-within .cardScalable {
+  transform: translateY(-4px);
+}
+
+.card:hover .cardScalable::before,
+.card:focus-within .cardScalable::before {
+  opacity: 1;
+}
+
+.cardText {
+  color: var(--nf-text-2);
+}
+
+.cardText-first {
+  color: var(--nf-text);
+  font-weight: 600;
+}
+
+.cardOverlayContainer {
+  background: linear-gradient(180deg, transparent 45%, rgba(5, 6, 10, 0.6));
+}
+
+/* The card's play button is Play: a neon tube. */
+.cardOverlayFab-primary {
+  color: #fff;
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  box-shadow: var(--nf-tube);
+}
+
+.countIndicator,
+.playedIndicator {
+  color: #fff;
+  background-color: var(--nf-neon);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.itemProgressBar {
+  height: 4px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.itemProgressBarForeground {
+  border-radius: inherit;
+  background-color: var(--nf-neon);
+}
