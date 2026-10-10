@@ -12,8 +12,9 @@ class BuildError(RuntimeError):
     pass
 
 
-def code_mask(css: str) -> list[bool]:
-    """True for each character that is CSS code; False inside comments and strings."""
+def code_mask(css: str, strings: bool = False) -> list[bool]:
+    """True for each character that is CSS code; False inside comments and, unless strings is
+    set, inside strings."""
     mask = [True] * len(css)
     i, n = 0, len(css)
     while i < n:
@@ -25,6 +26,9 @@ def code_mask(css: str) -> list[bool]:
             while end < n and css[end] != quote:
                 end += 2 if css[end] == "\\" else 1
             end = min(end + 1, n)
+            if strings:
+                i = end
+                continue
         else:
             i += 1
             continue
@@ -108,31 +112,38 @@ class Rule(NamedTuple):
 
 
 def leaf_rules(css: str) -> list[Rule]:
-    """Every block that holds declarations, with the at-rule preludes around it."""
+    """Every block that holds declarations, with the at-rule preludes around it. A rule that
+    nests others keeps only its own declarations, the nested rules cut out of its body."""
     code = _code_only(css)
-    stack: list[list] = []  # [prelude, open offset, holds a nested block]
+    stack: list[list] = []  # [prelude, open offset, prelude start, spans of nested rules]
     rules: list[Rule] = []
     start = 0
     for i, ch in enumerate(code):
         if ch == "{":
-            if stack:
-                stack[-1][2] = True
-            stack.append([" ".join(code[start:i].split()), i, False])
+            stack.append([" ".join(code[start:i].split()), i, start, []])
             start = i + 1
         elif ch == "}":
             if stack:
-                prelude, at, nested = stack.pop()
-                if not nested:
-                    rules.append(Rule(prelude, css[at + 1 : i], at, tuple(s[0] for s in stack)))
+                prelude, at, began, nested = stack.pop()
+                if stack:
+                    stack[-1][3].append((began, i + 1))
+                body, cut = "", at + 1
+                for a, b in nested:
+                    body, cut = body + css[cut:a], b
+                body += css[cut:i]
+                if not nested or body.strip():
+                    rules.append(Rule(prelude, body, at, tuple(s[0] for s in stack)))
             start = i + 1
         elif ch == ";":
             start = i + 1
     return rules
 
 
-def declarations(body: str) -> list[tuple[str, str]]:
-    """(property, value) pairs of a declaration block, in order, comments removed."""
+def declarations(body: str, keep_strings: bool = False) -> list[tuple[str, str]]:
+    """(property, value) pairs of a declaration block, in order, comments removed. Strings
+    are blanked unless keep_strings is set."""
     code = _code_only(body)
+    kept = "".join(c if m else " " for c, m in zip(body, code_mask(body, strings=True))) if keep_strings else code
     out: list[tuple[str, str]] = []
     depth = start = 0
     for i, ch in enumerate(code + ";"):
@@ -141,7 +152,7 @@ def declarations(body: str) -> list[tuple[str, str]]:
         elif ch == ")":
             depth -= 1
         elif ch == ";" and depth == 0:
-            text, start = code[start:i], i + 1
+            text, start = kept[start:i], i + 1
             if ":" in text:
                 prop, value = text.split(":", 1)
                 out.append((prop.strip().lower(), " ".join(value.split())))

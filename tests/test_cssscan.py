@@ -40,3 +40,13 @@ def test_declarations_keep_order_and_parentheses():
 
 def test_selectors_split_on_top_level_commas_only():
     assert selectors(".a, :is(.b, .c) > .d,\n .e") == [".a", ":is(.b, .c) > .d", ".e"]
+
+
+def test_leaf_rules_keep_a_nesting_rule_own_declarations():
+    rules = leaf_rules(".a { color: red; & .b { top: 0; } left: 1px; }")
+    assert [(r.prelude, declarations(r.body)) for r in rules] == [("& .b", [("top", "0")]), (".a", [("color", "red"), ("left", "1px")])]
+
+
+def test_declarations_can_keep_strings():
+    body = 'content: "a;b"; background: url("x.svg") /* "c" */;'
+    assert declarations(body, keep_strings=True) == [("content", '"a;b"'), ("background", 'url("x.svg")')]

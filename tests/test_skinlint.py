@@ -92,10 +92,33 @@ def test_selectors_avoid_emotion_hashes_and_localized_labels():
 
 def test_colours_come_from_the_palette():
     # One palette in the tokens file restyles the whole skin, so rules never write a colour out.
-    css = ".a { color: #fff; }\n.b { background: linear-gradient(rgba(5, 6, 10, 0.5), transparent); }\n.c { border-color: white; }\n.d { box-shadow: 0 0 2px hsl(0 0% 0%); }"
+    css = (
+        ".a { color: #fff; }\n.b { background: linear-gradient(rgba(5, 6, 10, 0.5), transparent); }\n"
+        ".c { border-color: white; }\n.d { box-shadow: 0 0 2px hsl(0 0% 0%); }"
+    )
     p = core(css)
     assert [x.split(":")[1] for x in p] == ["1", "2", "3", "4"] and all("palette" in x for x in p), p
     assert lint({"skin/00-tokens.css": ":root { --nf-light: #fff; --nf-ink: rgba(5, 6, 10, 1); }"}) == []
+
+
+def test_every_named_and_system_colour_is_a_literal():
+    css = ".a { color: crimson; }\n.b { border-color: DarkSlateGray; }\n.c { background: Canvas; }\n.d { outline-color: whitesmoke; }"
+    assert [x.split(":")[1] for x in core(css)] == ["1", "2", "3", "4"]
+
+
+def test_colours_in_strings_and_nesting_rules_are_linted():
+    css = (
+        ".a { background-image: url(\"data:image/svg+xml,<svg fill='red'/>\"); }\n"
+        ".b { background-image: url('data:image/svg+xml,<svg fill=\"%23ff2448\"/>'); }\n"
+        ".c { color: #f00; will-change: transform; & .d { color: inherit; } }"
+    )
+    p = core(css)
+    assert [x.split(":")[1] for x in p if "palette" in x] == ["1", "2", "3"], p
+    assert any("will-change" in x for x in p), p
+
+
+def test_words_that_only_contain_a_colour_name_pass():
+    assert core(".a { animation: tan-spin 1s; width: calc(tan(45deg) * 1px); transition: color 1s; color: var(--nf-teal); }") == []
 
 
 def test_tokens_masks_and_keywords_are_not_colour_literals():

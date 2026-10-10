@@ -29,10 +29,34 @@ EMOTION = re.compile(r"\.css-[0-9a-z]+\b")
 # Every colour comes from the palette in the tokens file, so one block restyles the skin.
 # Masks read only alpha, so their stops are not colours anyone sees.
 TOKENS = "skin/00-tokens.css"
+NAMED_COLOURS = (
+    "aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown"
+    " burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan"
+    " darkgoldenrod darkgray darkgreen darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid"
+    " darkred darksalmon darkseagreen darkslateblue darkslategray darkslategrey darkturquoise darkviolet"
+    " deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia gainsboro"
+    " ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory khaki"
+    " lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow"
+    " lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen lightskyblue lightslategray"
+    " lightslategrey lightsteelblue lightyellow lime limegreen linen magenta maroon mediumaquamarine"
+    " mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue mediumspringgreen"
+    " mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin navajowhite navy oldlace"
+    " olive olivedrab orange orangered orchid palegoldenrod palegreen paleturquoise palevioletred"
+    " papayawhip peachpuff peru pink plum powderblue purple rebeccapurple red rosybrown royalblue"
+    " saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue slategray slategrey"
+    " snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke yellow"
+    " yellowgreen"
+    # System colours: the browser's own, which a palette cannot reach either.
+    " accentcolor accentcolortext activetext buttonborder buttonface buttontext canvas canvastext field"
+    " fieldtext graytext highlight highlighttext linktext mark marktext selecteditem selecteditemtext"
+    " visitedtext"
+).split()
+# Hex, also escaped as %23 inside a data URI, colour functions, and the named colours as whole
+# words (tan-spin and tan() are not colours).
 COLOUR = re.compile(
-    r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\("
-    r"|\b(?:white|black|red|green|blue|yellow|orange|purple|pink|cyan|magenta|gr[ae]y|silver"
-    r"|maroon|fuchsia|lime|olive|navy|teal|aqua)\b"
+    r"(?:#|%23)[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\("
+    rf"|(?<![\w-])(?:{'|'.join(NAMED_COLOURS)})(?![\w(-])",
+    re.IGNORECASE,
 )
 MASKS = ("mask-image", "-webkit-mask-image", "mask", "-webkit-mask")
 
@@ -103,7 +127,7 @@ def lint(files: dict[str, str]) -> list[str]:
             if name != TOKENS:
                 problems += [
                     f"{where}: {prop} writes out a colour; take it from the palette in {TOKENS}"
-                    for prop, value in decls
+                    for prop, value in declarations(rule.body, keep_strings=True)
                     if prop not in MASKS and COLOUR.search(re.sub(r"--[\w-]+", "", value))
                 ]
             if rule.prelude.startswith("@") or any(c.startswith("@keyframes") for c in rule.context):
