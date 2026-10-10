@@ -181,7 +181,9 @@ def test_bench_cells_use_the_accepted_exception():
 
 
 def full_cells(state, pairs):
-    return {f"{state}/{p}/{r}": {"pairs": pairs} for p in ("desktop", "phone") for r in ("home", "movies", "series")}
+    from harness.profiles import PERF_ROUTES
+
+    return {f"{state}/{p}/{r}": {"pairs": pairs} for p in ("desktop", "phone") for r in PERF_ROUTES}
 
 
 def capture(state, **extra):
@@ -225,6 +227,14 @@ def test_every_cell_of_a_benched_state_is_needed(tmp_path, capsys):
     del cells["all/phone/series"]
     code, out = judge(tmp_path, [bench(cells)], [capture("all")], capsys)
     assert code == 1 and "all/phone/series: not benched" in out
+
+
+def test_title_pages_are_benched_too(tmp_path, capsys):
+    # Title pages carry a blurred copy of the backdrop, so a bench of home and the libraries
+    # alone is incomplete.
+    cells = {f"all/{p}/{r}": {"pairs": CLEAR} for p in ("desktop", "phone") for r in ("home", "movies", "series")}
+    code, out = judge(tmp_path, [bench(cells)], [capture("all")], capsys)
+    assert code == 1 and "all/desktop/movie: not benched" in out
 
 
 def test_benched_states_are_captured_and_all_on_and_off_are_benched(tmp_path, capsys):

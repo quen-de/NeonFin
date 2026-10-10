@@ -50,7 +50,10 @@ ROUTES = (
     Route("movie", "#/details?id={movie}", DETAIL),
     Route("show", "#/details?id={series}", DETAIL),
     Route("season", "#/details?id={season}", DETAIL),
+    Route("episode", "#/details?id={playable}", DETAIL),
     Route("search", "#/search?query={search_term}", "#searchPage .card"),
+    # A query nothing matches: the empty-results line.
+    Route("noresults", "#/search?query=zzqxjvw", "#searchPage .noItemsMessage"),
     Route("prefs", "#/mypreferencesmenu", ".listItem"),
     # 12.1's preference pages render nothing without ?userId=.
     Route("display", "#/mypreferencesdisplay?userId={user_id}", ".MuiFilledInput-root"),
@@ -67,4 +70,4 @@ ROUTES = (
     Route("tooltip", "#/home", ".MuiTooltip-tooltip", ready=".homeSectionsContainer", state="tooltip"),
     Route("osd", "#/details?id={playable}", ".videoOsdBottom", ready=DETAIL, state="osd"),
 )
-PERF_ROUTES = ("home", "movies", "series")
+PERF_ROUTES = ("home", "movies", "series", "movie")

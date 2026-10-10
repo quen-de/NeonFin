@@ -14,18 +14,35 @@ JS = pathlib.Path(__file__).resolve().parent / "js"
 # Title pages put their text straight on the backdrop.
 TITLE_TEXT = (
     ".detailRibbon .nameContainer > h1",
+    ".detailRibbon .nameContainer > h3",
     ".detailRibbon .itemMiscInfo-primary > .mediaInfoItem",
     ".trackSelections .selectLabel",
+    ".tagline",
     ".detailPagePrimaryContainer .overview",
     ".itemGenres",
     ".itemTags",
+    ".itemTags a",
+    ".itemExternalLinks a",
+    ".detailsGroupItem .label",
+    ".detailsGroupItem a",
+)
+# Library pages: the header's second row and the A to Z rail sit over the poster grid.
+LIBRARY_BAR = ".MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root"
+LIBRARY_TEXT = (
+    f"{LIBRARY_BAR} .MuiTypography-root",
+    f"{LIBRARY_BAR} .MuiChip-label",
+    ".alphaPicker-fixed-right .MuiToggleButton-root",
 )
 TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "*": (".MuiAppBar-root > .MuiToolbar-root:first-child .MuiButton-root",),
     "home": ("#slides-container .slide.active .plot", "#slides-container .slide.active .spec-line"),
+    "movies": LIBRARY_TEXT,
+    "series": LIBRARY_TEXT,
     "movie": TITLE_TEXT,
     "show": TITLE_TEXT,
     "season": TITLE_TEXT,
+    "episode": TITLE_TEXT,
+    "noresults": ("#searchPage .noItemsMessage",),
     "usermenu": ("#app-user-menu .MuiMenuItem-root",),
     "actionsheet": (".actionSheet .actionSheetItemText", ".actionSheet .actionSheetItemAsideText"),
 }

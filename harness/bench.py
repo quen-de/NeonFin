@@ -2,7 +2,7 @@
 both sides alike, and each cell stops as soon as its verdict is clear (harness.gates.decide).
 
 usage: python -m harness.bench --label NAME [--plugins STATE ...] [--profiles desktop,phone]
-       [--routes home,movies,series] [--trials 7] [--css dist|live]
+       [--routes home,movies,series,movie] [--trials 7] [--css dist|live]
 
 A cell is one plugin state, profile and route. Writes harness/runs/NAME/bench.json and
 prints each cell's ratios and verdict; judge it with python -m harness.gates --bench.
