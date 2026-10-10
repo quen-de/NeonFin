@@ -37,6 +37,11 @@ body:has(> #slides-container) {
   -webkit-line-clamp: 3;
 }
 
+/* The details line keeps to the column too; a long one wraps. */
+.layout-desktop #slides-container .spec-line {
+  max-width: 34vw;
+}
+
 #slides-container .spec-rail {
   background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
 }

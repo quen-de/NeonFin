@@ -58,6 +58,21 @@ def test_hero_text_reads_over_a_white_slide(open_page, tmp_path, profile, viewpo
     assert checks.contrast_failures(page, "home", tmp_path / "hero.png") == []
 
 
+def test_a_long_details_line_keeps_to_the_dimmed_column(open_page):
+    # Only the column the plot keeps to is dimmed for text. Two long genres on a 1280px desktop
+    # used to carry the details line past it, over undimmed artwork.
+    page = open_page("home", "desktop", "all", viewport=(1280, 800), variant="long-details")
+    edges = page.evaluate("""() => {
+      const slide = document.querySelector('#slides-container .slide.active');
+      const genre = document.createElement('span');
+      genre.className = 'spec-item spec-genre';
+      genre.textContent = 'Science Fiction · Adventure · Animation';
+      slide.querySelector('.spec-line').append(genre);
+      const right = (s) => slide.querySelector(s).getBoundingClientRect().right;
+      return [right('.spec-line'), right('.plot')]; }""")
+    assert edges[0] <= edges[1] + 1, edges
+
+
 def test_without_media_bar_home_starts_below_the_capsules(open_page):
     page = open_page("home", "desktop", "without:media-bar")
     top = page.evaluate("""() => document.querySelector(
