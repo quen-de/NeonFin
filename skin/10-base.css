@@ -17,13 +17,13 @@ html {
   color: var(--nf-text);
   color-scheme: dark;
   caret-color: var(--nf-neon);
-  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  scrollbar-color: color-mix(in srgb, var(--nf-light) 18%, transparent) transparent;
   scrollbar-width: thin;
 }
 
 ::selection {
   background-color: var(--nf-neon-deep);
-  color: #fff;
+  color: var(--nf-light);
 }
 
 ::-webkit-scrollbar {
@@ -36,7 +36,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18) padding-box;
+  background: color-mix(in srgb, var(--nf-light) 18%, transparent) padding-box;
   border: 2px solid transparent;
   border-radius: 999px;
 }

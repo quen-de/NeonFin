@@ -15,7 +15,7 @@
 
 .MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:first-child {
   padding: 0 16px;
-  color: #fff;
+  color: var(--nf-light);
   font-weight: 600;
   text-transform: none;
   text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
@@ -32,19 +32,19 @@
   min-width: 34px;
   padding: 0;
   color: var(--nf-text);
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
   box-shadow: inset 0 0 0 1px var(--nf-rim);
 }
 
 .MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:not(:first-child):hover {
-  background-color: rgba(255, 255, 255, 0.14);
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
 }
 
 /* The item count reads as a quiet label, not a control. */
 .MuiToolbar-root .MuiChip-filled {
   color: var(--nf-text-2);
-  background-color: rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background-color: color-mix(in srgb, var(--nf-light) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 12%, transparent);
 }
 
 /* The dot that marks an active filter. */

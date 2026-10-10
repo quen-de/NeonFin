@@ -26,10 +26,10 @@
 
 .MuiToolbar-root .je-header-buttons-tray .headerButton.paper-icon-button-light:hover {
   color: var(--nf-text);
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
 }
 
 .je-tag-host .language-flag {
   border-radius: 3px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--nf-shade) 45%, transparent);
 }

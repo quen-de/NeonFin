@@ -1,15 +1,22 @@
 /* NeonFin tokens. Override any of them after the skin to restyle it. */
 :root {
+  /* The palette. Every colour in the skin comes from these eight, so one :root block that
+     sets some of them recolours it all (see the README). */
+  --nf-neon: #ff2448;
+  --nf-teal: #19d3c5;
   --nf-ink: #05060a;
   --nf-ink-2: #090b12;
-  --nf-neon: #ff2448;
-  --nf-neon-deep: color-mix(in srgb, var(--nf-neon) 70%, black);
-  --nf-oxblood: color-mix(in srgb, var(--nf-neon) 29%, black);
-  --nf-teal: #19d3c5;
-  --nf-sign: color-mix(in srgb, var(--nf-neon) 12%, white);
-  --nf-text: rgba(246, 243, 240, 0.94);
-  --nf-text-2: rgba(246, 243, 240, 0.62);
-  --nf-rim: rgba(255, 255, 255, 0.16);
+  --nf-chrome: #121420;
+  --nf-paper: #f6f3f0;
+  --nf-light: #fff;
+  --nf-shade: #000;
+
+  --nf-neon-deep: color-mix(in srgb, var(--nf-neon) 70%, var(--nf-shade));
+  --nf-oxblood: color-mix(in srgb, var(--nf-neon) 29%, var(--nf-shade));
+  --nf-sign: color-mix(in srgb, var(--nf-neon) 12%, var(--nf-light));
+  --nf-text: color-mix(in srgb, var(--nf-paper) 94%, transparent);
+  --nf-text-2: color-mix(in srgb, var(--nf-paper) 62%, transparent);
+  --nf-rim: color-mix(in srgb, var(--nf-light) 16%, transparent);
 
   --nf-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --nf-sign-font: "NeonFin Sign", "Arial Narrow", sans-serif;
@@ -20,14 +27,18 @@
   --nf-fast: 180ms;
   --nf-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* Glass and chrome. Filter chains stay literal in the rules that use them. */
-  --nf-chrome-tint: rgba(18, 20, 32, 0.4);
-  --nf-chrome-solid: rgba(14, 16, 26, 0.92);
-  --nf-chrome-edge: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.07),
-    0 10px 26px -12px rgba(0, 0, 0, 0.7);
+  /* Glass and chrome. Filter chains stay literal in the rules that use them. The deep chrome
+     sits between the chrome and the ink, for solid panels. */
+  --nf-chrome-deep: color-mix(in srgb, var(--nf-chrome) 70%, var(--nf-ink));
+  --nf-chrome-tint: color-mix(in srgb, var(--nf-chrome) 40%, transparent);
+  --nf-chrome-solid: color-mix(in srgb, var(--nf-chrome-deep) 92%, transparent);
+  --nf-chrome-edge: inset 0 1px 0 color-mix(in srgb, var(--nf-light) 22%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 7%, transparent),
+    0 10px 26px -12px color-mix(in srgb, var(--nf-shade) 70%, transparent);
 
   /* Neon, derived from the accent so one override recolors it all. */
-  --nf-sign-glow: 0 0 2px rgba(255, 255, 255, 0.6), 0 0 10px color-mix(in srgb, var(--nf-neon) 90%, transparent),
+  --nf-sign-glow: 0 0 2px color-mix(in srgb, var(--nf-light) 60%, transparent),
+    0 0 10px color-mix(in srgb, var(--nf-neon) 90%, transparent),
     0 0 26px color-mix(in srgb, var(--nf-neon) 55%, transparent);
   --nf-tube: inset 0 0 0 2px var(--nf-neon), 0 0 18px color-mix(in srgb, var(--nf-neon) 80%, transparent),
     inset 0 0 14px color-mix(in srgb, var(--nf-neon) 60%, transparent);

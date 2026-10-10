@@ -71,13 +71,13 @@
 
 .MuiAppBar-root > .MuiToolbar-root:first-child > :is(.MuiStack-root, .MuiBox-root:not(:last-child)) > .MuiButtonBase-root:hover {
   color: var(--nf-text);
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
 }
 
 /* Where you are: a crimson pill, no glow. Glow belongs to Play. */
 .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButtonBase-root.MuiButton-textPrimary,
 .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButtonBase-root.MuiButton-textPrimary:hover {
-  color: #fff;
+  color: var(--nf-light);
   background-color: var(--nf-selected);
   box-shadow: var(--nf-selected-edge);
 }

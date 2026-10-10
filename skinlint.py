@@ -24,6 +24,15 @@ FILTERS = ("backdrop-filter", "-webkit-backdrop-filter")
 CONTENT_TEXT = re.compile(r"""\bcontent\s*:\s*(?:"[^"]+"|'[^']+')""")
 # Emotion classes (css-1x2y3z) change on every jellyfin-web build.
 EMOTION = re.compile(r"\.css-[0-9a-z]+\b")
+# Every colour comes from the palette in the tokens file, so one block restyles the skin.
+# Masks read only alpha, so their stops are not colours anyone sees.
+TOKENS = "skin/00-tokens.css"
+COLOUR = re.compile(
+    r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\("
+    r"|\b(?:white|black|red|green|blue|yellow|orange|purple|pink|cyan|magenta|gr[ae]y|silver"
+    r"|maroon|fuchsia|lime|olive|navy|teal|aqua)\b"
+)
+MASKS = ("mask-image", "-webkit-mask-image", "mask", "-webkit-mask")
 
 
 def _code(css: str) -> str:
@@ -89,6 +98,12 @@ def lint(files: dict[str, str]) -> list[str]:
             problems += _glass(where, rule.prelude, decls)
             if any(p == "will-change" for p, _ in decls):
                 problems.append(f"{where}: will-change is not allowed")
+            if name != TOKENS:
+                problems += [
+                    f"{where}: {prop} writes out a colour; take it from the palette in {TOKENS}"
+                    for prop, value in decls
+                    if prop not in MASKS and COLOUR.search(re.sub(r"--[\w-]+", "", value))
+                ]
             if rule.prelude.startswith("@") or any(c.startswith("@keyframes") for c in rule.context):
                 continue
             for sel in selectors(rule.prelude):

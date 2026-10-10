@@ -46,7 +46,7 @@ def test_glass_inside_a_media_query_is_checked():
 
 
 def test_import_font_face_and_will_change_fail_with_file_and_line():
-    p = core('.a { color: red; }\n@import "x.css";\n@font-face { font-family: x; }\n.b { will-change: transform; }')
+    p = core('.a { color: inherit; }\n@import "x.css";\n@font-face { font-family: x; }\n.b { will-change: transform; }')
     assert p == [
         "skin/30-header.css:2: @import is not allowed",
         "skin/30-header.css:3: @font-face belongs to build.py, which embeds the font",
@@ -59,13 +59,13 @@ def test_comments_and_strings_are_not_code():
 
 
 def test_plugin_file_needs_its_header():
-    assert lint({"skin/plugins/x.css": ".a { color: red; }"})[0].startswith("skin/plugins/x.css:1: a plugin file starts with")
+    assert lint({"skin/plugins/x.css": ".a { color: inherit; }"})[0].startswith("skin/plugins/x.css:1: a plugin file starts with")
 
 
 def test_plugin_file_stays_inside_its_roots():
     files = {
         "skin/plugins/mb.css": "/* plugin: Media Bar; roots: #slides-container */\n"
-        "#slides-container .dot { color: red; }\n.card { color: red; }\n"
+        "#slides-container .dot { color: inherit; }\n.card { color: inherit; }\n"
     }
     assert lint(files) == ["skin/plugins/mb.css:3: '.card' selects outside this plugin's roots"]
 
@@ -73,7 +73,7 @@ def test_plugin_file_stays_inside_its_roots():
 def test_core_never_selects_plugin_markup():
     files = {
         "skin/plugins/mb.css": "/* plugin: Media Bar; roots: #slides-container */\n",
-        "skin/40-rows-cards.css": "#slides-container .x { color: red; }",
+        "skin/40-rows-cards.css": "#slides-container .x { color: inherit; }",
     }
     assert lint(files) == ["skin/40-rows-cards.css:1: core file selects plugin markup (#slides-container)"]
 
@@ -84,7 +84,24 @@ def test_content_never_adds_visible_text():
 
 
 def test_selectors_avoid_emotion_hashes_and_localized_labels():
-    p = core(".css-1x2y3z { color: red; }\n[aria-label] .x { color: red; }")
+    p = core(".css-1x2y3z { color: inherit; }\n[aria-label] .x { color: inherit; }")
     assert len(p) == 2
     assert p[0].startswith("skin/30-header.css:1:") and "emotion hash" in p[0]
     assert p[1].startswith("skin/30-header.css:2:") and "aria-label" in p[1]
+
+
+def test_colours_come_from_the_palette():
+    # One palette in the tokens file restyles the whole skin, so rules never write a colour out.
+    css = ".a { color: #fff; }\n.b { background: linear-gradient(rgba(5, 6, 10, 0.5), transparent); }\n.c { border-color: white; }\n.d { box-shadow: 0 0 2px hsl(0 0% 0%); }"
+    p = core(css)
+    assert [x.split(":")[1] for x in p] == ["1", "2", "3", "4"] and all("palette" in x for x in p), p
+    assert lint({"skin/00-tokens.css": ":root { --nf-light: #fff; --nf-ink: rgba(5, 6, 10, 1); }"}) == []
+
+
+def test_tokens_masks_and_keywords_are_not_colour_literals():
+    css = (
+        ".a { color: var(--nf-teal); background: color-mix(in srgb, var(--nf-ink) 50%, transparent); }\n"
+        ".b { -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent); }\n"
+        ".c { border-color: currentColor; white-space: nowrap; }\n/* a white backdrop */"
+    )
+    assert core(css) == []

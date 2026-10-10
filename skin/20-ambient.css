@@ -14,10 +14,10 @@
   opacity: 1;
   background: linear-gradient(
     180deg,
-    rgba(5, 6, 10, 0.72) 0,
-    rgba(5, 6, 10, 0.6) 56px,
-    rgba(5, 6, 10, 0.1) 160px,
-    rgba(5, 6, 10, 0.5) 80%
+    color-mix(in srgb, var(--nf-ink) 72%, transparent) 0,
+    color-mix(in srgb, var(--nf-ink) 60%, transparent) 56px,
+    color-mix(in srgb, var(--nf-ink) 10%, transparent) 160px,
+    color-mix(in srgb, var(--nf-ink) 50%, transparent) 80%
   );
 }
 

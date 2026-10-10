@@ -61,6 +61,11 @@ def blue_hits(page) -> dict[str, int]:
     return page.evaluate(_js("blue.js"))
 
 
+def palette_hits(page, colours) -> dict[str, int]:
+    """Paint still in any of these (r, g, b) colours, by element and property."""
+    return page.evaluate(_js("palette.js"), [list(c) for c in colours])
+
+
 def relative_luminance(rgb) -> float:
     def channel(c: float) -> float:
         c = c / 255

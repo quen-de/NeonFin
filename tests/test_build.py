@@ -11,10 +11,10 @@ FONT = b"wOF2-test-bytes"
 def make_skin(root, files=None):
     tree = {
         "skin/00-tokens.css": ":root { --nf-x: 1; }\n",
-        "skin/30-header.css": ".h { color: red; }\n",
-        "skin/plugins/b-plugin.css": "/* plugin: B; roots: .b- */\n.b-x { color: red; }\n",
-        "skin/plugins/a-plugin.css": "/* plugin: A; roots: .a- */\n.a-x { color: red; }\n",
-        "skin/99-access.css": ".z { color: red; }\n",
+        "skin/30-header.css": ".h { color: inherit; }\n",
+        "skin/plugins/b-plugin.css": "/* plugin: B; roots: .b- */\n.b-x { color: inherit; }\n",
+        "skin/plugins/a-plugin.css": "/* plugin: A; roots: .a- */\n.a-x { color: inherit; }\n",
+        "skin/99-access.css": ".z { color: inherit; }\n",
     }
     tree.update(files or {})
     for rel, text in tree.items():
@@ -70,7 +70,7 @@ def test_skin_rule_violations_fail_the_build(tmp_path):
 
 def test_unbalanced_file_fails_with_its_name(tmp_path):
     with pytest.raises(BuildError, match="skin/30-header.css is brace-unbalanced"):
-        build.assemble(make_skin(tmp_path, {"skin/30-header.css": ".h { color: red;\n"}))
+        build.assemble(make_skin(tmp_path, {"skin/30-header.css": ".h { color: inherit;\n"}))
 
 
 def test_header_round_trip():

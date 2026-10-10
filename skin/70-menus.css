@@ -5,24 +5,24 @@
 .actionSheet,
 .MuiPopover-paper {
   border-radius: var(--nf-radius-menu) !important;
-  background-color: rgba(18, 20, 32, 0.55) !important;
+  background-color: color-mix(in srgb, var(--nf-chrome) 55%, transparent) !important;
   background-image: none !important;
   -webkit-backdrop-filter: saturate(180%) blur(22px);
   backdrop-filter: saturate(180%) blur(22px);
   box-shadow:
     var(--nf-chrome-edge),
-    0 18px 48px rgba(0, 0, 0, 0.5) !important;
+    0 18px 48px color-mix(in srgb, var(--nf-shade) 50%, transparent) !important;
 }
 
 .MuiPopover-paper {
-  background-color: rgba(18, 20, 32, 0.72) !important;
+  background-color: color-mix(in srgb, var(--nf-chrome) 72%, transparent) !important;
 }
 
 .layout-mobile .actionSheet,
 .layout-mobile .MuiPopover-paper,
 .transparentDocument .actionSheet,
 .transparentDocument .MuiPopover-paper {
-  background-color: rgba(12, 13, 21, 0.96) !important;
+  background-color: color-mix(in srgb, var(--nf-chrome-deep) 96%, transparent) !important;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -34,7 +34,7 @@
 .actionSheetMenuItem:hover,
 .actionSheetMenuItem:focus-visible,
 .MuiPopover-paper .MuiMenuItem-root:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
 }
 
 /* Only the current choice is lit; the other icons recede. */

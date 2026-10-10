@@ -9,7 +9,7 @@ def test_page_ground_type_and_browser_surfaces(open_page, style, color, plugin_s
     html = style(page, "html", "background-color", "caret-color", "scrollbar-color")
     assert color(html["background-color"]) == (5, 6, 10, 1.0)
     assert color(html["caret-color"]) == (255, 36, 72, 1.0)
-    assert html["scrollbar-color"].startswith("rgba(255, 255, 255, 0.18)")
+    assert color(html["scrollbar-color"]) == (255, 255, 255, 0.18)
     assert style(page, "body", "font-family")["font-family"].startswith("-apple-system")
 
 
