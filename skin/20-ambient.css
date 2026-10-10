@@ -26,3 +26,22 @@
   filter: blur(36px) saturate(1.7) brightness(0.95);
   transform: scale(1.18);
 }
+
+/* Desktop: the backdrop is sharp at the top and softens toward the bottom into the same
+   blur, on a copy that inherits the image Jellyfin sets on the element. Phones show the
+   in-page backdrop instead. */
+.layout-desktop .backdropImage {
+  filter: none;
+  transform: none;
+}
+
+.layout-desktop .backdropImage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  filter: blur(36px) saturate(1.7) brightness(0.95);
+  transform: scale(1.18);
+  -webkit-mask-image: linear-gradient(180deg, transparent 22%, #000 62%);
+  mask-image: linear-gradient(180deg, transparent 22%, #000 62%);
+}

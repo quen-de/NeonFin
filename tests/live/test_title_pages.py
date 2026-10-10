@@ -192,3 +192,21 @@ def test_links_light_up_crimson_on_hover(open_page, color):
         page.wait_for_timeout(300)
         assert color(link.evaluate("(e) => getComputedStyle(e).color"))[:3] == LINK_HOVER, sel
     page.mouse.move(0, 0)
+
+
+STRIPES = ".backdropImage.displayingBackdropImage { background: repeating-linear-gradient(90deg, #fff 0 12px, #000 12px 24px) !important; }"
+ONLY_BACKDROP = ".mainAnimatedPage, .MuiAppBar-root, .backgroundContainer { visibility: hidden !important; }"
+
+
+def test_the_backdrop_softens_into_a_blur_toward_the_bottom(open_page, tmp_path):
+    # Sharp at the top, the same image blurred toward the bottom (spec 6.7).
+    from PIL import Image, ImageStat
+
+    page = open_page("movie", "desktop", "none", variant="stripes")
+    page.add_style_tag(content=STRIPES)
+    page.wait_for_timeout(300)
+    page.screenshot(path=str(tmp_path / "b.png"), style=ONLY_BACKDROP, animations="disabled")
+    im = Image.open(tmp_path / "b.png").convert("L")
+    top = ImageStat.Stat(im.crop((200, 60, 1240, 80))).stddev[0]
+    bottom = ImageStat.Stat(im.crop((200, 860, 1240, 880))).stddev[0]
+    assert top > 60 and bottom < top / 4, (top, bottom)
