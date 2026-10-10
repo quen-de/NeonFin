@@ -82,12 +82,15 @@
   color: var(--nf-neon-text) !important;
 }
 
-/* Buttons stay icon-only: Play is the neon tube, the rest round tinted buttons. */
+/* Buttons stay icon-only: Play is the neon tube, the rest round tinted buttons. On the
+   narrowest phones the row wraps instead of squeezing them out of round. */
 .mainDetailButtons {
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .mainDetailButtons > .detailButton {
+  flex: none;
   width: 44px;
   height: 44px;
   min-width: 0;
@@ -110,6 +113,10 @@
   color: var(--nf-light);
   background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
   box-shadow: var(--nf-tube);
+}
+
+.mainDetailButtons > .detailButton.btnPlay:hover {
+  background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent);
 }
 
 .mainDetailButtons > .detailButton > .detailButton-content {

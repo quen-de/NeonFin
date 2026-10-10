@@ -232,3 +232,25 @@ def test_an_episode_row_takes_a_faint_fill_on_hover(open_page, color):
     r, g, b, a = color(bg)
     assert min(r, g, b) == 255 and 0.02 <= a <= 0.05 and radius == "12px", (bg, radius)
     page.mouse.move(0, 0)
+
+
+def test_detail_buttons_stay_round_on_a_320px_phone(open_page):
+    # A series page shows six buttons: they wrap rather than squeeze.
+    page = open_page("show", "phone", "none", viewport=(320, 780))
+    buttons = page.evaluate(BUTTONS)
+    assert len(buttons) >= 5, buttons
+    for b in buttons:
+        assert b["w"] == pytest.approx(b["h"], abs=0.5) and b["right"] <= 320, b
+    assert page.evaluate("document.documentElement.scrollWidth") <= 320
+
+
+def test_play_brightens_on_hover(open_page, color):
+    page = open_page("movie", "desktop", "none", variant="play-hover")
+    play = page.locator(".mainDetailButtons > .btnPlay >> visible=true").first
+    before = color(play.evaluate("(e) => getComputedStyle(e).backgroundColor"))
+    play.hover()
+    page.wait_for_timeout(400)
+    after = color(play.evaluate("(e) => getComputedStyle(e).backgroundColor"))
+    assert before[3] == pytest.approx(0.12, abs=0.01)
+    assert after[:3] == (255, 36, 72) and after[3] == pytest.approx(0.22, abs=0.01), after
+    page.mouse.move(0, 0)
