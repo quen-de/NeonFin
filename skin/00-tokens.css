@@ -17,6 +17,8 @@
   --nf-text: color-mix(in srgb, var(--nf-paper) 94%, transparent);
   --nf-text-2: color-mix(in srgb, var(--nf-paper) 62%, transparent);
   --nf-rim: color-mix(in srgb, var(--nf-light) 16%, transparent);
+  /* Errors keep the server theme's own colour. */
+  --nf-error: var(--jf-palette-error-main, #f44336);
 
   --nf-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --nf-sign-font: "NeonFin Sign", "Arial Narrow", sans-serif;

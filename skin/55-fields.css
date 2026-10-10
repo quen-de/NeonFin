@@ -24,7 +24,7 @@ select.emby-select-withcolor:not([disabled]):focus,
 
 .selectLabelFocused,
 .inputLabelFocused,
-.MuiFormLabel-root.MuiInputLabel-root.Mui-focused {
+.MuiFormLabel-root.MuiInputLabel-root.Mui-focused:not(.Mui-error) {
   color: var(--nf-neon);
 }
 
@@ -56,4 +56,17 @@ select.emby-select-withcolor:not([disabled]):focus,
 .MuiFilledInput-root::before,
 .MuiFilledInput-root::after {
   display: none;
+}
+
+/* A disabled field stays flat and does not answer the pointer. */
+.MuiFilledInput-root.Mui-disabled,
+.MuiFilledInput-root.Mui-disabled:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 3%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 7%, transparent);
+}
+
+/* MUI shows an error on the underline this skin hides, so the rim carries the error colour. */
+.MuiFilledInput-root.Mui-error,
+.MuiFilledInput-root.Mui-error.Mui-focused {
+  box-shadow: inset 0 0 0 1px var(--nf-error);
 }
