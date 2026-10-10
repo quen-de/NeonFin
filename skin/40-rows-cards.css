@@ -191,9 +191,10 @@
   background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
 }
 
-/* Played and favourite marks: crimson, like the watched check. */
-.material-icons.playstatebutton-icon-played,
-.material-icons.ratingbutton-icon-withrating {
+/* Played and favourite marks: crimson, like the watched check. Home draws them in the icon
+   font, libraries as SVG icons. */
+:is(.material-icons, svg).playstatebutton-icon-played,
+:is(.material-icons, svg).ratingbutton-icon-withrating {
   color: var(--nf-neon);
 }
 

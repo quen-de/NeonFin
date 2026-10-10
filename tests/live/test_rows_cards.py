@@ -304,3 +304,18 @@ def test_played_and_favourite_marks_are_crimson(open_page, color):
       const v = getComputedStyle(i).color; i.remove(); return v; })""")
     for v in got:
         assert color(v)[:3] == (255, 36, 72), v
+
+
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_played_and_favourite_marks_on_library_cards_are_crimson(open_page, color, route):
+    # Library cards draw their marks as SVG icons, not the icon font home uses.
+    page = open_page(route, "desktop", "none", variant="marks")
+    page.locator(".itemsContainer .card").first.hover()
+    page.wait_for_timeout(300)
+    got = page.evaluate("""() => { const c = document.querySelector('.itemsContainer .card');
+      return [['CheckIcon', 'playstatebutton-icon-played'], ['FavoriteIcon', 'ratingbutton-icon-withrating']].map(([icon, cls]) => {
+        const s = c.querySelector(`.cardOverlayContainer svg[data-testid="${icon}"]`);
+        s.classList.add(cls); return getComputedStyle(s).color; }); }""")
+    page.mouse.move(0, 0)
+    for v in got:
+        assert color(v)[:3] == (255, 36, 72), v
