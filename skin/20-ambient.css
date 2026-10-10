@@ -28,8 +28,10 @@
 }
 
 /* Desktop: the backdrop is sharp at the top and softens toward the bottom into the same
-   blur, on a copy that inherits the image Jellyfin sets on the element. Phones show the
-   in-page backdrop instead. */
+   blur, on a copy that inherits the image Jellyfin sets on the element. The copy reaches
+   twice the blur past the sides and bottom, so the blur has image to sample at the edges,
+   but lays the image out in the element's own box, so the blur lies on the sharp image.
+   Phones show the in-page backdrop instead. */
 .layout-desktop .backdropImage {
   filter: none;
   transform: none;
@@ -38,10 +40,12 @@
 .layout-desktop .backdropImage::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 -72px -72px;
+  padding: 0 72px 72px;
   background: inherit;
+  background-origin: content-box;
+  background-clip: border-box;
   filter: blur(36px) saturate(1.7) brightness(0.95);
-  transform: scale(1.18);
   -webkit-mask-image: linear-gradient(180deg, transparent 22%, #000 62%);
   mask-image: linear-gradient(180deg, transparent 22%, #000 62%);
 }

@@ -164,17 +164,23 @@ def test_the_details_line_steps_back_from_the_title(open_page, style, color, pro
     assert badge["border-top-color"] == badge["color"] and badge["border-top-left-radius"] == "6px"
 
 
-MEASURE = """() => { const o = document.querySelector('.detailPagePrimaryContainer .overview');
-  const probe = document.createElement('span'); probe.textContent = '0'.repeat(75);
-  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
-  o.append(probe); const w = probe.getBoundingClientRect().width; probe.remove();
-  return [o.getBoundingClientRect().width, w]; }"""
+PROSE = (
+    "A retired harbour pilot returns to the island where his brother vanished thirty years ago, and finds the "
+    "case files rewritten, the witnesses scattered, and the lighthouse keeper unwilling to say what the tide "
+    "carried in that night. Old friends close ranks as he follows a trail of letters, debts and half-remembered "
+    "songs, until the storm season cuts the ferry and leaves him alone with the people who know the truth."
+)
+LINES = """(text) => { const o = document.querySelector('.detailPagePrimaryContainer .overview'); o.textContent = text;
+  const r = document.createRange(), node = o.firstChild, lines = new Map();
+  for (let i = 0; i < text.length; i++) { r.setStart(node, i); r.setEnd(node, i + 1); const q = r.getClientRects()[0];
+    if (q) lines.set(Math.round(q.top), (lines.get(Math.round(q.top)) || 0) + 1); }
+  return [...lines.values()]; }"""
 
 
 def test_the_overview_runs_about_75_characters_a_line(open_page):
-    # The system font's ch runs a little wider than its rendered zeros: allow up to 78.
-    width, chars75 = open_page("movie", "desktop", "none").evaluate(MEASURE)
-    assert width <= chars75 * 78 / 75, (width, chars75)
+    # Characters of real prose per line, not zeros: a ch is wider than the average letter.
+    lines = open_page("movie", "desktop", "none", variant="prose").evaluate(LINES, PROSE)
+    assert len(lines) >= 5 and all(66 <= n <= 84 for n in lines[:-1]), lines
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
@@ -210,6 +216,43 @@ def test_the_backdrop_softens_into_a_blur_toward_the_bottom(open_page, tmp_path)
     top = ImageStat.Stat(im.crop((200, 60, 1240, 80))).stddev[0]
     bottom = ImageStat.Stat(im.crop((200, 860, 1240, 880))).stddev[0]
     assert top > 60 and bottom < top / 4, (top, bottom)
+
+
+BAR_IMAGE = (
+    ".backdropImage.displayingBackdropImage"
+    " { background: linear-gradient(90deg, #000 1150px, #fff 1150px 1170px, #000 1170px) !important; }"
+)
+
+
+def test_the_blur_lies_on_the_sharp_image(open_page, tmp_path):
+    # A bright bar right of centre: the blurred copy keeps it where the sharp image has it.
+    from PIL import Image
+
+    page = open_page("movie", "desktop", "none", variant="bar")
+    page.add_style_tag(content=BAR_IMAGE)
+    page.wait_for_timeout(300)
+    page.screenshot(path=str(tmp_path / "b.png"), style=ONLY_BACKDROP, animations="disabled")
+    im = Image.open(tmp_path / "b.png").convert("L")
+
+    def peak(y):
+        cols = [sum(im.getpixel((x, row)) for row in range(y, y + 20)) for x in range(im.width)]
+        return cols.index(max(cols))
+
+    assert abs(peak(60) - peak(860)) <= 10, (peak(60), peak(860))
+
+
+def test_the_blur_reaches_the_side_edges(open_page, tmp_path):
+    # No sharp strip where the blurred copy meets the window's edges.
+    from PIL import Image, ImageStat
+
+    page = open_page("movie", "desktop", "none", variant="stripes")
+    page.add_style_tag(content=STRIPES)
+    page.wait_for_timeout(300)
+    page.screenshot(path=str(tmp_path / "b.png"), style=ONLY_BACKDROP, animations="disabled")
+    im = Image.open(tmp_path / "b.png").convert("L")
+    top = ImageStat.Stat(im.crop((200, 60, 1240, 80))).stddev[0]
+    edges = [ImageStat.Stat(im.crop(box)).stddev[0] for box in ((0, 860, 48, 880), (1392, 860, 1440, 880))]
+    assert all(e < top / 4 for e in edges), (top, edges)
 
 
 THUMB = """() => { const e = document.querySelector('.listItemImage.listItemImage-large'); const r = e.getBoundingClientRect();

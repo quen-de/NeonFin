@@ -60,7 +60,7 @@
 
 /* About 75 characters a line. */
 .detailPagePrimaryContainer .overview {
-  max-width: 75ch;
+  max-width: 54ch;
 }
 
 /* Tags, external links and credit labels step back; links light up on hover. */
