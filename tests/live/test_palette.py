@@ -17,8 +17,17 @@ OWN = DEFAULTS[:6]
 
 @pytest.mark.parametrize(
     ("route", "profile"),
-    [("home", "desktop"), ("home", "phone"), ("movies", "desktop"), ("movie", "desktop"), ("movie", "phone"),
-     ("search", "desktop"), ("usermenu", "desktop"), ("actionsheet", "desktop"), ("display", "desktop")],
+    [
+        ("home", "desktop"),
+        ("home", "phone"),
+        ("movies", "desktop"),
+        ("movie", "desktop"),
+        ("movie", "phone"),
+        ("search", "desktop"),
+        ("usermenu", "desktop"),
+        ("actionsheet", "desktop"),
+        ("display", "desktop"),
+    ],
 )
 def test_one_palette_block_restyles_every_page(open_page, route, profile):
     page = open_page(route, profile, "all", after=SWAP)

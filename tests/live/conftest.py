@@ -70,7 +70,9 @@ def open_page(cfg, browser, skin_css):
             prof = PROFILES[profile]
             if profile not in states:
                 states[profile] = session.login_state(browser, cfg, prof)
-            ctx, page = session.new_page(browser, prof, states[profile], session.Override(skin_css + after), plugins.parse_state(plugin_state))
+            ctx, page = session.new_page(
+                browser, prof, states[profile], session.Override(skin_css + after), plugins.parse_state(plugin_state)
+            )
             if media:
                 cdp = ctx.new_cdp_session(page)
                 cdp.send("Emulation.setEmulatedMedia", {"features": [{"name": n, "value": v} for n, v in media]})

@@ -192,6 +192,9 @@ def test_seerr_request_is_a_neon_tube(open_page, color):
 def test_seerr_media_badges_are_quiet_dark_chips(open_page, color, profile):
     page = open_page("search", profile, "all")
     seerr_card(page)
-    for bg in page.evaluate("() => [...document.querySelectorAll('.jellyseerr-card .jellyseerr-media-badge')].slice(0, 8).map((b) => getComputedStyle(b).backgroundColor)"):
+    for bg in page.evaluate(
+        "() => [...document.querySelectorAll('.jellyseerr-card .jellyseerr-media-badge')].slice(0, 8)"
+        ".map((b) => getComputedStyle(b).backgroundColor)"
+    ):
         r, g, b, a = color(bg)
         assert max(r, g, b) <= 20 and a >= 0.7, bg
