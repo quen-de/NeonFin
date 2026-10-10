@@ -120,6 +120,23 @@
   padding: 0;
 }
 
+/* Season episode lists: 16:9 thumbnails with the thumbnail corners, a faint fill on hover. */
+.listItemImage.listItemImage-large {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--nf-radius-thumb);
+  overflow: hidden;
+}
+
+.listItem.listItem-largeImage {
+  border-radius: var(--nf-radius-card);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+
+.listItem.listItem-largeImage:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 4%, transparent);
+}
+
 /* Cards without artwork: Jellyfin fills them from a palette of its blues. */
 .defaultCardBackground.defaultCardBackground1 {
   background-color: color-mix(in srgb, var(--nf-neon) 12%, var(--nf-ink-2));

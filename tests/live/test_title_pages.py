@@ -210,3 +210,25 @@ def test_the_backdrop_softens_into_a_blur_toward_the_bottom(open_page, tmp_path)
     top = ImageStat.Stat(im.crop((200, 60, 1240, 80))).stddev[0]
     bottom = ImageStat.Stat(im.crop((200, 860, 1240, 880))).stddev[0]
     assert top > 60 and bottom < top / 4, (top, bottom)
+
+
+THUMB = """() => { const e = document.querySelector('.listItemImage.listItemImage-large'); const r = e.getBoundingClientRect();
+  return [r.width / r.height, getComputedStyle(e).borderTopLeftRadius]; }"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_episode_thumbnails_are_16_9_with_rounded_corners(open_page, profile):
+    ratio, radius = open_page("season", profile, "none").evaluate(THUMB)
+    assert ratio == pytest.approx(16 / 9, abs=0.02) and radius == "8px", (ratio, radius)
+
+
+def test_an_episode_row_takes_a_faint_fill_on_hover(open_page, color):
+    page = open_page("season", "desktop", "none", variant="row-hover")
+    row = page.locator(".listItem.listItem-largeImage >> visible=true").first
+    row.hover()
+    page.wait_for_timeout(300)
+    # Fainter than Jellyfin's own 8% hover, and on the card corners.
+    bg, radius = row.evaluate("(e) => [getComputedStyle(e).backgroundColor, getComputedStyle(e).borderTopLeftRadius]")
+    r, g, b, a = color(bg)
+    assert min(r, g, b) == 255 and 0.02 <= a <= 0.05 and radius == "12px", (bg, radius)
+    page.mouse.move(0, 0)
