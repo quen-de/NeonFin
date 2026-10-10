@@ -19,10 +19,10 @@ def metric(median, lo=None, hi=None):
     return {"median": median, "min": median if lo is None else lo, "max": median if hi is None else hi}
 
 
-def perf(recalc, task, anchor, anchor_max=None):
+def perf(recalc, task, anchor, anchor_max=None, route="home"):
     return {
         "desktop": {
-            "home": {"recalc_style_ms": metric(recalc), "task_ms": metric(task), "anchor_ms": metric(anchor, anchor, anchor_max or anchor)}
+            route: {"recalc_style_ms": metric(recalc), "task_ms": metric(task), "anchor_ms": metric(anchor, anchor, anchor_max or anchor)}
         }
     }
 
@@ -35,7 +35,9 @@ def test_skin_within_every_gate_passes():
 
 def test_recalc_and_task_time_ratios():
     fails = gates.evaluate(
-        summary("vanilla", perf(20, 400, 1000), plugins="none"), summary(perf=perf(27, 470, 1000), plugins="none"), set()
+        summary("vanilla", perf(20, 400, 1000, route="movies"), plugins="none"),
+        summary(perf=perf(27, 470, 1000, route="movies"), plugins="none"),
+        set(),
     )
     assert len(fails) == 2
     assert any("recalc_style_ms" in f for f in fails) and any("task_ms" in f for f in fails)
@@ -94,11 +96,13 @@ def test_plugin_built_desktop_home_runs_under_its_accepted_exception():
     assert len(fails) == 2 and all("desktop/home" in f for f in fails)
 
 
-def test_the_exception_covers_only_plugin_built_home():
+def test_exceptions_cover_only_their_own_cells():
     plain = gates.evaluate(
         summary("vanilla", perf(16, 420, 1000), plugins="none"), summary(perf=perf(28, 500, 1000), plugins="none"), set()
     )
-    assert len(plain) == 2
+    assert plain == ["desktop/home: recalc_style_ms 28 > 1.62x vanilla 16"]
+    assert gates.limits("none", "desktop", "home") == {"recalc_style_ms": 1.62, "task_ms": 1.37}
+    assert gates.limits("none", "phone", "home") == {"recalc_style_ms": 1.3, "task_ms": 1.15}
     assert gates.limits("all", "desktop", "movies") == {"recalc_style_ms": 1.3, "task_ms": 1.15}
 
 
@@ -172,7 +176,8 @@ def test_undecided_bench_cells_need_seven_pairs_then_judge_medians():
 def test_bench_cells_use_the_accepted_exception():
     pairs = [pair(16, 28, 420, 500)] * 7
     assert gates.evaluate_bench(bench({"all/desktop/home": {"pairs": pairs}})) == []
-    assert len(gates.evaluate_bench(bench({"none/desktop/home": {"pairs": pairs}}))) == 2
+    assert len(gates.evaluate_bench(bench({"none/desktop/home": {"pairs": pairs}}))) == 1  # its own, lower ceiling
+    assert len(gates.evaluate_bench(bench({"none/phone/home": {"pairs": pairs}}))) == 2
 
 
 def full_cells(state, pairs):

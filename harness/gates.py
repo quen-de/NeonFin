@@ -38,7 +38,16 @@ MIN_TRIALS = 7
 # unchanged: 0 dropped, p95 16.7 ms. Cutting the card treatment only reaches 1.29x.
 # The ceilings sit about 7% above the worst medians measured (1.77x, 1.18x): close enough to
 # catch a real step up, far enough that run-to-run spread (1.61x to 1.77x) does not trip it.
-EXCEPTIONS = {("all", "desktop", "home"): {"recalc_style_ms": 1.9, "task_ms": 1.24}}
+# 2026-10-10: with plugins off, desktop home is short, and hiding the My Media title (55px)
+# moves where the bench's mid-screen cursor stops: it now ends the scroll over a card, whose
+# hover animations (Jellyfin's overlay buttons, the skin's ring) restyle every frame. Moving
+# the page 55px without hiding anything costs the same (1.59x); hiding the title without
+# moving anything costs nothing (1.07x). Frames unchanged: 0 dropped, p95 16.7 ms. The
+# ceilings sit about 7% above the worst medians measured (1.51x, 1.28x).
+EXCEPTIONS = {
+    ("all", "desktop", "home"): {"recalc_style_ms": 1.9, "task_ms": 1.24},
+    ("none", "desktop", "home"): {"recalc_style_ms": 1.62, "task_ms": 1.37},
+}
 # Early decisions in paired benches, after MIN_DECIDED pairs: a cell fails once every pair is
 # over a limit and the median pair over it by MARGIN; it passes once, on every metric, every
 # pair is within the limit and the median pair within it by MARGIN. Were the true ratio on
