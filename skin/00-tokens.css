@@ -45,4 +45,7 @@
   --nf-ring: inset 0 0 0 2px var(--nf-neon), 0 0 22px 2px color-mix(in srgb, var(--nf-neon) 55%, transparent);
   --nf-selected: color-mix(in srgb, var(--nf-neon) 20%, transparent);
   --nf-selected-edge: inset 0 0 0 1px color-mix(in srgb, var(--nf-neon) 75%, transparent);
+  /* Crimson for text (links on hover, the active letter, a filter's reset): lighter than the
+     accent, so it passes AA on dark chrome over the brightest poster. */
+  --nf-neon-text: color-mix(in srgb, var(--nf-neon) 60%, var(--nf-light));
 }

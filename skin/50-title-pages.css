@@ -1,8 +1,8 @@
 /* Title pages: the backdrop runs under the whole page. Jellyfin's gray ribbon and page panel
    give way to ink that ramps in under the text, so the backdrop's colour comes through and
-   the text still passes AA over a white one. */
+   the text, the grey details line included, still passes AA over a white one. */
 .detailRibbon {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--nf-ink) 50%, transparent), color-mix(in srgb, var(--nf-ink) 72%, transparent));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--nf-ink) 64%, transparent), color-mix(in srgb, var(--nf-ink) 72%, transparent));
 }
 
 /* The ramp starts above the ribbon, so it has no top edge. */
@@ -13,7 +13,7 @@
   bottom: 100%;
   left: 0;
   height: 120px;
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--nf-ink) 50%, transparent));
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--nf-ink) 64%, transparent));
   pointer-events: none;
 }
 
@@ -46,6 +46,40 @@
   padding: 0.6em;
   font-size: 2.6rem;
   line-height: 1.05;
+}
+
+/* The details line steps back from the title. The age rating keeps Jellyfin's outline, which
+   follows the text colour. */
+.detailRibbon .itemMiscInfo-primary > .mediaInfoItem {
+  color: var(--nf-text-2);
+}
+
+.detailRibbon .mediaInfoOfficialRating {
+  border-radius: 6px;
+}
+
+/* About 75 characters a line. */
+.detailPagePrimaryContainer .overview {
+  max-width: 75ch;
+}
+
+/* Tags, external links and credit labels step back; links light up on hover. */
+.itemTags,
+.itemTags a,
+.itemExternalLinks,
+.itemExternalLinks a,
+.detailsGroupItem .label {
+  color: var(--nf-text-2);
+}
+
+.itemTags a:hover,
+.itemExternalLinks a:hover {
+  color: var(--nf-neon-text);
+}
+
+/* Credit links set color: inherit inline. */
+.detailsGroupItem a:hover {
+  color: var(--nf-neon-text) !important;
 }
 
 /* Buttons stay icon-only: Play is the neon tube, the rest round tinted buttons. */

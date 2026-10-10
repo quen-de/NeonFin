@@ -148,3 +148,47 @@ def test_settings_dropdowns_are_tinted_fields_without_an_underline(open_page, st
     r, g, b, a = color(s["background-color"])
     assert s["border-top-left-radius"] == "10px" and min(r, g, b) == 255 and a <= 0.12, s
     assert under["display"] == "none"
+
+
+SECONDARY = (246, 243, 240, 0.62)
+LINK_HOVER = (255, 124, 145)
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_the_details_line_steps_back_from_the_title(open_page, style, color, profile):
+    page = open_page("movie", profile, "none")
+    item = style(page, ".detailRibbon .itemMiscInfo-primary > .mediaInfoItem", "color")
+    badge = style(page, ".detailRibbon .mediaInfoOfficialRating", "color", "border-top-color", "border-top-left-radius")
+    assert color(item["color"]) == pytest.approx(SECONDARY, abs=0.01)
+    assert color(badge["color"]) == pytest.approx(SECONDARY, abs=0.01)
+    assert badge["border-top-color"] == badge["color"] and badge["border-top-left-radius"] == "6px"
+
+
+MEASURE = """() => { const o = document.querySelector('.detailPagePrimaryContainer .overview');
+  const probe = document.createElement('span'); probe.textContent = '0'.repeat(75);
+  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+  o.append(probe); const w = probe.getBoundingClientRect().width; probe.remove();
+  return [o.getBoundingClientRect().width, w]; }"""
+
+
+def test_the_overview_runs_about_75_characters_a_line(open_page):
+    # The system font's ch runs a little wider than its rendered zeros: allow up to 78.
+    width, chars75 = open_page("movie", "desktop", "none").evaluate(MEASURE)
+    assert width <= chars75 * 78 / 75, (width, chars75)
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_tags_links_and_credit_labels_step_back(open_page, style, color, profile):
+    page = open_page("movie", profile, "none")
+    for sel in (".itemTags a", ".itemExternalLinks a", ".detailsGroupItem .label"):
+        assert color(style(page, sel, "color")["color"]) == pytest.approx(SECONDARY, abs=0.01), sel
+
+
+def test_links_light_up_crimson_on_hover(open_page, color):
+    page = open_page("movie", "desktop", "none", variant="link-hover")
+    for sel in (".itemTags a", ".itemExternalLinks a", ".detailsGroupItem a"):
+        link = page.locator(f"{sel} >> visible=true").first
+        link.hover()
+        page.wait_for_timeout(300)
+        assert color(link.evaluate("(e) => getComputedStyle(e).color"))[:3] == LINK_HOVER, sel
+    page.mouse.move(0, 0)
