@@ -71,9 +71,55 @@ def test_the_library_toolbar_is_one_glass_capsule_under_the_header(open_page, st
     assert len(checks.glass_elements(page)) == 3
 
 
-def test_on_a_narrow_desktop_the_capsule_holds_its_controls(open_page):
-    g = open_page("movies", "desktop", "all", viewport=(1024, 768)).evaluate(GEOMETRY, [BAR2, FIRST_HEADER_ITEM])
+OUTSIDE = """(bar) => { const b = document.querySelector(bar), r = b.getBoundingClientRect();
+  return [...b.querySelectorAll('button, .MuiChip-root')].filter((e) => e.offsetParent)
+    .map((e) => [e.innerText.trim(), e.getBoundingClientRect()])
+    .filter(([, q]) => q.top < r.top - 0.5 || q.bottom > r.bottom + 0.5 || q.left < r.left - 0.5 || q.right > r.right + 0.5)
+    .map(([t, q]) => [t, q.left, q.top, q.right, q.bottom]); }"""
+
+
+@pytest.mark.parametrize("filtered", [False, True])
+def test_on_a_narrow_desktop_the_capsule_holds_its_controls(open_page, filtered):
+    # With a filter on, Jellyfin adds a Reset filters button to the row.
+    page = open_page("movies", "desktop", "all", viewport=(1024, 768), variant="letter-b" if filtered else "")
+    if filtered:
+        page.locator(f"{RAIL} .MuiToggleButton-root >> text=B").first.click()
+        page.wait_for_selector(f"{BAR2} .MuiButton-textPrimary")
+        page.wait_for_timeout(500)
+    g = page.evaluate(GEOMETRY, [BAR2, FIRST_HEADER_ITEM])
     assert g["height"] == 42 and g["overflow"] <= 0, g
+    assert page.evaluate(OUTSIDE, BAR2) == []
+
+
+TEXT_GROUP = """(bar) => [...document.querySelectorAll(bar + ' .MuiButtonGroup-text > .MuiButton-root')]
+  .filter((b) => b.offsetParent).map((b) => { const cs = getComputedStyle(b), r = b.getBoundingClientRect();
+    return { icon: b.querySelector('svg')?.dataset.testid, w: r.width, h: r.height, left: r.left, right: r.right,
+             radii: ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'].map((c) => parseFloat(cs[`border${c}Radius`])),
+             border: cs.borderRightWidth, shadow: cs.boxShadow, bg: cs.backgroundColor }; })"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_filter_sort_view_and_paging_are_round_tinted_buttons(open_page, color, profile, route):
+    # Spec 6.8: everything in the row but Play All is a round tinted button.
+    buttons = open_page(route, profile, "none").evaluate(TEXT_GROUP, BAR2)
+    assert {"FilterAltIcon", "SortByAlphaIcon"} <= {b["icon"] for b in buttons}, buttons
+    for b in buttons:
+        r, g, bl, a = color(b["bg"])
+        assert b["w"] == pytest.approx(b["h"], abs=0.5) and min(b["radii"]) >= b["h"] / 2 and b["border"] == "0px", b
+        assert min(r, g, bl) == 255 and 0.04 <= a <= 0.12 and "inset" in b["shadow"], b
+    gaps = [nxt["left"] - cur["right"] for cur, nxt in zip(buttons, buttons[1:])]
+    assert all(gap >= 4 for gap in gaps), gaps
+
+
+def test_a_round_button_brightens_on_hover(open_page, color):
+    page = open_page("movies", "desktop", "none", variant="text-hover")
+    button = page.locator(f"{BAR2} .MuiButtonGroup-text > .MuiButton-root >> visible=true").first
+    rest = color(button.evaluate("(e) => getComputedStyle(e).backgroundColor"))[3]
+    button.hover()
+    page.wait_for_timeout(300)
+    assert color(button.evaluate("(e) => getComputedStyle(e).backgroundColor"))[3] > rest
+    page.mouse.move(0, 0)
 
 
 @pytest.mark.parametrize("route", ["movies", "series"])
@@ -127,3 +173,14 @@ def test_picking_a_letter_lights_it_crimson_and_leaves_no_blue(open_page, color,
     picked = page.evaluate(f"() => getComputedStyle(document.querySelector('{RAIL} .Mui-selected')).color")
     assert color(picked)[:3] == (255, 124, 145), picked
     assert checks.blue_hits(page) == {}
+
+
+def test_reset_filters_answers_hover_without_blue(open_page):
+    page = open_page("movies", "desktop", "none", variant="reset-hover")
+    page.locator(f"{RAIL} .MuiToggleButton-root >> text=B").first.click()
+    reset = page.locator(f"{BAR2} .MuiButton-textPrimary")
+    reset.wait_for()
+    reset.hover()
+    page.wait_for_timeout(400)
+    assert checks.blue_hits(page) == {}
+    page.mouse.move(0, 0)
