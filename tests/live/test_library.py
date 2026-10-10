@@ -93,3 +93,37 @@ def test_header_and_toolbar_read_over_white_posters(open_page, tmp_path, profile
     page.evaluate("scrollTo(0, 1600)")
     page.wait_for_timeout(500)
     assert checks.contrast_failures(page, "movies", tmp_path / "white.png") == []
+
+
+RAIL = ".alphaPicker-fixed-right"
+
+
+def test_shuffle_stays_round_when_the_library_hides_play_all(open_page, color):
+    page = open_page("movies", "desktop", "none", variant="no-play-all")
+    page.evaluate("() => document.querySelector('.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:first-child').remove()")
+    page.wait_for_timeout(200)
+    buttons = page.evaluate(GROUP)
+    assert len(buttons) == 1, buttons
+    b = buttons[0]
+    r, g, bl, a = color(b["bg"])
+    assert b["w"] == pytest.approx(b["h"], abs=0.5) and min(r, g, bl) == 255 and b["shadow"].count("inset") == 1, b
+
+
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_the_a_to_z_rail_is_grey_on_a_solid_strip(open_page, style, color, route):
+    page = open_page(route, "phone", "none")
+    strip = style(page, f"{RAIL} .MuiPaper-root", "background-color", "border-top-left-radius")
+    letter = style(page, f"{RAIL} .MuiToggleButton-root", "color")
+    assert color(strip["background-color"])[3] >= 0.9 and float(strip["border-top-left-radius"].removesuffix("px")) >= 10, strip
+    assert color(letter["color"]) == pytest.approx((246, 243, 240, 0.62), abs=0.01)
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_picking_a_letter_lights_it_crimson_and_leaves_no_blue(open_page, color, profile):
+    page = open_page("movies", profile, "none", variant="letter-b")
+    page.locator(f"{RAIL} .MuiToggleButton-root >> text=B").first.click()
+    page.wait_for_selector(f"{RAIL} .Mui-selected")
+    page.wait_for_timeout(800)
+    picked = page.evaluate(f"() => getComputedStyle(document.querySelector('{RAIL} .Mui-selected')).color")
+    assert color(picked)[:3] == (255, 124, 145), picked
+    assert checks.blue_hits(page) == {}
