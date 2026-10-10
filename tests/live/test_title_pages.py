@@ -85,7 +85,8 @@ def test_watched_checks_outside_cards_stay_crimson(open_page, color):
 def test_a_focused_track_select_is_crimson_not_blue(open_page, color, profile):
     page = open_page("movie", profile, "none", variant="focused-select")
     page.locator(".trackSelections select:not([disabled]) >> visible=true").first.focus()
-    page.wait_for_timeout(300)
+    # Read the edge once its transition ends: mid-way, Chrome reports an oklab() blend.
+    page.evaluate("() => Promise.all(document.activeElement.getAnimations().map((a) => a.finished))")
     assert checks.blue_hits(page) == {}
     edge = page.evaluate("() => getComputedStyle(document.activeElement).borderTopColor")
     r, g, b, _ = color(edge)

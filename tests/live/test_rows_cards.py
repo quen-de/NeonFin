@@ -284,8 +284,9 @@ def test_episode_list_actions_answer_hover_without_blue(open_page):
     page.mouse.move(0, 0)
 
 
-def test_card_play_is_a_neon_tube_on_a_dark_disc(open_page, color):
-    page = open_page("home", "desktop", "none", variant="card-play")
+@pytest.mark.parametrize("route", ["home", "movies"])
+def test_card_play_is_a_neon_tube_on_a_dark_disc(open_page, color, route):
+    page = open_page(route, "desktop", "none", variant="card-play")
     play = hovered_card(page).locator(".cardOverlayFab-primary")
     fg, bg, shadow = play.evaluate("(e) => { const cs = getComputedStyle(e); return [cs.color, cs.backgroundColor, cs.boxShadow]; }")
     r, g, b, a = color(bg)
