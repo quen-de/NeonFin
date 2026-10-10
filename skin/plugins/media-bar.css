@@ -1,4 +1,13 @@
 /* plugin: Media Bar; roots: #slides-container */
+/* The plugin places the rows from the page's offset, which it measures on the first page in
+   the document. Other plugins add hidden pages ahead of home, so a re-measure while scrolled
+   (a phone's address bar folding away, a row that grows) takes the scroll for the offset and
+   lifts the rows over the hero until a reload. Hold it at zero, the layout the skin is drawn
+   for, with or without those plugins. */
+body:has(> #slides-container) {
+  --slideshow-page-offset: 0px;
+}
+
 /* The hero: the artwork fades to the page at the bottom and the left. */
 #slides-container .gradient-overlay {
   background:

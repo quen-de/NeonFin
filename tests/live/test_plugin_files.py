@@ -198,3 +198,23 @@ def test_seerr_media_badges_are_quiet_dark_chips(open_page, color, profile):
     ):
         r, g, b, a = color(bg)
         assert max(r, g, b) <= 20 and a >= 0.7, bg
+
+
+ROWS_TOP = """() => Math.round(document.querySelector('.homeSectionsContainer').getBoundingClientRect().top
+  + document.scrollingElement.scrollTop)"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_rows_stay_under_the_hero_after_a_resize_while_scrolled(open_page, profile):
+    # Media Bar re-measures the page on every resize (a phone's address bar folding away mid
+    # scroll fires one) and used to take the scroll for the page's offset, lifting the rows
+    # over the hero until a reload.
+    page = open_page("home", profile, "all", variant="resized-while-scrolled")
+    page.evaluate("() => document.scrollingElement.scrollTo(0, 0)")
+    before = page.evaluate(ROWS_TOP)
+    page.evaluate("() => document.scrollingElement.scrollTo(0, 1500)")
+    page.evaluate("() => window.dispatchEvent(new Event('resize'))")
+    page.wait_for_timeout(300)
+    page.evaluate("() => document.scrollingElement.scrollTo(0, 0)")
+    page.wait_for_timeout(100)
+    assert page.evaluate(ROWS_TOP) == before
