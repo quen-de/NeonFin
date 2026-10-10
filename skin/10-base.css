@@ -50,3 +50,15 @@ html {
 .mdl-spinner__layer {
   border-color: var(--nf-neon);
 }
+
+/* Jellyfin's round icon buttons (row arrows, list and card actions, the player's) answer hover
+   and press in its blue at (0,3,0); here in white. Keyboard focus shows crimson. */
+:is(button, a).paper-icon-button-light:hover:not(:disabled),
+:is(button, a).paper-icon-button-light:active:not(:disabled) {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 12%, transparent);
+}
+
+:is(button, a).paper-icon-button-light.show-focus:focus {
+  color: var(--nf-neon-text);
+}

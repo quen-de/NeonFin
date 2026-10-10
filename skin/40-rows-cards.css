@@ -172,11 +172,29 @@
   background: linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--nf-ink) 60%, transparent));
 }
 
-/* The card's play button is Play: a neon tube. */
-.cardOverlayFab-primary {
+/* The card's play button is Play: a neon tube on a dark disc, so the icon reads over any
+   poster. Jellyfin paints its disc at (0,2,0), which the bare class lost to. */
+.cardOverlayContainer > .cardOverlayFab-primary {
   color: var(--nf-light);
-  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  background-color: color-mix(in srgb, var(--nf-neon) 16%, color-mix(in srgb, var(--nf-ink) 70%, transparent));
   box-shadow: var(--nf-tube);
+}
+
+.cardOverlayContainer > .cardOverlayFab-primary:hover:not(:disabled) {
+  color: var(--nf-light);
+  background-color: color-mix(in srgb, var(--nf-neon) 30%, color-mix(in srgb, var(--nf-ink) 70%, transparent));
+}
+
+/* The other actions (mark played, favourite, more) brighten to white on a faint disc. */
+.cardOverlayContainer .cardOverlayButton:not(.cardOverlayFab-primary):hover:not(:disabled) {
+  color: var(--nf-light);
+  background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
+}
+
+/* Played and favourite marks: crimson, like the watched check. */
+.material-icons.playstatebutton-icon-played,
+.material-icons.ratingbutton-icon-withrating {
+  color: var(--nf-neon);
 }
 
 /* Counts and the watched check: crimson wherever Jellyfin shows them, lists included. */

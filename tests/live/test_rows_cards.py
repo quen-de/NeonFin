@@ -246,3 +246,61 @@ def test_my_media_keeps_its_row_but_not_its_title(open_page, profile, plugin_sta
     assert got["cards"] > 0
     assert got["w"] <= 1 and got["h"] <= 1  # nothing on screen
     assert got["text"] and got["display"] != "none" and got["visibility"] == "visible"  # still read out
+
+
+MOVIE_CARD = ".card[data-type='Movie'] >> visible=true"
+
+
+def hovered_card(page):
+    card = page.locator(MOVIE_CARD).first
+    card.scroll_into_view_if_needed()
+    card.hover()
+    page.wait_for_timeout(400)
+    return card
+
+
+@pytest.mark.parametrize("route", ["home", "movies"])
+def test_card_actions_answer_hover_without_blue(open_page, route):
+    # Play, Mark played, Add to favorites, More: home renders them as legacy buttons, libraries
+    # as MUI ones.
+    page = open_page(route, "desktop", "none", variant="card-actions")
+    buttons = hovered_card(page).locator(".cardOverlayContainer button")
+    assert buttons.count() >= 4
+    for i in range(buttons.count()):
+        buttons.nth(i).hover()
+        page.wait_for_timeout(300)
+        assert checks.blue_hits(page) == {}, buttons.nth(i).get_attribute("class")
+    page.mouse.move(0, 0)
+
+
+def test_episode_list_actions_answer_hover_without_blue(open_page):
+    page = open_page("season", "desktop", "none", variant="list-actions")
+    buttons = page.locator(".listItem button.paper-icon-button-light >> visible=true")
+    assert buttons.count() >= 3
+    for i in range(3):
+        buttons.nth(i).hover()
+        page.wait_for_timeout(300)
+        assert checks.blue_hits(page) == {}, buttons.nth(i).get_attribute("class")
+    page.mouse.move(0, 0)
+
+
+def test_card_play_is_a_neon_tube_on_a_dark_disc(open_page, color):
+    page = open_page("home", "desktop", "none", variant="card-play")
+    play = hovered_card(page).locator(".cardOverlayFab-primary")
+    fg, bg, shadow = play.evaluate("(e) => { const cs = getComputedStyle(e); return [cs.color, cs.backgroundColor, cs.boxShadow]; }")
+    r, g, b, a = color(bg)
+    assert color(fg) == (255, 255, 255, 1.0) and shadow.count("inset") == 2, (fg, shadow)
+    assert r > 2 * max(g, b) and a >= 0.7, bg
+    play.hover()
+    page.wait_for_timeout(300)
+    assert color(play.evaluate("(e) => getComputedStyle(e).backgroundColor"))[0] > r
+    page.mouse.move(0, 0)
+
+
+def test_played_and_favourite_marks_are_crimson(open_page, color):
+    page = open_page("movie", "desktop", "none", variant="marks")
+    got = page.evaluate("""() => ['playstatebutton-icon-played', 'ratingbutton-icon-withrating'].map((c) => {
+      const i = document.createElement('span'); i.className = 'material-icons ' + c; document.body.append(i);
+      const v = getComputedStyle(i).color; i.remove(); return v; })""")
+    for v in got:
+        assert color(v)[:3] == (255, 36, 72), v
