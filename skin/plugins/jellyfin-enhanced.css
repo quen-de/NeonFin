@@ -1,4 +1,4 @@
-/* plugin: Jellyfin Enhanced; roots: .je- */
+/* plugin: Jellyfin Enhanced; roots: .je-, .jellyseerr- */
 /* The plugin marks Jellyfin's own actions box; keep it content-width so the core capsule holds. */
 .je-header-actions-host {
   flex: 0 0 auto !important;
@@ -32,4 +32,26 @@
 .je-tag-host .language-flag {
   border-radius: 3px;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--nf-shade) 45%, transparent);
+}
+
+/* Seerr results on search: the same cards as the library, so the media type is a quiet dark
+   chip, and Request is a neon tube like every other primary action. The plugin sets these
+   colours with !important. */
+.jellyseerr-card .jellyseerr-media-badge {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-ink-2) 78%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+
+.jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request {
+  color: var(--nf-light) !important;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent) !important;
+  box-shadow: var(--nf-tube);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+}
+
+.jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent) !important;
+  box-shadow: var(--nf-tube);
 }

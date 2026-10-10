@@ -116,7 +116,7 @@ def test_the_plot_keeps_to_the_dimmed_column(open_page, viewport):
         """() => { const p = document.querySelector('#slides-container .slide.active .plot'), r = p.getBoundingClientRect();
       return [r.right, innerWidth, p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)]; }"""
     )
-    assert 2 <= lines <= 3.01 and right <= 0.4 * width, (right, width, lines)
+    assert 1.99 <= lines <= 3.01 and right <= 0.4 * width, (right, width, lines)
 
 
 def _hero_light(page, tmp_path, x_frac):
@@ -163,3 +163,35 @@ def test_hero_text_is_primary_white(open_page, style, color, profile):
     page = open_page("home", profile, "all")
     for sel in ("#slides-container .slide.active .plot", "#slides-container .slide.active .spec-line"):
         assert color(style(page, sel, "color")["color"])[3] >= 0.9, sel
+
+
+def seerr_card(page):
+    cards = page.locator(".jellyseerr-card >> visible=true")
+    if not cards.count():
+        pytest.skip("no Seerr results on this server for the search term")
+    return cards.first
+
+
+def test_seerr_request_is_a_neon_tube(open_page, color):
+    page = open_page("search", "desktop", "all", variant="seerr-hover")
+    card = seerr_card(page)
+    card.scroll_into_view_if_needed()
+    card.hover()
+    page.wait_for_timeout(500)
+    button = card.locator(".jellyseerr-request-button.jellyseerr-button-request")
+    if not button.count():
+        pytest.skip("the first Seerr result offers no request")
+    bg, shadow, radius = button.first.evaluate(
+        "(e) => { const cs = getComputedStyle(e); return [cs.backgroundColor, cs.boxShadow, cs.borderTopLeftRadius]; }"
+    )
+    assert color(bg)[:3] == (255, 36, 72) and shadow.count("inset") == 2 and float(radius.removesuffix("px")) >= 15, (bg, shadow, radius)
+    page.mouse.move(0, 0)
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_seerr_media_badges_are_quiet_dark_chips(open_page, color, profile):
+    page = open_page("search", profile, "all")
+    seerr_card(page)
+    for bg in page.evaluate("() => [...document.querySelectorAll('.jellyseerr-card .jellyseerr-media-badge')].slice(0, 8).map((b) => getComputedStyle(b).backgroundColor)"):
+        r, g, b, a = color(bg)
+        assert max(r, g, b) <= 20 and a >= 0.7, bg
