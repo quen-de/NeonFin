@@ -1,8 +1,13 @@
-/* Accessibility: solid instead of glass, still instead of moving. */
+/* Accessibility: solid instead of glass, still instead of moving. Phones' capsules are already
+   solid but not opaque, at a higher specificity, so they are named again. */
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
   .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
   .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child),
-  .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+  .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root,
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child),
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root:first-child,
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
     background-color: var(--nf-ink-2);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;

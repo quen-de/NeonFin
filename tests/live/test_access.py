@@ -4,12 +4,15 @@ pytestmark = pytest.mark.live
 
 NAV = ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root"
 ACTIONS = ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child)"
+MENU = ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root:first-child"
 
 
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
 @pytest.mark.parametrize("feature", [("prefers-reduced-transparency", "reduce"), ("prefers-contrast", "more")])
-def test_glass_turns_solid_when_asked(open_page, style, color, feature):
-    page = open_page("home", "desktop", "none", media=(feature,))
-    for sel in (NAV, ACTIONS):
+def test_glass_turns_solid_when_asked(open_page, style, color, feature, profile):
+    page = open_page("home", profile, "none", media=(feature,))
+    # Phones have no navigation capsule; their menu button is a capsule of its own.
+    for sel in (NAV, ACTIONS) if profile == "desktop" else (ACTIONS, MENU):
         s = style(page, sel, "backdrop-filter", "background-color")
         assert s["backdrop-filter"] == "none"
         assert color(s["background-color"]) == (9, 11, 18, 1.0)
@@ -55,7 +58,12 @@ def test_forced_colors_leave_text_and_focus_to_the_system(open_page, style):
 LIBRARY_BAR = ".MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root"
 
 
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
 @pytest.mark.parametrize("feature", [("prefers-reduced-transparency", "reduce"), ("prefers-contrast", "more"), ("forced-colors", "active")])
-def test_the_library_toolbar_turns_solid_when_asked(open_page, style, feature):
-    page = open_page("movies", "desktop", "none", media=(feature,))
-    assert style(page, LIBRARY_BAR, "backdrop-filter")["backdrop-filter"] == "none"
+def test_the_library_toolbar_turns_solid_when_asked(open_page, style, color, feature, profile):
+    page = open_page("movies", profile, "none", media=(feature,))
+    s = style(page, LIBRARY_BAR, "backdrop-filter", "background-color")
+    assert s["backdrop-filter"] == "none"
+    # Forced colours paint the system's own background.
+    if feature[0] != "forced-colors":
+        assert color(s["background-color"]) == (9, 11, 18, 1.0)
