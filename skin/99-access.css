@@ -1,7 +1,8 @@
 /* Accessibility: solid instead of glass, still instead of moving. */
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
   .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
-  .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child),
+  .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
     background-color: var(--nf-ink-2);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;

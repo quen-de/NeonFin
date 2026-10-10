@@ -12,6 +12,8 @@ GLASS_ALLOWLIST = frozenset(
     {
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root",
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child)",
+        # Library pages: the header's second row (spec 5.2).
+        ".MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root",
         # Menus, desktop pages only: phones and the player turn it off.
         ".actionSheet",
         ".MuiPopover-paper",

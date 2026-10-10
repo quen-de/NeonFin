@@ -50,3 +50,12 @@ def test_forced_colors_leave_text_and_focus_to_the_system(open_page, style):
     target = page.locator(".homeSectionsContainer .emby-scroller .card >> visible=true").first.locator(".cardImageContainer")
     target.focus()
     assert target.evaluate("(a) => getComputedStyle(a).outlineStyle") == "solid"
+
+
+LIBRARY_BAR = ".MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root"
+
+
+@pytest.mark.parametrize("feature", [("prefers-reduced-transparency", "reduce"), ("prefers-contrast", "more"), ("forced-colors", "active")])
+def test_the_library_toolbar_turns_solid_when_asked(open_page, style, feature):
+    page = open_page("movies", "desktop", "none", media=(feature,))
+    assert style(page, LIBRARY_BAR, "backdrop-filter")["backdrop-filter"] == "none"

@@ -41,7 +41,55 @@ def test_the_filter_dot_is_crimson(open_page, style, color):
     assert color(dot["background-color"])[:3] == (255, 36, 72)
 
 
-def test_the_item_count_is_a_quiet_tinted_chip(open_page, style, color):
-    chip = style(open_page("movies", "desktop", "none"), ".MuiToolbar-root .MuiChip-filled", "background-color", "color")
-    r, g, b, a = color(chip["background-color"])
-    assert min(r, g, b) == 255 and a <= 0.1, chip
+def test_the_item_count_is_a_quiet_rimmed_label(open_page, style, color):
+    # It sits on the toolbar capsule's glass: a rim, no fill of its own, grey text.
+    chip = style(open_page("movies", "desktop", "none"), ".MuiToolbar-root .MuiChip-filled", "background-color", "color", "box-shadow")
+    assert color(chip["background-color"])[3] == 0 and "inset" in chip["box-shadow"], chip
+    assert color(chip["color"]) == pytest.approx((246, 243, 240, 0.62), abs=0.01), chip
+
+
+BAR2 = checks.LIBRARY_BAR
+FIRST_HEADER_ITEM = ".MuiAppBar-root > .MuiToolbar-root:first-child > *"
+GEOMETRY = """([bar, first]) => { const b = document.querySelector(bar), r = b.getBoundingClientRect();
+  return { left: r.left, height: r.height, bottom: r.bottom, first: document.querySelector(first).getBoundingClientRect().left,
+           appbar: document.querySelector('.MuiAppBar-root').getBoundingClientRect().height,
+           grid: document.querySelector('.itemsContainer').getBoundingClientRect().top,
+           overflow: b.scrollWidth - b.clientWidth }; }"""
+WHITE_POSTERS = (
+    ".itemsContainer .cardScalable, .itemsContainer .cardImageContainer { background: #fff !important; }"
+    " .itemsContainer .cardImageContainer > *, .itemsContainer .cardIndicators { visibility: hidden !important; }"
+)
+
+
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_the_library_toolbar_is_one_glass_capsule_under_the_header(open_page, style, route):
+    page = open_page(route, "desktop", "all")
+    s = style(page, BAR2, "backdrop-filter", "border-top-left-radius")
+    g = page.evaluate(GEOMETRY, [BAR2, FIRST_HEADER_ITEM])
+    assert "blur(20px)" in s["backdrop-filter"] and float(s["border-top-left-radius"].removesuffix("px")) >= 21
+    assert g["height"] == 42 and g["left"] == pytest.approx(g["first"], abs=1) and g["appbar"] == 96, g
+    assert len(checks.glass_elements(page)) == 3
+
+
+def test_on_a_narrow_desktop_the_capsule_holds_its_controls(open_page):
+    g = open_page("movies", "desktop", "all", viewport=(1024, 768)).evaluate(GEOMETRY, [BAR2, FIRST_HEADER_ITEM])
+    assert g["height"] == 42 and g["overflow"] <= 0, g
+
+
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_the_phone_library_toolbar_is_solid_and_leaves_the_grid_in_place(open_page, style, color, route):
+    page = open_page(route, "phone", "all")
+    s = style(page, BAR2, "background-color", "backdrop-filter")
+    g = page.evaluate(GEOMETRY, [BAR2, FIRST_HEADER_ITEM])
+    assert color(s["background-color"])[3] >= 0.9 and s["backdrop-filter"] == "none", s
+    assert g["left"] == pytest.approx(g["first"], abs=1) and g["bottom"] <= g["grid"] + 0.5, g
+    assert checks.glass_elements(page) == []
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_header_and_toolbar_read_over_white_posters(open_page, tmp_path, profile):
+    page = open_page("movies", profile, "none", variant="white-posters")
+    page.add_style_tag(content=WHITE_POSTERS)
+    page.evaluate("scrollTo(0, 1600)")
+    page.wait_for_timeout(500)
+    assert checks.contrast_failures(page, "movies", tmp_path / "white.png") == []

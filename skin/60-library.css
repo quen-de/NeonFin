@@ -1,3 +1,46 @@
+/* Library pages: the header's second row (view, count, Play All, filters, paging) is one glass
+   capsule under the header capsules, as tall as they are and on their edges. The row keeps its
+   48px, so the grid below does not move. */
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+  height: 42px;
+  min-height: 42px;
+  margin: 3px 3.3%;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: var(--nf-chrome-tint);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--nf-chrome-edge);
+}
+
+/* Phones: a solid panel at the height Jellyfin lays the row out (it wraps to two rows). */
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+  height: auto;
+  min-height: 0;
+  margin: 0 3.3%;
+  padding: 0 8px;
+  border-radius: 22px;
+  background-color: var(--nf-chrome-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Posters scroll under both header rows: a band of ink behind them keeps their text readable
+   over the brightest poster, as the hero band does on home. */
+.layout-desktop .MuiAppBar-root:has(> .MuiToolbar-root + .MuiToolbar-root)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -48px;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--nf-ink) 72%, transparent) 0,
+    color-mix(in srgb, var(--nf-ink) 60%, transparent) 96px,
+    transparent
+  );
+  pointer-events: none;
+}
+
 /* Library toolbar: Play All is the title page's Play, a neon tube; shuffle a round tinted
    button beside it. MUI's grouped buttons are squared off at (0,3,0); these win at (0,4,0). */
 .MuiToolbar-root .MuiButtonGroup-contained {
@@ -40,10 +83,10 @@
   background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
 }
 
-/* The item count reads as a quiet label, not a control. */
+/* The item count reads as a quiet label, not a control: a rim on the capsule's own glass. */
 .MuiToolbar-root .MuiChip-filled {
   color: var(--nf-text-2);
-  background-color: color-mix(in srgb, var(--nf-light) 6%, transparent);
+  background-color: transparent;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 12%, transparent);
 }
 
