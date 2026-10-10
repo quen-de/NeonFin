@@ -43,7 +43,7 @@
 
 /* Library toolbar: Play All is the title page's Play, a neon tube; shuffle a round tinted
    button beside it. They are told apart by their icons, since a library can hide Play All.
-   MUI's grouped buttons are squared off at (0,3,0); these win at (0,4,1). */
+   MUI squares off grouped buttons at (0,2,0); the corners here win at (0,3,0). */
 .MuiToolbar-root .MuiButtonGroup-contained {
   gap: 8px;
   box-shadow: none;
@@ -138,7 +138,8 @@
   background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
 }
 
-/* A to Z rail: grey letters on a solid strip, the active one in crimson. */
+/* A to Z rail: grey letters on a solid strip, the active one in crimson. MUI's grouped corners
+   are (0,2,0) too, and lose to these: Custom CSS always comes after MUI's styles. */
 .alphaPicker-fixed-right .MuiPaper-root {
   padding: 6px 0;
   border-radius: 999px;

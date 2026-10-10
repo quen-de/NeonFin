@@ -23,8 +23,9 @@ def test_no_jellyfin_blue_on_search(open_page, profile):
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
-def test_play_all_is_the_neon_tube_and_shuffle_a_round_tinted_button(open_page, color, profile):
-    buttons = open_page("movies", profile, "none").evaluate(GROUP)
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_play_all_is_the_neon_tube_and_shuffle_a_round_tinted_button(open_page, color, profile, route):
+    buttons = open_page(route, profile, "none").evaluate(GROUP)
     assert len(buttons) >= 2, buttons
     play, rest = buttons[0], buttons[1:]
     assert play["shadow"].count("inset") == 2 and color(play["bg"])[:3] == (255, 36, 72), play
@@ -144,8 +145,9 @@ def test_header_and_toolbar_read_over_white_posters(open_page, tmp_path, profile
 RAIL = ".alphaPicker-fixed-right"
 
 
-def test_shuffle_stays_round_when_the_library_hides_play_all(open_page, color):
-    page = open_page("movies", "desktop", "none", variant="no-play-all")
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_shuffle_stays_round_when_the_library_hides_play_all(open_page, color, route):
+    page = open_page(route, "desktop", "none", variant="no-play-all")
     page.evaluate("() => document.querySelector('.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:first-child').remove()")
     page.wait_for_timeout(200)
     buttons = page.evaluate(GROUP)
@@ -162,6 +164,27 @@ def test_the_a_to_z_rail_is_grey_on_a_solid_strip(open_page, style, color, route
     letter = style(page, f"{RAIL} .MuiToggleButton-root", "color")
     assert color(strip["background-color"])[3] >= 0.9 and float(strip["border-top-left-radius"].removesuffix("px")) >= 10, strip
     assert color(letter["color"]) == pytest.approx((246, 243, 240, 0.62), abs=0.01)
+
+
+# MUI squares off grouped buttons from emotion styles it may inject after the skin at any time.
+MUI_CORNERS_AFTER_THE_SKIN = """(rail) => {
+  const group = document.querySelector(rail + ' .MuiToggleButtonGroup-root');
+  const css = [...group.classList].find((c) => c.startsWith('css-'));
+  const tag = document.createElement('style');
+  tag.textContent = ['firstButton', 'middleButton', 'lastButton']
+    .map((p) => '.' + css + ' .MuiToggleButtonGroup-' + p + ' { border-radius: 0; }').join('');
+  document.head.append(tag);
+}"""
+
+
+@pytest.mark.parametrize("route", ["movies", "series"])
+def test_a_to_z_letters_stay_round_whatever_order_mui_styles_load_in(open_page, route):
+    page = open_page(route, "phone", "none", variant="mui-corners-last")
+    page.evaluate(MUI_CORNERS_AFTER_THE_SKIN, RAIL)
+    radii = page.evaluate(f"""() => [...document.querySelectorAll('{RAIL} .MuiToggleButton-root')].flatMap((b) => {{
+      const cs = getComputedStyle(b);
+      return [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius]; }})""")
+    assert radii and set(radii) == {"999px"}, sorted(set(radii))
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
