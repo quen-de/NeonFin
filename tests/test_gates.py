@@ -286,6 +286,15 @@ def test_the_exception_ceilings_sit_just_above_what_was_measured():
     assert gates.limits("all", "desktop", "home") == {"recalc_style_ms": 1.9, "task_ms": 1.24}
 
 
+def test_title_pages_run_under_their_accepted_exception():
+    for plugins in ("all", "none"):
+        for profile in ("desktop", "phone"):
+            assert gates.limits(plugins, profile, "movie") == {"recalc_style_ms": 1.4, "task_ms": 1.25}
+    pairs = [pair(9.5, 12.9, 171, 208)] * 7
+    assert gates.evaluate_bench(bench({"all/desktop/movie": {"pairs": pairs}})) == []
+    assert len(gates.evaluate_bench(bench({"all/desktop/series": {"pairs": pairs}}))) == 2
+
+
 def test_a_bench_whose_skin_never_reached_the_page_fails(tmp_path, capsys):
     code, out = judge(tmp_path, [bench(full_cells("all", CLEAR), intercept_hits=0)], [capture("all")], capsys)
     assert code == 1 and "the skin CSS never reached the page" in out

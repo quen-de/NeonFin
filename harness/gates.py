@@ -44,10 +44,17 @@ MIN_TRIALS = 7
 # the page 55px without hiding anything costs the same (1.59x); hiding the title without
 # moving anything costs nothing (1.07x). Frames unchanged: 0 dropped, p95 16.7 ms. The
 # ceilings sit about 7% above the worst medians measured (1.51x, 1.28x).
+# 2026-10-10, owner-approved: title pages restyle about 1.35x vanilla and run about 1.2x its
+# main-thread work while scrolling (pooled medians over four benches: 1.36x and 1.21x with
+# plugins on desktop, 1.34x and 1.17x on phones), with frames unchanged (p95 16.7 ms) and
+# page-ready unaffected. The milestone 1 skin alone measured about 1.1x here; benching the
+# milestone 2 commits one by one found no single cause (the blurred backdrop copy costs
+# nothing measurable, the palette about 1 ms a scroll). One ceiling for every title page cell.
+TITLE_PAGE = {"recalc_style_ms": 1.4, "task_ms": 1.25}
 EXCEPTIONS = {
     ("all", "desktop", "home"): {"recalc_style_ms": 1.9, "task_ms": 1.24},
     ("none", "desktop", "home"): {"recalc_style_ms": 1.62, "task_ms": 1.37},
-}
+} | {(plugins, profile, "movie"): TITLE_PAGE for plugins in ("all", "none") for profile in ("desktop", "phone")}
 # Early decisions in paired benches, after MIN_DECIDED pairs: a cell fails once every pair is
 # over a limit and the median pair over it by MARGIN; it passes once, on every metric, every
 # pair is within the limit and the median pair within it by MARGIN. Were the true ratio on
