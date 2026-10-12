@@ -46,3 +46,9 @@ def test_contrast_reads_the_player_text(osd):
     found = osd("desktop").evaluate(VISIBLE, list(checks.TEXT_TARGETS.get("osd", ())))
     for sel in (".videoOsdBottom .osdPositionText", ".videoOsdBottom .osdDurationText", ".osdHeader .videoOsd-appBar .MuiTypography-root"):
         assert sel in found, sel
+
+
+def test_contrast_reads_the_sign_in_page(open_page):
+    found = open_page("login", "desktop", "none").evaluate(VISIBLE, list(checks.TEXT_TARGETS.get("login", ())))
+    for sel in ("#loginPage h1", "#loginPage .inputLabel", "#loginPage .checkboxLabel", "#loginPage .raised"):
+        assert sel in found, sel

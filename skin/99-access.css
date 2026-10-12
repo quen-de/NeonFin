@@ -7,7 +7,9 @@
   .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
   .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child),
   .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root:first-child,
-  .layout-mobile .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root,
+  #loginPage > .margin-auto-y,
+  .layout-mobile #loginPage > .margin-auto-y {
     background-color: var(--nf-ink-2);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;

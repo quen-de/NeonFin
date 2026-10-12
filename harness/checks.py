@@ -33,6 +33,14 @@ LIBRARY_TEXT = (
     f"{LIBRARY_BAR} .MuiChip-label",
     ".alphaPicker-fixed-right .MuiToggleButton-root",
 )
+# Sign-in: the panel's text over the splash screen or the city light.
+SIGN_IN_TEXT = (
+    "#loginPage h1",
+    "#loginPage .inputLabel",
+    "#loginPage .checkboxLabel",
+    "#loginPage .raised",
+    "#loginPage .loginDisclaimer",
+)
 TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "*": (".MuiAppBar-root > .MuiToolbar-root:first-child .MuiButton-root",),
     "home": tuple(f"#slides-container .slide.active {s}" for s in (".plot", ".spec-line", ".misc-info", ".genre")),
@@ -45,6 +53,8 @@ TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "noresults": ("#searchPage .noItemsMessage",),
     "usermenu": ("#app-user-menu .MuiMenuItem-root",),
     "actionsheet": (".actionSheet .actionSheetItemText", ".actionSheet .actionSheetItemAsideText"),
+    "login": SIGN_IN_TEXT,
+    "picker": SIGN_IN_TEXT + ("#divUsers .cardText",),
     # The player: time, remaining and title over the video.
     "osd": (
         ".videoOsdBottom .osdPositionText",

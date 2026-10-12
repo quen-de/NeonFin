@@ -17,6 +17,8 @@ GLASS_ALLOWLIST = frozenset(
         # Menus, desktop pages only: phones and the player turn it off.
         ".actionSheet",
         ".MuiPopover-paper",
+        # The sign-in panel, desktop only: phones turn it off (spec 5.2).
+        "#loginPage > .margin-auto-y",
     }
 )
 PLUGIN_DIR = "skin/plugins/"

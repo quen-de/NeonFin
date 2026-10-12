@@ -1,0 +1,39 @@
+/* Sign-in: one glass panel holds the form, the other ways in and the disclaimer; on phones it
+   is solid, like all chrome there. Jellyfin pads the page's bottom by 5em, inside the panel
+   here. */
+#loginPage > .margin-auto-y {
+  box-sizing: border-box;
+  width: min(440px, 100% - 32px);
+  margin-right: auto;
+  margin-left: auto;
+  padding: 28px 28px 24px !important;
+  border-radius: var(--nf-radius-menu);
+  background-color: color-mix(in srgb, var(--nf-chrome) 55%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  box-shadow: var(--nf-chrome-edge);
+}
+
+.layout-mobile #loginPage > .margin-auto-y {
+  padding: 22px 18px 18px !important;
+  background-color: color-mix(in srgb, var(--nf-chrome-deep) 96%, transparent);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* A focused field's label in the crimson for text: the accent itself reads under 4.5:1 on the
+   glass over a bright splash. */
+#loginPage .inputLabelFocused {
+  color: var(--nf-neon-text);
+}
+
+/* A server's splash screen stays behind the panel, sharp and dimmed, without the blurred
+   lower half title backdrops get. With none, the page sits on the city light. */
+.backdropImage[style*="Branding/Splashscreen"] {
+  filter: brightness(0.4);
+  transform: none;
+}
+
+.layout-desktop .backdropImage[style*="Branding/Splashscreen"]::after {
+  display: none;
+}
