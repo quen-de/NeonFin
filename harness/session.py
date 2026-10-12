@@ -77,9 +77,10 @@ def _track_requests(page) -> None:
     _pending[page] = pending
 
 
-def new_page(browser, profile, state, override: Override | None, plugins_off: frozenset[str] = frozenset()):
+def new_page(browser, profile, state, override: Override | None, plugins_off: frozenset[str] = frozenset(), freeze_clock: bool = True):
     ctx = browser.new_context(storage_state=state, service_workers="block", timezone_id=TIMEZONE, locale=LOCALE, **profile.context)
-    ctx.add_init_script(FREEZE_DATE_JS)
+    if freeze_clock:
+        ctx.add_init_script(FREEZE_DATE_JS)
     ctx.route(PLAYBACK_REPORTS, _swallow_report)
     if plugins_off:
         ctx.route(lambda url: plugins.blocks(url, plugins_off), lambda route: route.abort())

@@ -337,3 +337,11 @@ def test_the_lazy_reveal_stops_on_a_page_that_grows_as_it_scrolls(browser):
     took, top = time.monotonic() - t0, page.evaluate("scrollY")
     ctx.close()
     assert took < 5 and top == 0
+
+
+def test_new_page_can_leave_the_clock_running(browser):
+    # Player trials time real playback: buffering and the controls read Date.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None, freeze_clock=False)
+    page.goto("about:blank")
+    assert abs(page.evaluate("Date.now()") - time.time() * 1000) < 60_000
+    ctx.close()
