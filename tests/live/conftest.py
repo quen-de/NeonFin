@@ -12,7 +12,7 @@ import pytest
 from playwright.sync_api import sync_playwright
 
 import build
-from harness import config, plugins, session
+from harness import config, player, plugins, session
 from harness.profiles import PROFILES, ROUTES
 
 ROUTE = {r.name: r for r in ROUTES}
@@ -85,6 +85,25 @@ def open_page(cfg, browser, skin_css):
     yield get
     for ctx, _ in opened.values():
         ctx.close()
+
+
+@pytest.fixture(scope="session")
+def osd(open_page):
+    """The player page with its controls showing. Jellyfin hides them a few seconds after the
+    last input, paused or not, and pages are shared between tests. A tap toggles them on a
+    phone, so it only taps when they are hidden; a mouse move just keeps them up."""
+    hidden = "() => document.querySelector('.videoOsdBottom').classList.contains('videoOsdBottom-hidden')"
+
+    def get(profile="desktop", variant="", media=()):
+        page = open_page("osd", profile, "none", variant=variant, media=media)
+        prof = PROFILES[profile]
+        if not prof.context.get("has_touch") or page.evaluate(hidden):
+            player.wake(page, prof)
+        page.wait_for_selector(".videoOsdBottom:not(.videoOsdBottom-hidden)")
+        page.wait_for_timeout(100)
+        return page
+
+    return get
 
 
 @pytest.fixture(scope="session")

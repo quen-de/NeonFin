@@ -104,10 +104,10 @@ THUMB = """() => { const s = document.querySelector('.osdPositionSlider');
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
-def test_player_bars_are_crimson_with_a_white_handle(open_page, style, color, tmp_path, profile):
+def test_player_bars_are_crimson_with_a_white_handle(osd, style, color, tmp_path, profile):
     from PIL import Image
 
-    page = open_page("osd", profile, "none")
+    page = osd(profile)
     assert checks.blue_hits(page) == {}
     lower = style(page, ".videoOsdBottom .mdl-slider-background-lower", "background-color")
     assert color(lower["background-color"])[:3] == (255, 36, 72)

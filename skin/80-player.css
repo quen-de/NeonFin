@@ -18,3 +18,47 @@
   background: var(--nf-light);
   box-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 50%, transparent);
 }
+
+/* Controls over video: no glass (spec 5.3). The top and bottom bars sit on ink that holds
+   dark behind the text, then fades out; Jellyfin fades the bars themselves by opacity. */
+.skinHeader.skinHeader-withBackground.osdHeader {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--nf-ink) 80%, transparent),
+    color-mix(in srgb, var(--nf-ink) 55%, transparent) 55%,
+    transparent
+  );
+}
+
+.videoOsdBottom.videoOsdBottom-maincontrols {
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--nf-ink) 86%, transparent),
+    color-mix(in srgb, var(--nf-ink) 72%, transparent) 50%,
+    transparent
+  );
+}
+
+/* White icons with a soft shadow, so they hold over a bright frame. */
+.videoOsdBottom .material-icons,
+.osdHeader .material-icons {
+  text-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 60%, transparent);
+}
+
+.osdHeader svg {
+  filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--nf-shade) 60%, transparent));
+}
+
+/* The time over the progress bar, with the frame there when the server makes them: a dark
+   panel with a thumbnail's corners. */
+.sliderBubble {
+  overflow: hidden;
+  color: var(--nf-text);
+  background: var(--nf-chrome-deep);
+  border-radius: var(--nf-radius-thumb);
+  box-shadow: inset 0 1px 0 var(--nf-rim);
+}
+
+.upNextDialog-countdownText {
+  color: var(--nf-neon-text);
+}

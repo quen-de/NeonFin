@@ -45,6 +45,13 @@ TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "noresults": ("#searchPage .noItemsMessage",),
     "usermenu": ("#app-user-menu .MuiMenuItem-root",),
     "actionsheet": (".actionSheet .actionSheetItemText", ".actionSheet .actionSheetItemAsideText"),
+    # The player: time, remaining and title over the video.
+    "osd": (
+        ".videoOsdBottom .osdPositionText",
+        ".videoOsdBottom .osdDurationText",
+        ".videoOsdBottom .endsAtText",
+        ".osdHeader .videoOsd-appBar .MuiTypography-root",
+    ),
 }
 
 

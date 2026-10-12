@@ -40,3 +40,9 @@ def test_the_dialog_route_opens_add_to_playlist(open_page):
 def test_the_picker_route_shows_two_made_up_users(open_page, profile):
     page = open_page("picker", profile, "none")
     assert page.locator("#divUsers .card .cardText").all_inner_texts() == ["Alex", "Sam"]
+
+
+def test_contrast_reads_the_player_text(osd):
+    found = osd("desktop").evaluate(VISIBLE, list(checks.TEXT_TARGETS.get("osd", ())))
+    for sel in (".videoOsdBottom .osdPositionText", ".videoOsdBottom .osdDurationText", ".osdHeader .videoOsd-appBar .MuiTypography-root"):
+        assert sel in found, sel
