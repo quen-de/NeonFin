@@ -1,6 +1,6 @@
 import pytest
 
-from harness import checks
+from harness import checks, states
 
 pytestmark = pytest.mark.live
 
@@ -34,3 +34,37 @@ def test_full_screen_dialogs_are_square(open_page, style, color, profile, viewpo
     assert color(d["background-color"])[:3] == INK2 and rim["display"] == "none", (d, rim)
     if profile == "phone":
         assert checks.glass_elements(page) == []
+
+
+def dark_pill(s, color):
+    r, g, b, a = color(s["background-color"])
+    height = s["rect"][3]
+    return a >= 0.95 and max(r, g, b) < 40 and float(s["border-top-left-radius"].removesuffix("px")) >= height / 2 - 0.5
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_tooltips_are_small_dark_pills(open_page, style, color, profile):
+    s = style(open_page("tooltip", profile, "none"), ".MuiTooltip-tooltip", "background-color", "border-top-left-radius")
+    assert dark_pill(s, color), s
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_toasts_are_small_dark_pills(open_page, style, color, profile):
+    page = open_page("login", profile, "none", variant="toast")
+    answered = []
+
+    def refuse(route):
+        answered.append(route.request.method)
+        route.fulfill(status=401, body="")
+
+    # A refused sign-in, answered here: nothing reaches the server.
+    page.route(states.api_path("/users/authenticatebyname"), refuse)
+    page.fill("#txtManualName", "nobody")
+    page.fill("#txtManualPassword", "wrong")
+    page.press("#txtManualPassword", "Enter")
+    page.wait_for_selector(".toast.toastVisible", timeout=10_000)
+    assert answered == ["POST"], answered
+    page.wait_for_timeout(400)  # the slide-in
+    s = style(page, ".toast", "background-color", "border-top-left-radius")
+    assert dark_pill(s, color), s
+    assert checks.blue_hits(page) == {}
