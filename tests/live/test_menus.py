@@ -158,3 +158,17 @@ def test_phone_action_sheets_rise_from_the_bottom_edge(open_page, over):
     assert s["radii"] == ["14px", "14px", "0px", "0px"], s
     origin_y = float(s["origin"].split()[1].removesuffix("px"))
     assert abs(origin_y - (bottom - top)) < 1, s  # it grows up from the edge
+
+
+def test_a_long_phone_action_sheet_stops_at_84_percent_and_scrolls(open_page):
+    page = open_page("actionsheet", "phone", "none", variant="long")
+    page.evaluate("""() => { const item = document.querySelector('.actionSheet .actionSheetMenuItem');
+      for (let i = 0; i < 25; i++) item.parentElement.append(item.cloneNode(true)); }""")
+    page.wait_for_timeout(300)
+    s = page.evaluate(SHEET)
+    _, top, _, bottom = s["rect"]
+    assert abs(top - 0.16 * s["vh"]) < 2 and abs(bottom - s["vh"]) < 1, s
+    scroll = page.evaluate(
+        "() => { const e = document.querySelector('.actionSheet .actionSheetScroller'); return [e.scrollHeight, e.clientHeight]; }"
+    )
+    assert scroll[0] > scroll[1], scroll
