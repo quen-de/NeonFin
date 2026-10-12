@@ -24,3 +24,10 @@ def test_blocks_matches_plugin_paths_even_under_a_base_path():
     assert plugins.blocks("https://jf.example/jellyfin/MediaBar/WebConfig?x=1", off)
     assert not plugins.blocks("https://jf.example/HomeScreen/Sections", off)
     assert not plugins.blocks("https://jf.example/web/?q=/MediaBar/", off)
+
+
+def test_media_bar_and_media_bar_enhanced_switch_off_apart():
+    enhanced = "https://jf.example/MediaBarEnhanced/Resources/mediaBarEnhanced.js"
+    assert plugins.blocks(enhanced, frozenset({"media-bar-enhanced"}))
+    assert not plugins.blocks(enhanced, frozenset({"media-bar"}))
+    assert not plugins.blocks("https://jf.example/MediaBar/slideshowpure.js", frozenset({"media-bar-enhanced"}))
