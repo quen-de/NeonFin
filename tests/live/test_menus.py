@@ -119,3 +119,42 @@ def test_player_bars_are_crimson_with_a_white_handle(open_page, style, color, tm
     px = list(getattr(im, "get_flattened_data", im.getdata)())  # getdata is deprecated from Pillow 12
     assert max(min(p) for p in px) >= 235, px  # the handle's middle is white
     assert not any(b > r + 60 and b > 150 for r, _, b in px), px  # and nothing there is Jellyfin blue
+
+
+ITEMS = {
+    "actionsheet": ".actionSheet .actionSheetMenuItem",
+    "usermenu": "#app-user-menu .MuiMenuItem-root",
+    "select": "#menu-language .MuiMenuItem-root",
+}
+HEIGHTS = "(s) => [...document.querySelectorAll(s)].filter((e) => e.offsetParent).map((e) => e.getBoundingClientRect().height)"
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+@pytest.mark.parametrize("route", list(ITEMS))
+def test_menu_items_are_40px_on_desktop_and_finger_sized_on_phones(open_page, route, profile):
+    heights = open_page(route, profile, "none").evaluate(HEIGHTS, ITEMS[route])
+    fits = (lambda h: abs(h - 40) < 0.5) if profile == "desktop" else (lambda h: h >= 44)
+    assert heights and all(map(fits, heights)), heights
+
+
+SHEET = """() => { const s = document.querySelector('.actionSheet'); const r = s.getBoundingClientRect();
+  const cs = getComputedStyle(s);
+  return {rect: [r.left, r.top, r.right, r.bottom], vw: innerWidth, vh: innerHeight, origin: cs.transformOrigin,
+    radii: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius]}; }"""
+
+
+@pytest.mark.parametrize("over", ["page", "video"])
+def test_phone_action_sheets_rise_from_the_bottom_edge(open_page, over):
+    if over == "page":
+        page = open_page("actionsheet", "phone", "none")
+    else:
+        # Its own page: a sheet along the bottom covers the button that opens it.
+        page = _osd_menu(open_page, "phone", ".btnVideoOsdSettings", "rise")
+    page.wait_for_timeout(300)  # the 140 ms scale-in
+    s = page.evaluate(SHEET)
+    left, top, right, bottom = s["rect"]
+    assert left == 0 and right == s["vw"] and abs(bottom - s["vh"]) < 1, s
+    assert top >= 0.16 * s["vh"] - 1, s  # never taller than 84% of the screen
+    assert s["radii"] == ["14px", "14px", "0px", "0px"], s
+    origin_y = float(s["origin"].split()[1].removesuffix("px"))
+    assert abs(origin_y - (bottom - top)) < 1, s  # it grows up from the edge

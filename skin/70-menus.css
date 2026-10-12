@@ -57,3 +57,24 @@
   background-color: var(--nf-selected);
   box-shadow: var(--nf-selected-edge);
 }
+
+/* Desktop menus use 40px rows; phones keep Jellyfin's taller, finger-sized ones. */
+html:not(.layout-mobile) .MuiPopover-paper .MuiMenuItem-root {
+  min-height: 40px;
+}
+
+/* Phones: an action sheet rises from the bottom edge, full width, instead of opening by its
+   button. Jellyfin places it inline (left, top) and scales it in; here it grows up from the
+   edge. */
+.layout-mobile .actionSheet.actionsheet-not-fullscreen {
+  top: auto !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  max-height: 84%;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-radius: var(--nf-radius-menu) var(--nf-radius-menu) 0 0 !important;
+  transform-origin: 50% 100%;
+}
