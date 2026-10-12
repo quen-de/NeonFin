@@ -1,0 +1,54 @@
+/* Dialogs: solid raised ink with a rim, over the page dimmed in ink. Glass would show nothing
+   through the dim (spec 5.2). The rim is drawn over the dialog's own header and footer. */
+.dialog.formDialog {
+  background-color: var(--nf-ink-2);
+  border-radius: var(--nf-radius-menu);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--nf-shade) 60%, transparent);
+}
+
+.dialog.formDialog::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 var(--nf-rim),
+    inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 7%, transparent);
+}
+
+.formDialog .formDialogHeader:not(.formDialogHeader-clear) {
+  background-color: transparent;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+
+.formDialog .formDialogFooter:not(.formDialogFooter-clear) {
+  background-color: var(--nf-ink-2);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+
+/* Full screen (phones, and windows Jellyfin finds too small): square, no rim. */
+.dialog.formDialog.dialog-fullscreen {
+  border-radius: 0;
+}
+
+.dialog.formDialog.dialog-fullscreen::after {
+  display: none;
+}
+
+@media (max-width: 80em), (max-height: 45em) {
+  .dialog.formDialog.dialog-fixedSize,
+  .dialog.formDialog.dialog-fullscreen-lowres {
+    border-radius: 0;
+  }
+
+  .dialog.formDialog.dialog-fixedSize::after,
+  .dialog.formDialog.dialog-fullscreen-lowres::after {
+    display: none;
+  }
+}
+
+.dialogBackdrop {
+  background-color: var(--nf-ink);
+}
