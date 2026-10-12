@@ -1,6 +1,7 @@
 """Check API login as the harness account and write harness/config.local.json.
 
-Picks the first item by sort name in each slot, so reruns pick the same items.
+Picks the first item by sort name in each slot, so reruns pick the same items; the player titles
+are the first films that fit (pick_player_titles).
 """
 
 from __future__ import annotations
@@ -19,6 +20,35 @@ CLIENT = 'MediaBrowser Client="neonfin-harness", Device="harness", DeviceId="neo
 def merge_local(old: dict, found: dict) -> dict:
     """New item ids over the old file; every other key the developer set is kept."""
     return {**found, **{k: v for k, v in old.items() if k != "items"}}
+
+
+def _streams(film: dict) -> tuple[dict, dict, dict]:
+    source = (film.get("MediaSources") or [{}])[0]
+    streams = source.get("MediaStreams", [])
+    video = next((s for s in streams if s.get("Type") == "Video"), {})
+    audio = next((s for s in streams if s.get("Type") == "Audio"), {})
+    return source, video, audio
+
+
+def pick_player_titles(films: list[dict]) -> dict[str, str]:
+    """The player measurement's two films, first in the order given (sort name), 720 lines or
+    more: play_direct, an H.264 MP4 with AAC sound that any browser plays as is; play_hdr, an
+    HEVC HDR film, with AAC sound if one has it, so that only the picture can need converting."""
+    direct = hdr = hdr_aac = None
+    for film in films:
+        source, video, audio = _streams(film)
+        if (video.get("Height") or 0) < 720:
+            continue
+        containers = set((source.get("Container") or "").split(","))
+        plain = video.get("Codec") == "h264" and video.get("VideoRange") == "SDR"
+        if direct is None and plain and containers & {"mp4", "m4v", "mov"} and audio.get("Codec") == "aac":
+            direct = film["Id"]
+        if video.get("Codec") == "hevc" and video.get("VideoRange") == "HDR":
+            hdr = hdr or film["Id"]
+            if audio.get("Codec") == "aac":
+                hdr_aac = hdr_aac or film["Id"]
+    picked = {"play_direct": direct, "play_hdr": hdr_aac or hdr}
+    return {k: v for k, v in picked.items() if v}
 
 
 def main() -> int:
@@ -61,6 +91,17 @@ def main() -> int:
         "search_term": "the",
         "volatile": ["#slides-container", "#randomItemButton .je-dice-face"],
     }
+    q = urllib.parse.urlencode(
+        {
+            "ParentId": lib["movies"],
+            "IncludeItemTypes": "Movie",
+            "Recursive": "true",
+            "SortBy": "SortName",
+            "Fields": "MediaSources",
+            "userId": uid,
+        }
+    )
+    data["items"] |= pick_player_titles(call(f"/Items?{q}", token=tok)["Items"])
     data = merge_local(json.loads(LOCAL.read_text()) if LOCAL.exists() else {}, data)
     LOCAL.write_text(json.dumps(data, indent=2) + "\n")
     print(f"login ok; wrote {LOCAL.name} with {len(data['items'])} items")
