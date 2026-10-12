@@ -41,46 +41,65 @@ METRICS = (
     "metadata_ms",
     "controls_shown_ms",
     "controls_visible_ms",
+    "controls_frame_ms",
     "frame_p95",
     "dropped",
     "video_dropped",
     "task_ms",
     "recalc_style_ms",
 )
-SHOWN = ("first_frame_ms", "start_ms", "metadata_ms", "controls_visible_ms", "frame_p95", "dropped", "video_dropped", "task_ms")
+SHOWN = (
+    "first_frame_ms",
+    "start_ms",
+    "metadata_ms",
+    "controls_visible_ms",
+    "controls_frame_ms",
+    "frame_p95",
+    "dropped",
+    "video_dropped",
+    "task_ms",
+)
 
-# Marks in the page's own clock (event timeStamps share performance.now()'s origin).
+# Marks in the page's own clock (event timeStamps share performance.now()'s origin), taken only
+# after the click on Play and from the video it started: a theme video or a trailer on the title
+# page may load before.
 PLAYER_JS = r"""(() => {
-  const L = window.__nfp = { click: null, info: null, loadstart: null, metadata: null, frame: null, inputs: [], osd: null };
+  const L = window.__nfp = { click: null, info: null, loadstart: null, metadata: null, frame: null, video: null, inputs: [], osd: null };
   document.addEventListener('click', (e) => {
     if (L.click === null && e.target.closest('.mainDetailButtons')) L.click = e.timeStamp;
   }, true);
-  for (const [type, key] of [['loadstart', 'loadstart'], ['loadedmetadata', 'metadata']]) {
-    document.addEventListener(type, (e) => {
-      if (e.target.tagName !== 'VIDEO' || L[key] !== null) return;
-      L[key] = e.timeStamp;
-      if (type === 'loadstart') e.target.requestVideoFrameCallback((now) => { L.frame = now; });
-    }, true);
-  }
+  document.addEventListener('loadstart', (e) => {
+    if (e.target.tagName !== 'VIDEO' || L.click === null || L.video !== null) return;
+    L.video = e.target;
+    L.loadstart = e.timeStamp;
+    e.target.requestVideoFrameCallback((now) => { L.frame = now; });
+  }, true);
+  document.addEventListener('loadedmetadata', (e) => {
+    if (e.target === L.video && L.metadata === null) L.metadata = e.timeStamp;
+  }, true);
   new PerformanceObserver((list) => {
-    for (const e of list.getEntries()) if (L.info === null && e.name.includes('/PlaybackInfo')) L.info = e.responseEnd;
+    for (const e of list.getEntries()) {
+      if (L.info === null && L.click !== null && e.startTime >= L.click && e.name.includes('/PlaybackInfo')) L.info = e.responseEnd;
+    }
   }).observe({ type: 'resource', buffered: true });
   for (const type of ['pointermove', 'pointerdown']) document.addEventListener(type, (e) => L.inputs.push(e.timeStamp), true);
 })()"""
 
-# Armed while the controls are hidden: notes when they show again and when they are fully opaque.
+# Armed while the controls are hidden: notes when the player shows them again (the class change),
+# the start of the first frame that draws them fully opaque, and the start of the frame after it,
+# by which time that frame's style, layout and paint, where CSS costs, are done.
 OSD_ARM = r"""() => {
   const L = window.__nfp, bar = document.querySelector('.videoOsdBottom');
   L.inputs = [];
-  L.osd = { input: null, shown: null, visible: null };
+  L.osd = { input: null, shown: null, visible: null, frame: null };
   const obs = new MutationObserver(() => {
     if (bar.classList.contains('videoOsdBottom-hidden') || bar.classList.contains('hide')) return;
     obs.disconnect();
     L.osd.shown = performance.now();
     L.osd.input = L.inputs.filter((t) => t <= L.osd.shown).pop() ?? null;
-    const poll = () => {
-      if (parseFloat(getComputedStyle(bar).opacity) >= 0.99) L.osd.visible = performance.now();
-      else requestAnimationFrame(poll);
+    const poll = (t) => {
+      if (parseFloat(getComputedStyle(bar).opacity) < 0.99) return requestAnimationFrame(poll);
+      requestAnimationFrame((next) => { L.osd.frame = next - t; L.osd.visible = next; });
     };
     requestAnimationFrame(poll);
   });
@@ -97,22 +116,41 @@ NO_HEVC_JS = r"""(() => {
 })()"""
 
 QUALITY = """() => {
-  const q = document.querySelector('video').getVideoPlaybackQuality();
+  const q = window.__nfp.video.getVideoPlaybackQuality();
   return [q.droppedVideoFrames, q.totalVideoFrames];
 }"""
 OSD_UP = "() => !document.querySelector('.videoOsdBottom').classList.contains('videoOsdBottom-hidden')"
-STOP_JS = "(id) => window.ApiClient.stopActiveEncodings(id).then(() => true, () => false)"
+STOP_TIMEOUT_MS = 10_000
+STOP_JS = """([id, ms]) => Promise.race([
+  window.ApiClient.stopActiveEncodings(id).then(() => true, () => false),
+  new Promise((resolve) => setTimeout(() => resolve(false), ms)),
+])"""
 
 
-def run_pairs(trial, pairs: int) -> list[dict]:
-    """Pairs of trial(side) results in the bench's alternating order; pair 0 warms caches and is
-    dropped."""
-    out = []
+class TrialError(RuntimeError):
+    """A trial that failed, with whether its conversion was ended; run_pairs adds where."""
+
+    def __init__(self, cause: str, conversion_stopped: bool | None):
+        super().__init__(cause)
+        self.conversion_stopped = conversion_stopped
+        self.pair: int | None = None
+        self.side: str | None = None
+
+
+def run_pairs(trial, pairs: int, kept: list[dict]) -> list[dict]:
+    """Pairs of trial(side) results in the bench's alternating order, appended to kept as each
+    completes, so a failure keeps the pairs before it; pair 0 warms caches and is dropped."""
     for i in range(pairs + 1):
-        pair = {side: trial(side) for side in bench.order(i)}
+        pair = {}
+        for side in bench.order(i):
+            try:
+                pair[side] = trial(side)
+            except TrialError as e:
+                e.pair, e.side = i, side
+                raise
         if i:
-            out.append(pair)
-    return out
+            kept.append(pair)
+    return kept
 
 
 def play_method(urls: list[str]) -> str:
@@ -129,7 +167,9 @@ def play_method(urls: list[str]) -> str:
 
 
 def play_session(urls: list[str]) -> str | None:
-    for u in urls:
+    """The play session to stop: the conversion's own (named by its master playlist) if there is
+    one, as after a fallback from direct play, else the first one named."""
+    for u in sorted(urls, key=lambda u: not urllib.parse.urlsplit(u).path.lower().endswith("/master.m3u8")):
         for key, values in urllib.parse.parse_qs(urllib.parse.urlsplit(u).query).items():
             if key.lower() == "playsessionid":
                 return values[0]
@@ -150,6 +190,7 @@ def timings(start: dict, osd: dict) -> dict:
         "first_frame_ms": gap(start["click"], start["frame"]),
         "controls_shown_ms": gap(osd["input"], osd["shown"]),
         "controls_visible_ms": gap(osd["input"], osd["visible"]),
+        "controls_frame_ms": None if osd.get("frame") is None else round(osd["frame"], 1),
     }
 
 
@@ -170,9 +211,13 @@ def describe(cell: str, pairs: list[dict]) -> str:
 
     trials = [p[side] for p in pairs for side in p]
     methods = sorted({t["method"] for t in trials})
-    hid = sum(not t["controls_held"] for t in trials)
+    flags = {
+        "controls hid early": sum(not t["controls_held"] for t in trials),
+        "conversion not stopped": sum(t["conversion_stopped"] is False for t in trials),
+        "no CSS request": sum(t["css_hits"] == 0 for t in trials),
+    }
     line = f"{cell:16} {len(pairs)} pairs  " + "  ".join(one(m) for m in SHOWN) + f"  [{', '.join(methods)}]"
-    return line + (f"  controls hid early in {hid} trial{'s' if hid != 1 else ''}" if hid else "")
+    return line + "".join(f"  {flag} in {n} trial{'s' if n != 1 else ''}" for flag, n in flags.items() if n)
 
 
 def wake(page, prof) -> None:
@@ -216,12 +261,16 @@ def measure(page, cdp, cfg, prof, item: str, urls: list[str]) -> dict:
 
 def stop_conversion(page, urls: list[str]) -> bool | None:
     """End this trial's conversion on the server now. The harness swallows playback reports, the
-    Stopped one included, which is what normally ends it. None when nothing was converted."""
-    sid = play_session(urls)
-    if sid is None or play_method(urls) == "direct":
+    Stopped one included, which is what normally ends it. Segment requests are cut off first: one
+    arriving after the stop would start the conversion again. None when nothing was converted."""
+    if play_method(urls) in ("direct", "unknown"):
         return None
+    sid = play_session(urls)
+    if sid is None:
+        return False
     try:
-        return page.evaluate(STOP_JS, sid)
+        page.route(lambda u: "/videos/" in u.lower() and "activeencodings" not in u.lower(), lambda route: route.abort())
+        return page.evaluate(STOP_JS, [sid, STOP_TIMEOUT_MS])
     except Exception:
         return False
 
@@ -236,15 +285,21 @@ def play_trial(browser, cfg, prof, item: str, convert: bool, state, override, pl
     # Kept in memory only: these URLs carry the session's token.
     urls: list[str] = []
     page.on("request", lambda r: urls.append(r.url) if "/videos/" in r.url.lower() else None)
+    hits = override.hits
     try:
         cdp = ctx.new_cdp_session(page)
         cdp.send("Performance.enable")
         cdp.send("Emulation.setCPUThrottlingRate", {"rate": prof.cpu_throttle})
         result = measure(page, cdp, cfg, prof, item, urls)
-    finally:
+    except Exception as e:
+        cause = (str(e).splitlines() or [type(e).__name__])[0]
+        raise TrialError(cause, stop_conversion(page, urls)) from e
+    else:
         stopped = stop_conversion(page, urls)
+    finally:
         ctx.close()
-    return result | {"conversion_stopped": stopped}
+    # Both sides fetch the custom CSS through the harness: none means the page never asked for it.
+    return result | {"conversion_stopped": stopped, "css_hits": override.hits - hits}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -297,10 +352,25 @@ def main(argv: list[str] | None = None) -> int:
             for title in titles:
                 key, convert = TITLES[title]
                 cell = f"{prof_name}/{title}"
-                pairs = run_pairs(lambda side: play_trial(browser, cfg, prof, cfg.items[key], convert, state, sides[side], off), args.pairs)
-                out["cells"][cell] = {"pairs": pairs}
+                kept: list[dict] = []
+                out["cells"][cell] = {"pairs": kept}
+                try:
+                    run_pairs(
+                        lambda side: play_trial(browser, cfg, prof, cfg.items[key], convert, state, sides[side], off), args.pairs, kept
+                    )
+                except TrialError as e:
+                    out["error"] = {
+                        "cell": cell,
+                        "pair": e.pair,
+                        "side": e.side,
+                        "cause": str(e),
+                        "conversion_stopped": e.conversion_stopped,
+                    }
+                    save(out)
+                    print(f"FAIL {cell}, pair {e.pair}, {e.side}: {e} (conversion stopped: {e.conversion_stopped})", flush=True)
+                    return 1
                 save(out)
-                print(describe(cell, pairs), flush=True)
+                print(describe(cell, kept), flush=True)
         browser.close()
     save(out)
     print(f"{outdir}: {len(out['cells'])} cells in {out['seconds']} s")
