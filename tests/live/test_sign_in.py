@@ -120,3 +120,13 @@ def test_users_are_round_avatars_ringed_on_focus(open_page, style, color):
     ring = style(page, "#divUsers .card .cardScalable", "opacity", "box-shadow", pseudo="::after")
     assert ring["opacity"] == "1" and "255, 36, 72" in ring["box-shadow"], ring
     assert style(page, "#divUsers .card", "outline-style")["outline-style"] == "none"
+
+
+@pytest.mark.parametrize("width", [1440, 1100])
+def test_users_keep_their_names_on_desktop(open_page, width):
+    # Jellyfin sizes the cards by the window; inside the panel they shrank to a letter.
+    cards = open_page("picker", "desktop", "none", viewport=(width, 900)).evaluate("""() =>
+      [...document.querySelectorAll('#divUsers .card')].map((c) => { const t = c.querySelector('.cardText');
+        return [t.innerText, t.scrollWidth <= t.clientWidth, c.querySelector('.cardScalable').getBoundingClientRect().width]; })""")
+    assert [c[0] for c in cards] == ["Alex", "Sam"], cards
+    assert all(fits and avatar >= 96 for _, fits, avatar in cards), cards

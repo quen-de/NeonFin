@@ -104,6 +104,12 @@
   border-radius: 50%;
 }
 
+/* Jellyfin sizes user cards by the window, so inside the panel they shrank to a letter's width.
+   Three to a row on desktop; phones keep Jellyfin's two. */
+html:not(.layout-mobile) #divUsers .card.squareCard {
+  width: calc(100% / 3);
+}
+
 #divUsers .card .defaultCardBackground {
   background-color: var(--nf-oxblood);
 }
