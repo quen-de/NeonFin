@@ -28,3 +28,15 @@ def test_contrast_reads_the_title_page_links_and_credits(open_page):
 def test_contrast_reads_the_library_toolbar_and_rail(open_page, route):
     found = open_page(route, "desktop", "none").evaluate(VISIBLE, list(checks.TEXT_TARGETS.get(route, ())))
     assert len(found) == 3, found
+
+
+def test_the_dialog_route_opens_add_to_playlist(open_page):
+    page = open_page("dialog", "desktop", "none")
+    assert page.locator(".formDialog .formDialogHeaderTitle").is_visible()
+    assert page.locator(".formDialog .button-submit").count() == 1
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_the_picker_route_shows_two_made_up_users(open_page, profile):
+    page = open_page("picker", profile, "none")
+    assert page.locator("#divUsers .card .cardText").all_inner_texts() == ["Alex", "Sam"]

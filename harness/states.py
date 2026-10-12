@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 
 def usermenu(page):
     page.locator("button[aria-label='User Menu']").click()
@@ -37,4 +39,29 @@ def osd(page):
     page.mouse.move(400, 400)  # wake the OSD
 
 
-STATES = {f.__name__: f for f in (usermenu, select, actionsheet, tooltip, osd)}
+def api_path(path):
+    """Match a server API path whatever its case: Jellyfin's client asks for users/public and
+    users/authenticatebyname in lower case. `path` is lower case."""
+    return lambda url: path in url.lower()
+
+
+def dialog(page):
+    actionsheet(page)
+    page.locator(".actionSheet [data-id='addtoplaylist']").click()
+
+
+# Made-up users for the sign-in picker, which a server can hide. The harness answers the
+# request itself; the picker only appears if the answer was used.
+PICKER_USERS = [
+    {"Name": "Alex", "Id": "0" * 31 + "1", "HasPassword": True, "HasConfiguredPassword": True},
+    {"Name": "Sam", "Id": "0" * 31 + "2", "HasPassword": False, "HasConfiguredPassword": False},
+]
+
+
+def picker(page):
+    body = json.dumps(PICKER_USERS)
+    page.route(api_path("/users/public"), lambda route: route.fulfill(status=200, content_type="application/json", body=body))
+    page.reload()
+
+
+STATES = {f.__name__: f for f in (usermenu, select, actionsheet, tooltip, osd, dialog, picker)}

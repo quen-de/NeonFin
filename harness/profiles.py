@@ -67,6 +67,10 @@ ROUTES = (
     # The detail page's "more" button opens the same .actionSheet on both
     # profiles; phone cards have no menu button and ignore long-press here.
     Route("actionsheet", "#/details?id={movie}", ".actionSheet", ready=DETAIL, state="actionsheet"),
+    # More, then Add to playlist: a form dialog. Nothing is submitted.
+    Route("dialog", "#/details?id={movie}", ".formDialog", ready=DETAIL, state="dialog"),
+    # The sign-in page's user picker, with two made-up users (states.picker).
+    Route("picker", "#/login", "#divUsers .card", ready="#txtManualName, .btnManual", state="picker", logged_in=False),
     Route("tooltip", "#/home", ".MuiTooltip-tooltip", ready=".homeSectionsContainer", state="tooltip"),
     Route("osd", "#/details?id={playable}", ".videoOsdBottom", ready=DETAIL, state="osd"),
 )
