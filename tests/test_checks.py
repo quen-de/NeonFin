@@ -77,3 +77,13 @@ def test_contrast_ignores_icons_inside_the_text(page, tmp_path, monkeypatch):
         style="display:inline-block;width:16px;height:16px;background:#ffd400"></span><svg width=16 height=16>
         <rect width=16 height=16 fill="#ffd400"/></svg>7.1</p></body>""")
     assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []
+
+
+def test_contrast_reads_colours_at_rest_not_mid_transition(page, tmp_path, monkeypatch):
+    # A colour caught mid-transition reads as oklab(), which the check cannot judge.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".fading",))
+    page.set_content("""<body style="margin:0;background:#000">
+      <p class=fading style="color:color(srgb 1 1 1 / 0.5);transition:color 10s;margin:0;font-size:16px">Fading</p></body>""")
+    page.evaluate("""() => { const p = document.querySelector('.fading'); getComputedStyle(p).color;
+      p.style.color = 'color(srgb 1 1 1 / 0.9)'; }""")
+    assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []
