@@ -65,6 +65,18 @@ as if it were not installed. `harness.run` still captures and times one CSS mode
 and `harness.gates VANILLA_RUN SKIN_RUN` still judges two such runs.
 `uv run python -m harness.sheet harness/runs/skin` writes a contact sheet per device.
 
+## Player timing
+
+    uv run python -m harness.player --label player
+
+Times the video player with the skin against plain Jellyfin, in pairs like the speed bench:
+the first frame after Play, the controls coming back after a mouse move (a tap on phones), and
+frames while they show. `python -m harness.discover` picks the films: an H.264 MP4 every
+browser plays as is, and an HEVC HDR film, played once as the browser handles it and once with
+HEVC hidden from the page so the server has to convert it. Playback reports stay swallowed, and
+each trial ends its own conversion on the server. Nothing is gated; `player.json` keeps every
+trial.
+
 ## Live tests
 
 `uv run pytest -m live` runs `tests/live/` against your server with the local build
