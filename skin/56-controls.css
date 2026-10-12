@@ -1,0 +1,46 @@
+/* Legacy form controls. Jellyfin paints them in its blue from global rules (spec 6.10), so
+   the fix is global too: the primary button is the neon tube, every other raised button a
+   tinted pill, and focus keeps the fill and shows the crimson ring. */
+.raised.button-submit {
+  color: var(--nf-light);
+  font-weight: 600;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+  background: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  border-radius: 999px;
+  box-shadow: var(--nf-tube);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+
+.raised.button-submit:hover,
+.raised.button-submit:focus {
+  color: var(--nf-light);
+  background: color-mix(in srgb, var(--nf-neon) 22%, transparent);
+}
+
+.raised:not(.button-submit) {
+  color: var(--nf-text);
+  background: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+
+.raised:not(.button-submit):hover,
+.raised:not(.button-submit):focus {
+  color: var(--nf-text);
+  background: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+
+/* Checkboxes: crimson when on, with a white tick; an empty box takes focus in crimson. */
+input.emby-checkbox:checked + span + .checkboxOutline {
+  background-color: var(--nf-neon);
+  border-color: var(--nf-neon);
+}
+
+input.emby-checkbox:checked + span + .checkboxOutline > .checkboxIcon-checked {
+  color: var(--nf-light);
+}
+
+input.emby-checkbox:focus:not(:checked) + span + .checkboxOutline {
+  border-color: var(--nf-neon);
+}
