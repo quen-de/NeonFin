@@ -60,3 +60,13 @@ def test_a_focused_empty_box_is_edged_in_crimson(open_page, style, color):
     assert page.eval_on_selector(".chkRememberLogin", "(e) => !e.checked")
     s = style(page, ".chkRememberLogin + span + .checkboxOutline", "border-top-color")
     assert crimson(color(s["border-top-color"])), s
+
+
+def test_a_ticked_box_shows_keyboard_focus(open_page, style):
+    # "Remember me" starts ticked; the input itself is invisible, so its box carries the ring.
+    page = open_page("login", "desktop", "none", variant="tab-to-box")
+    page.focus("#txtManualPassword")
+    page.keyboard.press("Tab")
+    assert page.evaluate("() => document.activeElement.matches('.chkRememberLogin:checked:focus-visible')")
+    ring = style(page, ".chkRememberLogin + span + .checkboxOutline", "box-shadow")["box-shadow"]
+    assert "255, 36, 72" in ring, ring

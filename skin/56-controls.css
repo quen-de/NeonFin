@@ -41,6 +41,11 @@ input.emby-checkbox:checked + span + .checkboxOutline > .checkboxIcon-checked {
   color: var(--nf-light);
 }
 
+/* The input itself is invisible, so keyboard focus rings its box: a ticked box keeps its fill. */
+input.emby-checkbox:focus-visible + span + .checkboxOutline {
+  box-shadow: 0 0 0 2px var(--nf-ink-2), 0 0 0 4px var(--nf-neon);
+}
+
 input.emby-checkbox:focus:not(:checked) + span + .checkboxOutline {
   border-color: var(--nf-neon);
 }
