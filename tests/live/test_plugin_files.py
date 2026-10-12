@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from harness import checks
@@ -6,8 +8,17 @@ pytestmark = pytest.mark.live
 
 NAV = ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root"
 ACTIONS = ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child)"
+# Media Bar and Media Bar Enhanced both build #slides-container and never run together: only
+# Enhanced puts .jellyfin-v12 on the body, only Media Bar draws a .spec-line.
+HERO = """() => document.body.classList.contains('jellyfin-v12') ? 'media-bar-enhanced'
+  : document.querySelector('#slides-container .spec-line') ? 'media-bar' : null"""
 BLUR_INSIDE_SLIDES = """() => [...document.querySelectorAll('#slides-container *')].filter((e) => {
   const v = getComputedStyle(e).backdropFilter; return v && v !== 'none'; }).length"""
+
+
+def hero_is(page, plugin):
+    if page.evaluate(HERO) != plugin:
+        pytest.skip(f"this server's home hero is not {plugin}")
 
 
 @pytest.mark.parametrize("profile, budget", [("desktop", 2), ("phone", 0)])
@@ -17,11 +28,16 @@ def test_home_with_every_plugin_keeps_the_glass_budget(open_page, profile, budge
     assert len(checks.glass_elements(page)) == budget
 
 
-def test_media_bar_play_is_a_neon_tube_and_the_active_dot_is_crimson(open_page, style, color):
+def test_hero_play_is_a_neon_tube(open_page, style, color):
     page = open_page("home", "desktop", "all")
     play = style(page, "#slides-container .slide.active .play-button", "box-shadow", "background-color")
     assert play["box-shadow"].count("inset") == 2 and color(play["background-color"])[:3] == (255, 36, 72)
-    dot = style(page, "#slides-container .dot.active", "background-color")
+
+
+def test_the_active_dot_is_crimson(open_page, style, color):
+    dot = style(open_page("home", "desktop", "all"), "#slides-container .dot.active", "background-color")
+    if dot is None:
+        pytest.skip("this server's hero counts its slides instead of showing dots")
     assert color(dot["background-color"]) == (255, 36, 72, 1.0)
 
 
@@ -54,7 +70,9 @@ def test_hero_text_reads_over_a_white_slide(open_page, tmp_path, profile, viewpo
         " #slides-container .backdrop-container > * { visibility: hidden !important; }"
     )
     page.wait_for_timeout(200)
-    assert page.locator("#slides-container .slide.active .plot >> visible=true").count() == 1
+    # Media Bar Enhanced shows no plot on phones; its details line stands in.
+    shown = ".plot" if profile == "desktop" else ":is(.plot, .spec-line, .misc-info)"
+    assert page.locator(f"#slides-container .slide.active {shown} >> visible=true").count() >= 1
     assert checks.contrast_failures(page, "home", tmp_path / "hero.png") == []
 
 
@@ -62,6 +80,7 @@ def test_a_long_details_line_keeps_to_the_dimmed_column(open_page):
     # Only the column the plot keeps to is dimmed for text. Two long genres on a 1280px desktop
     # used to carry the details line past it, over undimmed artwork.
     page = open_page("home", "desktop", "all", viewport=(1280, 800), variant="long-details")
+    hero_is(page, "media-bar")
     edges = page.evaluate("""() => {
       const slide = document.querySelector('#slides-container .slide.active');
       const genre = document.createElement('span');
@@ -74,7 +93,7 @@ def test_a_long_details_line_keeps_to_the_dimmed_column(open_page):
 
 
 def test_without_media_bar_home_starts_below_the_capsules(open_page):
-    page = open_page("home", "desktop", "without:media-bar")
+    page = open_page("home", "desktop", "without:media-bar,media-bar-enhanced")
     top = page.evaluate("""() => document.querySelector(
       '.homeSectionsContainer > .verticalSection:not(.hide):not(#hssLoadingIndicator)').getBoundingClientRect().top""")
     assert top >= 48
@@ -119,8 +138,10 @@ def test_phone_hero_keeps_its_top_undimmed(open_page):
     overlay = "getComputedStyle(document.querySelector('#slides-container .slide.active .gradient-overlay')).backgroundImage"
     desktop = open_page("home", "desktop", "all").evaluate(overlay)
     phone = page.evaluate(overlay)
-    # The left and bottom fades only; desktop adds the top fade under its glass capsules.
-    assert phone.count("linear-gradient(") == 2 and desktop.count("linear-gradient(") == 3
+    # Only desktop fades down from the top, under its glass capsules: the one gradient with no
+    # angle, since Chrome leaves out the default top-to-bottom.
+    top_fade = re.compile(r"linear-gradient\((?!\d+deg|to )")
+    assert len(top_fade.findall(desktop)) == 1 and top_fade.findall(phone) == [], (desktop, phone)
 
 
 @pytest.mark.parametrize("viewport", [None, (1280, 800)])
@@ -169,6 +190,7 @@ def test_the_desktop_hero_shows_more_of_the_artwork(open_page, tmp_path):
 
 def test_the_phone_hero_panel_lets_the_artwork_through(open_page, style, color):
     page = open_page("home", "phone", "all")
+    hero_is(page, "media-bar")
     panel = style(page, "#slides-container .slide.active .slide-content", "background-color")
     assert color(panel["background-color"])[3] <= 0.66
 
@@ -176,8 +198,9 @@ def test_the_phone_hero_panel_lets_the_artwork_through(open_page, style, color):
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
 def test_hero_text_is_primary_white(open_page, style, color, profile):
     page = open_page("home", profile, "all")
-    for sel in ("#slides-container .slide.active .plot", "#slides-container .slide.active .spec-line"):
-        assert color(style(page, sel, "color")["color"])[3] >= 0.9, sel
+    details = (".spec-line",) if page.evaluate(HERO) == "media-bar" else (".misc-info", ".genre")
+    for sel in (".plot", *details):
+        assert color(style(page, f"#slides-container .slide.active {sel}", "color")["color"])[3] >= 0.9, sel
 
 
 def seerr_card(page):
@@ -233,3 +256,58 @@ def test_rows_stay_under_the_hero_after_a_resize_while_scrolled(open_page, profi
     page.evaluate("() => document.scrollingElement.scrollTo(0, 0)")
     page.wait_for_timeout(100)
     assert page.evaluate(ROWS_TOP) == before
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_enhanced_details_are_set_in_the_interface_face(open_page, style, profile):
+    # The plugin brings a narrow web font; the skin keeps its own and loads nothing more.
+    page = open_page("home", profile, "all")
+    hero_is(page, "media-bar-enhanced")
+    for sel in (".misc-info", ".genre", ".play-button"):
+        face = style(page, f"#slides-container .slide.active {sel}", "font-family")["font-family"]
+        assert face.startswith("-apple-system") and "Archivo" not in face, (sel, face)
+
+
+def test_enhanced_counter_is_tinted_and_its_progress_crimson(open_page, style, color):
+    page = open_page("home", "desktop", "all")
+    hero_is(page, "media-bar-enhanced")
+    counter = style(page, "#slides-container .slide-counter", "backdrop-filter", "background-color")
+    if counter is None:
+        pytest.skip("this server's Media Bar Enhanced shows dots, not a counter")
+    assert counter["backdrop-filter"] == "none" and color(counter["background-color"])[:3] == (9, 11, 18)
+    fill = style(page, "#slides-container .media-bar-progress-fill", "background-color")
+    assert color(fill["background-color"])[:3] == (255, 36, 72)
+
+
+def test_enhanced_trailer_is_a_tinted_pill_beside_play(open_page, style, color):
+    page = open_page("home", "desktop", "all", variant="trailer")
+    hero_is(page, "media-bar-enhanced")
+    # Only a slide with a trailer has the button: give the current one a button like the plugin's.
+    page.evaluate("""() => { const b = document.createElement('button');
+      b.className = 'detailButton trailer-button'; b.textContent = 'Trailer';
+      document.querySelector('#slides-container .slide.active .button-container').append(b); }""")
+    trailer = style(page, "#slides-container .slide.active .trailer-button", "background-color", "border-top-left-radius")
+    play = style(page, "#slides-container .slide.active .play-button", "border-top-left-radius")
+    assert color(trailer["background-color"])[3] <= 0.15, trailer
+    assert trailer["border-top-left-radius"] == play["border-top-left-radius"] == "999px"
+
+
+LONG_DETAILS = """() => {
+  const slide = document.querySelector('#slides-container .slide.active'), line = slide.querySelector('.misc-info');
+  for (const text of ['Ends at 11:59 PM', '2h 38m', 'Dolby Vision']) {
+    const item = document.createElement('div'); item.className = 'runTime'; item.textContent = text; line.append(item); }
+  const lines = (e) => new Set([...(() => { const r = document.createRange(); r.selectNodeContents(e); return r.getClientRects(); })()]
+    .map((r) => Math.round(r.top))).size;
+  return { right: line.getBoundingClientRect().right, plot: slide.querySelector('.plot').getBoundingClientRect().right,
+    width: innerWidth, broken: [...line.querySelectorAll('.runTime, .date')].filter((e) => lines(e) > 1).map((e) => e.textContent) }; }"""
+
+
+@pytest.mark.parametrize("profile, viewport", [("desktop", (1280, 800)), ("phone", None)])
+def test_a_long_enhanced_details_line_wraps_between_items(open_page, profile, viewport):
+    # The interface face is wider than the plugin's: a long line wraps between its items, never
+    # inside one, and on desktop keeps to the dimmed column the plot keeps to.
+    page = open_page("home", profile, "all", viewport=viewport, variant="long-details")
+    hero_is(page, "media-bar-enhanced")
+    r = page.evaluate(LONG_DETAILS)
+    assert r["broken"] == [], r
+    assert r["right"] <= (r["plot"] + 1 if profile == "desktop" else r["width"]), r

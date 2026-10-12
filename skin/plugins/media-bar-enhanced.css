@@ -1,0 +1,94 @@
+/* plugin: Media Bar Enhanced; roots: #slides-container */
+/* Media Bar Enhanced builds the same hero as Media Bar, so media-bar.css already draws most of
+   it: the dimmed column, the Play tube, the round buttons and the dots. This file covers what
+   only this plugin has, under the version class it puts on the body, since Media Bar shares
+   several of these class names. */
+
+/* The interface face, not the plugin's web font. */
+.jellyfin-v12 #slides-container :is(.misc-info, .date, .runTime, .genre, .plot, .play-button, .trailer-button, .slide-counter) {
+  font-family: var(--nf-ui);
+}
+
+.jellyfin-v12 #slides-container .separator-icon {
+  color: var(--nf-text-2);
+}
+
+.jellyfin-v12 #slides-container .age-rating {
+  color: var(--nf-text);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--nf-text-2);
+}
+
+/* Play and Trailer are pills; Trailer is tinted like the round buttons beside it. */
+.jellyfin-v12 #slides-container .button-container :is(.play-button, .trailer-button) {
+  border-radius: 999px;
+}
+
+.jellyfin-v12 #slides-container .trailer-button {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+
+.jellyfin-v12 #slides-container .trailer-button:hover {
+  opacity: 1;
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+
+/* With more slides than dots, a counter stands in for them: tinted, not blurred. */
+.jellyfin-v12 #slides-container .slide-counter {
+  color: var(--nf-text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+  background-color: color-mix(in srgb, var(--nf-ink-2) 64%, transparent);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.jellyfin-v12 #slides-container .media-bar-progress-bar {
+  background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
+}
+
+.jellyfin-v12 #slides-container .media-bar-progress-fill {
+  background-color: var(--nf-neon);
+}
+
+.jellyfin-v12 #slides-container :is(.pause-button, .mute-button) {
+  color: var(--nf-text);
+}
+
+/* A long details line wraps between its items, never inside one: the interface face is wider
+   than the plugin's narrow one. */
+.jellyfin-v12 #slides-container .misc-info {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.jellyfin-v12 #slides-container .misc-info > * {
+  white-space: nowrap;
+}
+
+.layout-mobile .jellyfin-v12 #slides-container .misc-info {
+  justify-content: center;
+}
+
+/* Desktop: the details keep to the dimmed column, as the plot does. */
+.layout-desktop .jellyfin-v12 #slides-container :is(.info-container, .genre) {
+  max-width: 34vw;
+  justify-content: flex-start;
+}
+
+/* Phones centre the details over the artwork's lower half: ink rises behind them instead of
+   the column, which the centred lines would run past. */
+.layout-mobile .jellyfin-v12 #slides-container .gradient-overlay {
+  background: linear-gradient(
+    0deg,
+    var(--nf-ink) 0%,
+    color-mix(in srgb, var(--nf-ink) 70%, transparent) 16%,
+    color-mix(in srgb, var(--nf-ink) 66%, transparent) 50%,
+    transparent 70%
+  ) !important;
+}

@@ -35,7 +35,7 @@ LIBRARY_TEXT = (
 )
 TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "*": (".MuiAppBar-root > .MuiToolbar-root:first-child .MuiButton-root",),
-    "home": ("#slides-container .slide.active .plot", "#slides-container .slide.active .spec-line"),
+    "home": tuple(f"#slides-container .slide.active {s}" for s in (".plot", ".spec-line", ".misc-info", ".genre")),
     "movies": LIBRARY_TEXT,
     "series": LIBRARY_TEXT,
     "movie": TITLE_TEXT,
