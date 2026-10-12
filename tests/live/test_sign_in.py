@@ -69,3 +69,54 @@ def test_sign_in_text_reads_over_a_white_splash(open_page, tmp_path, route, prof
     page.add_style_tag(content=f"{SPLASH}, {SPLASH}::after {{ background: #fff !important; }}")
     page.wait_for_timeout(300)
     assert checks.contrast_failures(page, route, tmp_path / "sign-in.png") == []
+
+
+TEXT_2 = (246, 243, 240, 0.62)
+
+
+def test_the_heading_is_a_lit_sign(open_page, style):
+    s = style(open_page("login", "desktop", "none"), "#loginPage .manualLoginForm h1", "font-family", "text-transform", "text-shadow")
+    assert "NeonFin Sign" in s["font-family"] and s["text-transform"] == "uppercase" and s["text-shadow"] != "none", s
+
+
+def test_forgot_password_and_the_disclaimer_step_back(open_page, style, color):
+    page = open_page("login", "desktop", "none")
+    forgot = style(page, "#loginPage .btnForgotPassword", "color", "background-color", "box-shadow")
+    assert color(forgot["background-color"])[3] == 0 and forgot["box-shadow"] == "none", forgot
+    assert color(forgot["color"]) == TEXT_2, forgot
+    if page.locator("#loginPage .loginDisclaimer").inner_text().strip():
+        assert color(style(page, "#loginPage .loginDisclaimer", "color")["color"]) == TEXT_2
+
+
+def test_the_panel_ends_close_under_its_last_line(open_page):
+    # The disclaimer's paragraph margin and Jellyfin's spacing left a tall empty band.
+    gap = open_page("login", "desktop", "none").evaluate(
+        """(s) => { const panel = document.querySelector(s).getBoundingClientRect();
+      const last = [...document.querySelectorAll('#loginPage .readOnlyContent *')]
+        .filter((e) => e.getClientRects().length && e.innerText && e.innerText.trim()).pop().getBoundingClientRect();
+      return panel.bottom - last.bottom; }""",
+        PANEL,
+    )
+    assert gap <= 32, gap
+
+
+def test_disclaimer_links_are_crimson(open_page, color):
+    page = open_page("login", "desktop", "none", variant="disclaimer-link")
+    # Jellyfin renders the disclaimer from Markdown and marks its links as button links.
+    c = page.evaluate("""() => { const a = document.createElement('a'); a.className = 'button-link'; a.href = '#';
+      a.textContent = 'terms'; document.querySelector('#loginPage .loginDisclaimer').append(a); return getComputedStyle(a).color; }""")
+    r, g, b, _ = color(c)
+    assert r - max(g, b) > 80, c
+
+
+def test_users_are_round_avatars_ringed_on_focus(open_page, style, color):
+    page = open_page("picker", "desktop", "none", variant="focus")
+    for sel in ("#divUsers .card .cardScalable", "#divUsers .card .cardContent", "#divUsers .card .cardImage"):
+        assert style(page, sel, "border-top-left-radius")["border-top-left-radius"] == "50%", sel
+    ground = style(page, "#divUsers .card .defaultCardBackground", "background-color")
+    assert color(ground["background-color"])[:3] == (74, 10, 21), ground  # the oxblood
+    page.locator("#divUsers .card").first.focus()
+    page.wait_for_timeout(400)
+    ring = style(page, "#divUsers .card .cardScalable", "opacity", "box-shadow", pseudo="::after")
+    assert ring["opacity"] == "1" and "255, 36, 72" in ring["box-shadow"], ring
+    assert style(page, "#divUsers .card", "outline-style")["outline-style"] == "none"
