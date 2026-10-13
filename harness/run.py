@@ -42,6 +42,11 @@ def shot_hidden(volatile, show_volatile: bool) -> tuple:
     return () if show_volatile else tuple(volatile)
 
 
+def split_routes(routes, plugins_off):
+    """The routes a plugin state can show, and those it cannot: a plugin they need is off."""
+    return [r for r in routes if not r.needs & plugins_off], [r for r in routes if r.needs & plugins_off]
+
+
 def capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off, show_volatile=False):
     volatile = cfg.volatile
     state = session.login_state(browser, cfg, prof)
@@ -51,6 +56,8 @@ def capture_profile(browser, cfg, prof, routes, override, effective, outdir, sum
     unique = sorted(set(selectors))
     hit: set[int] = set()
     (outdir / prof.name).mkdir(parents=True, exist_ok=True)
+    routes, skipped = split_routes(routes, plugins_off)
+    summary["skipped"] += [f"{prof.name}/{r.name}" for r in skipped]
     for route in routes:
         p = page if route.logged_in else anon_page
         key = f"{prof.name}/{route.name}"
@@ -145,6 +152,7 @@ def main(argv: list[str] | None = None) -> int:
         "trials": None if args.no_perf else args.trials,
         "show_volatile": args.show_volatile,
         "failures": [],
+        "skipped": [],
     }
     with lock.hold(timed=not args.no_perf), sync_playwright() as pw:
         browser = session.launch(pw)

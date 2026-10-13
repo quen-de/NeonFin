@@ -39,6 +39,7 @@ class Route:
     ready: str | None = None  # visible before the state action runs
     state: str | None = None
     logged_in: bool = True
+    needs: frozenset[str] = frozenset()  # plugins without which the route does not exist
 
 
 DETAIL = ".detailPagePrimaryContainer"
@@ -58,6 +59,11 @@ ROUTES = (
     # 12.1's preference pages render nothing without ?userId=.
     Route("display", "#/mypreferencesdisplay?userId={user_id}", ".MuiFilledInput-root"),
     Route("playback", "#/mypreferencesplayback?userId={user_id}", ".emby-select"),
+    Route("subtitles", "#/mypreferencessubtitles?userId={user_id}", "#selectSubtitleLanguage"),
+    Route("homeprefs", "#/mypreferenceshome?userId={user_id}", "#selectHomeSection1"),
+    # The password fields are only waited on, never typed into.
+    Route("profile", "#/userprofile?userId={user_id}", "#fldCurrentPassword"),
+    Route("quickconnect", "#/quickconnect", "#txtQuickConnectCode"),
     # Hidden SyncPlay/remote menus also carry .MuiMenu-paper; anchor on the user menu itself.
     Route("usermenu", "#/home", "#app-user-menu .MuiMenu-paper", ready=".homeSectionsContainer", state="usermenu"),
     # The first select on Display is the language one; MUI mounts its menu as #menu-language.
@@ -73,5 +79,17 @@ ROUTES = (
     Route("picker", "#/login", "#divUsers .card", ready="#txtManualName, .btnManual", state="picker", logged_in=False),
     Route("tooltip", "#/home", ".MuiTooltip-tooltip", ready=".homeSectionsContainer", state="tooltip"),
     Route("osd", "#/details?id={playable}", ".videoOsdBottom", ready=DETAIL, state="osd"),
+    # Jellyfin Enhanced's own surfaces: its calendar page, which Plugin Pages hosts, and its
+    # settings panel.
+    Route(
+        "calendar",
+        "#/userpluginsettings.html?pageUrl=/JellyfinEnhanced/calendarPage",
+        ".je-calendar-view-btn.active",
+        needs=frozenset({"jellyfin-enhanced", "plugin-pages"}),
+    ),
+    Route(
+        "jepanel", "#/home", "#jellyfin-enhanced-panel", ready=".homeSectionsContainer", state="jepanel",
+        needs=frozenset({"jellyfin-enhanced"}),
+    ),
 )
 PERF_ROUTES = ("home", "movies", "series", "movie")

@@ -298,3 +298,31 @@ def test_title_pages_run_under_their_accepted_exception():
 def test_a_bench_whose_skin_never_reached_the_page_fails(tmp_path, capsys):
     code, out = judge(tmp_path, [bench(full_cells("all", CLEAR), intercept_hits=0)], [capture("all")], capsys)
     assert code == 1 and "the skin CSS never reached the page" in out
+
+
+def test_a_route_whose_plugin_is_off_is_not_missing(tmp_path, capsys):
+    c = capture("none")
+    for key in ("desktop/calendar", "phone/calendar", "desktop/jepanel", "phone/jepanel"):
+        del c["routes"][key]
+    code, out = judge(tmp_path, [bench(full_cells("none", CLEAR))], [c], capsys)
+    assert code == 0, out
+    (tmp_path / "2").mkdir()
+    c = capture("all")
+    del c["routes"]["desktop/calendar"]
+    code, out = judge(tmp_path / "2", [bench(full_cells("all", CLEAR))], [c], capsys)
+    assert code == 1 and "all: no capture of desktop/calendar" in out
+
+
+def test_scope_all_checks_blue_on_every_route(tmp_path, capsys):
+    import json
+
+    from harness import gates
+
+    c = capture("all")
+    c["routes"]["desktop/homeprefs"]["blue"] = {"span.listItemIcon background": 1}
+    (tmp_path / "b").mkdir()
+    (tmp_path / "b" / "bench.json").write_text(json.dumps(bench(full_cells("all", CLEAR))))
+    (tmp_path / "c").mkdir()
+    (tmp_path / "c" / "summary.json").write_text(json.dumps(c))
+    assert gates.main(["--bench", str(tmp_path / "b"), str(tmp_path / "c"), "--scope", "all"]) == 1
+    assert "desktop/homeprefs: Jellyfin blue still painted" in capsys.readouterr().out

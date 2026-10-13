@@ -41,6 +41,15 @@ SIGN_IN_TEXT = (
     "#loginPage .raised",
     "#loginPage .loginDisclaimer",
 )
+# Settings pages: headings, labels and the help under each field, on the page ground.
+SETTINGS_TEXT = (
+    ".userPreferencesPage .sectionTitle",
+    ".userPreferencesPage .MuiTypography-h2",
+    ".userPreferencesPage .inputLabel",
+    ".userPreferencesPage .checkboxLabel",
+    ".userPreferencesPage .fieldDescription",
+    ".userPreferencesPage .listItemBodyText",
+)
 TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "*": (".MuiAppBar-root > .MuiToolbar-root:first-child .MuiButton-root",),
     "home": tuple(f"#slides-container .slide.active {s}" for s in (".plot", ".misc-info", ".genre")),
@@ -62,6 +71,15 @@ TEXT_TARGETS: dict[str, tuple[str, ...]] = {
         ".videoOsdBottom .endsAtText",
         ".osdHeader .videoOsd-appBar .MuiTypography-root",
     ),
+    "prefs": SETTINGS_TEXT,
+    "display": SETTINGS_TEXT,
+    "playback": SETTINGS_TEXT,
+    "subtitles": SETTINGS_TEXT,
+    "homeprefs": SETTINGS_TEXT,
+    "profile": SETTINGS_TEXT,
+    "quickconnect": SETTINGS_TEXT,
+    "calendar": (".je-calendar-nav .je-calendar-view-btn", ".je-calendar-legend-item"),
+    "jepanel": ("#jellyfin-enhanced-panel h3", "#jellyfin-enhanced-panel .tab-button"),
 }
 
 

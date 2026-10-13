@@ -64,4 +64,9 @@ def picker(page):
     page.reload()
 
 
-STATES = {f.__name__: f for f in (usermenu, select, actionsheet, tooltip, osd, dialog, picker)}
+def jepanel(page):
+    # Jellyfin Enhanced opens its panel on "?"; its user menu entry is a translated label.
+    page.keyboard.press("?")
+
+
+STATES = {f.__name__: f for f in (usermenu, select, actionsheet, tooltip, osd, dialog, picker, jepanel)}

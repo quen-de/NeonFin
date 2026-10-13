@@ -4,7 +4,8 @@ usage: python -m harness.gates VANILLA_RUN SKIN_RUN [--scope home,movies]
        python -m harness.gates --bench BENCH_RUN [--bench BENCH_RUN ...] [SKIN_CAPTURE_RUN ...] [--scope home,movies]
 
 Performance and glass apply to every route captured; Jellyfin blue and text
-contrast apply only to the routes in scope (the pages the milestone styles).
+contrast apply only to the routes in scope (the pages the milestone styles);
+--scope all checks every route.
 A bench run (harness.bench) carries paired vanilla and skin trials; capture
 runs next to it carry the glass, blue and contrast checks. Every benched state needs its
 captures, every route captured, and all plugins on and off need every speed cell benched,
@@ -21,6 +22,7 @@ import pathlib
 import statistics
 import sys
 
+from harness import plugins
 from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
 
 GLASS_BUDGET = {"desktop": 3, "phone": 0}
@@ -222,8 +224,16 @@ def evaluate_evidence(benches: list[dict], captures: dict[str, dict], scope: set
         for key in ("server_version", "browser_version"):
             if capture.get(key) != bench.get(key):
                 fails.append(f"{run}: {key} differs from the bench: {capture.get(key)} vs {bench.get(key)}")
+        try:
+            off = plugins.parse_state(str(state))
+        except plugins.PluginStateError as e:
+            fails.append(f"{run}: {e}")
+            continue
         fails += [
-            f"{state}: no capture of {p}/{r.name}" for p in PROFILES for r in ROUTES if f"{p}/{r.name}" not in capture.get("routes", {})
+            f"{state}: no capture of {p}/{r.name}"
+            for p in PROFILES
+            for r in ROUTES
+            if not r.needs & off and f"{p}/{r.name}" not in capture.get("routes", {})
         ]
         fails += [f"{state}: {f}" for f in route_failures(capture, scope)]
     return fails, notes
@@ -235,9 +245,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument(
         "--bench", action="append", help="a harness.bench run, repeatable: speed comes from its paired trials, pooled across benches"
     )
-    ap.add_argument("--scope", default="home")
+    ap.add_argument("--scope", default="home", help="route names, or all")
     args = ap.parse_args(argv)
-    scope = set(args.scope.split(","))
+    scope = {r.name for r in ROUTES} if args.scope == "all" else set(args.scope.split(","))
     if args.bench:
         benches = [json.loads((pathlib.Path(b) / "bench.json").read_text()) for b in args.bench]
         fails, notes = evaluate_evidence(benches, {pathlib.Path(r).name: _summary(r) for r in args.runs}, scope)
