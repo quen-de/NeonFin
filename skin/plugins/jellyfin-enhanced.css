@@ -12,6 +12,22 @@
   --blur: 0px;
 }
 
+/* It picks its theme once, the first time it needs a colour. When the skin lands after that,
+   on a slow connection, it settles on its default and writes Jellyfin's blue inline: put the
+   accent back. The chosen subtitle preset's border is set with !important and out of reach. */
+#jellyfin-enhanced-panel :is([style*="color: #00a4dc" i], [style*="color:#00a4dc" i]) {
+  color: var(--primary-accent-color) !important;
+  accent-color: var(--primary-accent-color) !important;
+}
+
+#jellyfin-enhanced-panel :is([style*="background: #00a4dc" i], [style*="background: rgb(0, 164, 220)"]) {
+  background-color: var(--primary-accent-color) !important;
+}
+
+#jellyfin-enhanced-panel :is([style*="left: 3px solid #00a4dc" i], [style*="left:3px solid #00a4dc" i]) {
+  border-left-color: var(--primary-accent-color) !important;
+}
+
 /* The plugin marks Jellyfin's own actions box; keep it content-width so the core capsule holds. */
 .je-header-actions-host {
   flex: 0 0 auto !important;

@@ -2,13 +2,14 @@
 
 import pytest
 
-from harness import checks, session
+from harness import checks, session, states
 from harness.profiles import PROFILES, ROUTES
 
 pytestmark = pytest.mark.live
 
 ROUTE = {r.name: r for r in ROUTES}
 INK_2 = (9, 11, 18)
+THEME = "() => window.JellyfinEnhanced?.themer?.activeTheme?.key ?? null"
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
@@ -58,9 +59,48 @@ def test_the_plugin_takes_the_palette_on_a_fresh_load(cfg, browser, skin_css):
     # that lands after that never reaches it. A fresh page shows which one it picked.
     prof = PROFILES["desktop"]
     ctx, page = session.new_page(browser, prof, session.login_state(browser, cfg, prof), session.Override(skin_css))
-    session.open_route(page, cfg, ROUTE["home"], cfg.volatile)
-    picked = page.evaluate("() => window.JellyfinEnhanced?.themer?.activeTheme?.key ?? null")
-    ctx.close()
-    if picked is None:
-        pytest.skip("this Jellyfin Enhanced build exposes no theme detection")
-    assert picked == "jellyfish"
+    try:
+        session.open_route(page, cfg, ROUTE["home"], cfg.volatile)
+        if not page.evaluate("() => !!window.JellyfinEnhanced?.themer"):
+            pytest.skip("this Jellyfin Enhanced build has no theme detection")
+        page.wait_for_function(THEME, timeout=15_000)
+        assert page.evaluate(THEME) == "jellyfish"
+    finally:
+        ctx.close()
+
+
+def late_skin_page(cfg, browser, skin_css):
+    """Home with the skin held back until the plugin has picked its theme, as on a slow
+    connection: jellyfin-web fetches custom CSS after it starts."""
+    prof = PROFILES["desktop"]
+    ctx, page = session.new_page(browser, prof, session.login_state(browser, cfg, prof), session.Override(skin_css))
+    held = []
+    ctx.route("**/Branding/Configuration*", lambda route: held.append(route))
+    page.goto(session.route_url(cfg, ROUTE["home"]))
+    page.wait_for_function(THEME, timeout=30_000)
+    for route in held:
+        route.fallback()
+    page.wait_for_selector(ROUTE["jepanel"].ready)
+    return ctx, page
+
+
+def test_the_panel_keeps_the_palette_when_the_skin_arrives_late(cfg, browser, skin_css, color):
+    # The plugin then settles on its default theme and writes Jellyfin's blue inline. Only the
+    # chosen subtitle preset's border, set inline with !important, is out of reach.
+    ctx, page = late_skin_page(cfg, browser, skin_css)
+    try:
+        assert page.evaluate(THEME) == "default"
+        states.jepanel(page)
+        tabs = page.locator("#jellyfin-enhanced-panel .tab-button")
+        for i in range(tabs.count()):
+            tabs.nth(i).dispatch_event("click")
+            page.wait_for_timeout(300)
+            hits = {k: n for k, n in checks.blue_hits(page).items() if not k.startswith("div.preset-box")}
+            assert hits == {}, tabs.nth(i).inner_text()
+        accents = page.evaluate(
+            "() => [...document.querySelectorAll('#jellyfin-enhanced-panel input[style*=\"accent-color\" i]')]"
+            ".map((e) => getComputedStyle(e).accentColor)"
+        )
+        assert accents and {color(a)[:3] for a in accents} == {(255, 36, 72)}, set(accents)
+    finally:
+        ctx.close()
