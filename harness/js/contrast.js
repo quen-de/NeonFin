@@ -1,8 +1,6 @@
 // Text elements matching the selectors that are visible in the viewport, with
 // their box, colour and size: what contrast_failures samples behind.
 (selectors) => {
-  // A colour caught mid-transition reads as oklab(); judge the colours at rest.
-  for (const a of document.getAnimations()) if (a instanceof CSSTransition) a.finish();
   const rgba = (v) => {
     let m = v && v.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
     if (m) return [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]];

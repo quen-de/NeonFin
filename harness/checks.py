@@ -88,16 +88,22 @@ def _js(name: str) -> str:
     return (JS / name).read_text()
 
 
+def at_rest(page) -> None:
+    page.evaluate(_js("at_rest.js"))
+
+
 def glass_elements(page) -> list[str]:
     return page.evaluate(_js("glass.js"))
 
 
 def blue_hits(page) -> dict[str, int]:
+    at_rest(page)
     return page.evaluate(_js("blue.js"))
 
 
 def palette_hits(page, colours) -> dict[str, int]:
     """Paint still in any of these (r, g, b) colours, by element and property."""
+    at_rest(page)
     return page.evaluate(_js("palette.js"), [list(c) for c in colours])
 
 
@@ -131,6 +137,7 @@ def brightest_decile(img: Image.Image, rect, dpr: float) -> tuple[int, int, int]
 
 
 def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
+    at_rest(page)
     selectors = TEXT_TARGETS["*"] + TEXT_TARGETS.get(route_name, ())
     items = page.evaluate(_js("contrast.js"), list(selectors))
     if not items:

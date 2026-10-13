@@ -159,6 +159,15 @@ def _hero_light(page, tmp_path, x_frac):
     return sum(px) / len(px)
 
 
+def _hold_the_slide(page):
+    """Stop the slideshow and finish what is moving, so two samples see the same slide."""
+    pause = page.locator("#slides-container .pause-button >> visible=true")
+    if pause.count():
+        pause.first.click()
+    page.evaluate("() => document.getAnimations().forEach((a) => { try { a.finish(); } catch (e) {} })")
+    page.wait_for_timeout(200)
+
+
 def test_the_desktop_hero_shows_more_of_the_artwork(open_page, tmp_path):
     page = open_page("home", "desktop", "all", variant="white-hero")
     page.add_style_tag(
@@ -166,6 +175,7 @@ def test_the_desktop_hero_shows_more_of_the_artwork(open_page, tmp_path):
         " #slides-container .backdrop-container > * { visibility: hidden !important; }"
     )
     page.wait_for_timeout(200)
+    _hold_the_slide(page)
     assert _hero_light(page, tmp_path, 0.85) >= 85  # under the end of the plot
     assert _hero_light(page, tmp_path, 720) >= 170  # mid-screen, beside the text column
 

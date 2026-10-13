@@ -52,11 +52,11 @@ def test_the_time_bubble_is_a_dark_pill(osd, style, color):
     assert float(s["border-top-left-radius"].removesuffix("px")) >= 8, s
 
 
-def test_the_up_next_countdown_is_crimson(open_page, color):
-    page = open_page("osd", "desktop", "none", variant="upnext")
+def test_the_up_next_countdown_is_crimson(osd, color):
+    page = osd("desktop")
     # Up Next shows near the end of an episode; its countdown is built the same way.
     c = page.evaluate("""() => { const e = document.createElement('div');
       e.className = 'upNextDialog-countdownText'; e.textContent = '10'; document.body.append(e);
-      return getComputedStyle(e).color; }""")
+      const c = getComputedStyle(e).color; e.remove(); return c; }""")
     r, g, b, _ = color(c)
     assert r - max(g, b) > 80, c

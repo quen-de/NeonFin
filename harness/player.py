@@ -224,6 +224,9 @@ def wake(page, prof) -> None:
     """What a viewer does to bring the controls back: move the mouse, or tap the picture."""
     vp = prof.context["viewport"]
     if prof.context.get("has_touch"):
+        # Jellyfin drops a touch less than 300 ms after the last one, timed by Date: on a page
+        # whose clock the harness froze, every later tap would land at the same instant.
+        page.evaluate("() => window.__harnessAdvanceClock && window.__harnessAdvanceClock(1000)")
         page.touchscreen.tap(vp["width"] / 2, vp["height"] / 3)
     else:
         page.mouse.move(vp["width"] / 3, vp["height"] / 3)

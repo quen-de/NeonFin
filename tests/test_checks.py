@@ -83,7 +83,24 @@ def test_contrast_reads_colours_at_rest_not_mid_transition(page, tmp_path, monke
     # A colour caught mid-transition reads as oklab(), which the check cannot judge.
     monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".fading",))
     page.set_content("""<body style="margin:0;background:#000">
-      <p class=fading style="color:color(srgb 1 1 1 / 0.5);transition:color 10s;margin:0;font-size:16px">Fading</p></body>""")
+      <p class=fading style="color:color(srgb 1 1 1 / 0.2);transition:color 10s;margin:0;font-size:16px">Fading</p></body>""")
     page.evaluate("""() => { const p = document.querySelector('.fading'); getComputedStyle(p).color;
       p.style.color = 'color(srgb 1 1 1 / 0.9)'; }""")
     assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []
+
+
+def test_blue_hits_read_colours_at_rest(page):
+    page.set_content("<div id=d style='width:9px;height:9px;background:#000;transition:background-color 10s'></div>")
+    page.evaluate("() => { const d = document.getElementById('d'); getComputedStyle(d).backgroundColor; d.style.backgroundColor = '#00a4dc'; }")
+    assert checks.blue_hits(page) == {"div#d background": 1}
+
+
+def test_checks_survive_a_transition_that_cannot_finish(page, tmp_path, monkeypatch):
+    # finish() throws on a transition with no end in sight; the check reads what is there.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".stuck",))
+    page.set_content("""<body style="margin:0;background:#000">
+      <p class=stuck style="color:#fff;transition:color 10s;margin:0;font-size:16px">Stuck</p></body>""")
+    page.evaluate("""() => { const p = document.querySelector('.stuck'); getComputedStyle(p).color;
+      p.style.color = '#eee'; p.getAnimations()[0].playbackRate = 0; }""")
+    checks.contrast_failures(page, "t", tmp_path / "c.png")  # must not raise
+    checks.blue_hits(page)

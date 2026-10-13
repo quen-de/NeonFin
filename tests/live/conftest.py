@@ -91,14 +91,16 @@ def open_page(cfg, browser, skin_css):
 def osd(open_page):
     """The player page with its controls showing. Jellyfin hides them a few seconds after the
     last input, paused or not, and pages are shared between tests. A tap toggles them on a
-    phone, so it only taps when they are hidden; a mouse move just keeps them up."""
+    phone, so it waits for them to hide and taps them back; a mouse move just keeps them up."""
     hidden = "() => document.querySelector('.videoOsdBottom').classList.contains('videoOsdBottom-hidden')"
 
     def get(profile="desktop", variant="", media=()):
         page = open_page("osd", profile, "none", variant=variant, media=media)
         prof = PROFILES[profile]
-        if not prof.context.get("has_touch") or page.evaluate(hidden):
-            player.wake(page, prof)
+        if prof.context.get("has_touch") and not page.evaluate(hidden):
+            # A tap toggles the controls: on controls about to hide it would race the hide.
+            page.wait_for_function(hidden, timeout=15_000)
+        player.wake(page, prof)
         page.wait_for_selector(".videoOsdBottom:not(.videoOsdBottom-hidden)")
         page.wait_for_timeout(100)
         return page

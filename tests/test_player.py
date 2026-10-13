@@ -201,3 +201,18 @@ def test_controls_time_runs_from_the_waking_input_to_full_opacity(browser):
     assert osd["shown"] - osd["input"] >= 30
     assert osd["visible"] - osd["shown"] >= 150
     ctx.close()
+
+
+def test_taps_register_on_a_page_whose_clock_is_frozen(browser):
+    # Jellyfin ignores a touch less than 300 ms after the last one by Date; on a frozen clock
+    # every tap after the first would look like the same instant.
+    ctx, page = session.new_page(browser, PROFILES["phone"], None, None)
+    page.goto("about:blank")
+    page.set_content("<div style='width:100vw;height:100vh'></div>")
+    page.evaluate("""() => { window.taps = 0; let last = 0;
+      document.addEventListener('pointerdown', () => { const now = new Date().getTime();
+        if (now - last > 300) { last = now; window.taps += 1; } }); }""")
+    player.wake(page, PROFILES["phone"])
+    player.wake(page, PROFILES["phone"])
+    assert page.evaluate("taps") == 2
+    ctx.close()
