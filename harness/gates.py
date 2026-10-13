@@ -219,6 +219,7 @@ def evaluate_evidence(benches: list[dict], captures: dict[str, dict], scope: set
             fails.append(f"{run}: a vanilla capture has no skin checks")
             continue
         fails += [f"{run}: {f}" for f in _provenance("capture", capture)]
+        notes += [f"{run}: signed in again before {key}" for key in capture.get("relogins", [])]
         if capture.get("skin_sha") != shas[0]:
             fails.append(f"{run}: captured build {capture.get('skin_sha')}, benched {shas[0]}")
         for key in ("server_version", "browser_version"):

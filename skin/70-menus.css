@@ -68,11 +68,11 @@ html:not(.layout-mobile) .MuiPopover-paper .MuiMenuItem-root {
    edge. */
 .layout-mobile .actionSheet.actionsheet-not-fullscreen {
   top: auto !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  right: 0;
+  bottom: 0;
   left: 0 !important;
-  width: auto !important;
-  max-width: none !important;
+  width: auto;
+  max-width: none;
   max-height: 84%;
   padding-bottom: env(safe-area-inset-bottom);
   border-radius: var(--nf-radius-menu) var(--nf-radius-menu) 0 0 !important;

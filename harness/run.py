@@ -47,25 +47,52 @@ def split_routes(routes, plugins_off):
     return [r for r in routes if not r.needs & plugins_off], [r for r in routes if r.needs & plugins_off]
 
 
+def signed_out(page) -> bool:
+    """Jellyfin sends a page whose session has ended to the sign-in page."""
+    return "#/login" in page.url
+
+
+def open_signed_in(page_for, relogin, cfg, route, volatile) -> tuple[bool, bool]:
+    """Open route on page_for(). A signed-in route that lands on the sign-in page lost its
+    session (seen once while parallel captures signed in together): sign in again, once, and
+    retry. Returns whether the page settled, and whether it signed in again."""
+    try:
+        return session.open_route(page_for(), cfg, route, volatile), False
+    except session.RouteError:
+        if not (route.logged_in and signed_out(page_for())):
+            raise
+    relogin()
+    return session.open_route(page_for(), cfg, route, volatile), True
+
+
 def capture_profile(browser, cfg, prof, routes, override, effective, outdir, summary, plugins_off, show_volatile=False):
     volatile = cfg.volatile
-    state = session.login_state(browser, cfg, prof)
-    ctx, page = session.new_page(browser, prof, state, override, plugins_off)
+    live = {"state": session.login_state(browser, cfg, prof)}
+    live["ctx"], live["page"] = session.new_page(browser, prof, live["state"], override, plugins_off)
     anon_ctx, anon_page = session.new_page(browser, prof, None, override, plugins_off)
-    n_rules, selectors = collect.css_selectors(page, effective)
+
+    def relogin():
+        live["ctx"].close()
+        live["state"] = session.login_state(browser, cfg, prof)
+        live["ctx"], live["page"] = session.new_page(browser, prof, live["state"], override, plugins_off)
+
+    n_rules, selectors = collect.css_selectors(live["page"], effective)
     unique = sorted(set(selectors))
     hit: set[int] = set()
     (outdir / prof.name).mkdir(parents=True, exist_ok=True)
     routes, skipped = split_routes(routes, plugins_off)
     summary["skipped"] += [f"{prof.name}/{r.name}" for r in skipped]
     for route in routes:
-        p = page if route.logged_in else anon_page
         key = f"{prof.name}/{route.name}"
+        page_for = (lambda: live["page"]) if route.logged_in else (lambda: anon_page)
         try:
-            settled = session.open_route(p, cfg, route, volatile)
+            settled, again = open_signed_in(page_for, relogin, cfg, route, volatile)
         except session.RouteError as e:
             summary["failures"].append(f"{key}: {e}")
             continue
+        if again:
+            summary["relogins"].append(key)
+        p = page_for()
         session.screenshot(p, route, shot_hidden(volatile, show_volatile), outdir / prof.name / f"{route.name}.png")
         snap = collect.styles(p, volatile)
         write_gz(outdir / prof.name / f"{route.name}.styles.json.gz", snap)
@@ -84,8 +111,8 @@ def capture_profile(browser, cfg, prof, routes, override, effective, outdir, sum
     summary["css"]["selectors"] = len(unique)
     summary["css"]["matched_share"][prof.name] = round(len(hit) / len(unique), 4) if unique else 0
     anon_ctx.close()
-    ctx.close()
-    return state
+    live["ctx"].close()
+    return live["state"]
 
 
 def perf_profile(browser, cfg, prof, state, override, trials, plugins_off):
@@ -153,6 +180,7 @@ def main(argv: list[str] | None = None) -> int:
         "show_volatile": args.show_volatile,
         "failures": [],
         "skipped": [],
+        "relogins": [],
     }
     with lock.hold(timed=not args.no_perf), sync_playwright() as pw:
         browser = session.launch(pw)

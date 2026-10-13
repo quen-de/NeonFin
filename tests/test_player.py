@@ -216,3 +216,30 @@ def test_taps_register_on_a_page_whose_clock_is_frozen(browser):
     player.wake(page, PROFILES["phone"])
     assert page.evaluate("taps") == 2
     ctx.close()
+
+
+@pytest.mark.parametrize(("hide_at", "window", "held"), [(60, 200, False), (250, 100, True), (None, 200, True)])
+def test_controls_held_counts_only_a_hide_inside_the_window(browser, hide_at, window, held):
+    # A hide after the window, while the harness reads its results, is not an early hide.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None, freeze_clock=False)
+    page.set_content("<div class=videoOsdBottom></div>")
+    page.evaluate(player.PLAYER_JS)
+    page.evaluate(player.HELD_ARM)
+    if hide_at is not None:
+        page.evaluate("(ms) => setTimeout(() => document.querySelector('.videoOsdBottom').classList.add('videoOsdBottom-hidden'), ms)", hide_at)
+    page.wait_for_timeout(400)
+    assert page.evaluate(player.HELD, window) is held
+    ctx.close()
+
+
+def test_a_trial_that_fails_says_why_and_still_stops_its_conversion(browser, monkeypatch):
+    stopped = []
+
+    def never_plays(*args):
+        raise RuntimeError("never played\nmore detail")
+
+    monkeypatch.setattr(player, "measure", never_plays)
+    monkeypatch.setattr(player, "stop_conversion", lambda page, urls: stopped.append(page) or True)
+    with pytest.raises(player.TrialError) as failed:
+        player.play_trial(browser, None, PROFILES["desktop"], "x", False, None, session.Override(""), frozenset())
+    assert (str(failed.value), failed.value.conversion_stopped, len(stopped)) == ("never played", True, 1)

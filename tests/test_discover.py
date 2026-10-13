@@ -12,14 +12,15 @@ def test_merge_local_takes_new_items_and_keeps_every_developer_key():
     }
 
 
-def film(id, container="mp4", vcodec="h264", vrange="SDR", acodec="aac", height=1080):
+def film(id, container="mp4", vcodec="h264", vrange="SDR", acodec="aac", height=1080, *, vrange_type=None):
     return {
         "Id": id,
         "MediaSources": [
             {
                 "Container": container,
                 "MediaStreams": [
-                    {"Type": "Video", "Codec": vcodec, "VideoRange": vrange, "Height": height},
+                    {"Type": "Video", "Codec": vcodec, "VideoRange": vrange, "Height": height,
+                     "VideoRangeType": vrange_type or ("HDR10" if vrange == "HDR" else "SDR")},
                     {"Type": "Audio", "Codec": acodec},
                 ],
             }
@@ -45,3 +46,9 @@ def test_an_hdr_film_without_aac_sound_still_counts():
 
 def test_a_container_list_naming_mp4_counts_as_mp4():
     assert discover.pick_player_titles([film("d", container="mov,mp4,m4a,3gp,3g2,mj2")]) == {"play_direct": "d"}
+
+
+def test_dolby_vision_alone_is_not_the_hdr_film():
+    # A browser asked about Dolby Vision alone is asked a different question from HDR10 or HLG.
+    films = [film("dv", "mkv", "hevc", "HDR", vrange_type="DOVI"), film("dvhdr", "mkv", "hevc", "HDR", vrange_type="DOVIWithHDR10")]
+    assert discover.pick_player_titles(films) == {"play_hdr": "dvhdr"}

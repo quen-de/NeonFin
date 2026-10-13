@@ -30,10 +30,16 @@ def _streams(film: dict) -> tuple[dict, dict, dict]:
     return source, video, audio
 
 
+# HDR a browser is asked about as HDR. Dolby Vision alone is a different question, and a
+# browser that cannot answer it makes the server convert for a reason that is not HDR.
+HDR_TYPES = {"HDR10", "HDR10Plus", "HLG", "DOVIWithHDR10", "DOVIWithHLG"}
+
+
 def pick_player_titles(films: list[dict]) -> dict[str, str]:
     """The player measurement's two films, first in the order given (sort name), 720 lines or
     more: play_direct, an H.264 MP4 with AAC sound that any browser plays as is; play_hdr, an
-    HEVC HDR film, with AAC sound if one has it, so that only the picture can need converting."""
+    HEVC HDR10 or HLG film (Dolby Vision only with one of those under it), with AAC sound if
+    one has it, so that only the picture can need converting."""
     direct = hdr = hdr_aac = None
     for film in films:
         source, video, audio = _streams(film)
@@ -43,7 +49,7 @@ def pick_player_titles(films: list[dict]) -> dict[str, str]:
         plain = video.get("Codec") == "h264" and video.get("VideoRange") == "SDR"
         if direct is None and plain and containers & {"mp4", "m4v", "mov"} and audio.get("Codec") == "aac":
             direct = film["Id"]
-        if video.get("Codec") == "hevc" and video.get("VideoRange") == "HDR":
+        if video.get("Codec") == "hevc" and video.get("VideoRangeType") in HDR_TYPES:
             hdr = hdr or film["Id"]
             if audio.get("Codec") == "aac":
                 hdr_aac = hdr_aac or film["Id"]

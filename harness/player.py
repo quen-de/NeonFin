@@ -119,7 +119,16 @@ QUALITY = """() => {
   const q = window.__nfp.video.getVideoPlaybackQuality();
   return [q.droppedVideoFrames, q.totalVideoFrames];
 }"""
-OSD_UP = "() => !document.querySelector('.videoOsdBottom').classList.contains('videoOsdBottom-hidden')"
+# Whether the controls stayed up through the frame window. The hide is timed when it happens,
+# so one after the window, while the harness reads its results, does not count as early.
+HELD_ARM = r"""() => {
+  const L = window.__nfp, bar = document.querySelector('.videoOsdBottom');
+  const hidden = () => bar.classList.contains('videoOsdBottom-hidden');
+  L.held = { from: performance.now(), hid: hidden() ? performance.now() : null };
+  new MutationObserver(() => { if (L.held.hid === null && hidden()) L.held.hid = performance.now(); })
+    .observe(bar, { attributes: true, attributeFilter: ['class'] });
+}"""
+HELD = "(ms) => window.__nfp.held.hid === null || window.__nfp.held.hid - window.__nfp.held.from >= ms"
 STOP_TIMEOUT_MS = 10_000
 STOP_JS = """([id, ms]) => Promise.race([
   window.ApiClient.stopActiveEncodings(id).then(() => true, () => false),
@@ -245,6 +254,7 @@ def measure(page, cdp, cfg, prof, item: str, urls: list[str]) -> dict:
     page.wait_for_function("() => window.__nfp.osd.visible !== null", timeout=10_000)
     osd = page.evaluate("() => window.__nfp.osd")
     m0, q0 = perf.read_metrics(cdp), page.evaluate(QUALITY)
+    page.evaluate(HELD_ARM)
     page.evaluate(perf.RAF_START)
     page.wait_for_timeout(WINDOW_MS)
     frames = page.evaluate(perf.RAF_STOP)
@@ -256,7 +266,7 @@ def measure(page, cdp, cfg, prof, item: str, urls: list[str]) -> dict:
         | {
             "video_dropped": q1[0] - q0[0],
             "video_frames": q1[1] - q0[1],
-            "controls_held": page.evaluate(OSD_UP),
+            "controls_held": page.evaluate(HELD, WINDOW_MS),
             "method": play_method(urls),
         }
     )

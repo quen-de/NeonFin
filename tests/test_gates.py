@@ -326,3 +326,8 @@ def test_scope_all_checks_blue_on_every_route(tmp_path, capsys):
     (tmp_path / "c" / "summary.json").write_text(json.dumps(c))
     assert gates.main(["--bench", str(tmp_path / "b"), str(tmp_path / "c"), "--scope", "all"]) == 1
     assert "desktop/homeprefs: Jellyfin blue still painted" in capsys.readouterr().out
+
+
+def test_a_capture_that_signed_in_again_says_so(tmp_path, capsys):
+    code, out = judge(tmp_path, [bench(full_cells("all", CLEAR))], [capture("all", relogins=["desktop/movies"])], capsys)
+    assert code == 0 and "signed in again before desktop/movies" in out
