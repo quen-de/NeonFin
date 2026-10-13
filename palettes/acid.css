@@ -1,0 +1,9 @@
+/* NeonFin palette: Acid green. Paste after the skin in Custom CSS. */
+:root {
+  --nf-neon: #b6ff2e;
+  --nf-on-neon: #000;
+  --nf-teal: #ff2bd6;
+  --nf-ink: #050704;
+  --nf-ink-2: #090c07;
+  --nf-chrome: #131a10;
+}

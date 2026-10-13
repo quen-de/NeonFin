@@ -1,6 +1,6 @@
 /* NeonFin tokens. Override any of them after the skin to restyle it. */
 :root {
-  /* The palette. Every colour in the skin comes from these eight, so one :root block that
+  /* The palette. Every colour in the skin comes from these nine, so one :root block that
      sets some of them recolours it all (see the README). */
   --nf-neon: #ff2448;
   --nf-teal: #19d3c5;
@@ -10,6 +10,8 @@
   --nf-paper: #f6f3f0;
   --nf-light: #fff;
   --nf-shade: #000;
+  /* Labels and ticks drawn on the accent. A light accent needs a dark one. */
+  --nf-on-neon: var(--nf-light);
 
   --nf-neon-deep: color-mix(in srgb, var(--nf-neon) 70%, var(--nf-shade));
   --nf-oxblood: color-mix(in srgb, var(--nf-neon) 29%, var(--nf-shade));

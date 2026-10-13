@@ -1,0 +1,8 @@
+/* NeonFin palette: Violet. Paste after the skin in Custom CSS. */
+:root {
+  --nf-neon: #a855ff;
+  --nf-teal: #2ee6d6;
+  --nf-ink: #06050b;
+  --nf-ink-2: #0b0914;
+  --nf-chrome: #161225;
+}

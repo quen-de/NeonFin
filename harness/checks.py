@@ -111,7 +111,7 @@ def palette_hits(page, colours) -> dict[str, int]:
 # Every palette input moved off its default. Run after the skin, a colour that stays put was
 # written out somewhere instead of taken from the palette.
 SWAP_PALETTE = """:root { --nf-neon: #00e5ff; --nf-teal: #ffb000; --nf-ink: #140a1e; --nf-ink-2: #1a0f26;
-  --nf-chrome: #2a1838; --nf-paper: #e6f2ff; --nf-light: #fff8e0; --nf-shade: #100008; }"""
+  --nf-chrome: #2a1838; --nf-paper: #e6f2ff; --nf-light: #fff8e0; --nf-shade: #100008; --nf-on-neon: #201000; }"""
 COLOUR_VALUE = re.compile(
     r"rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)|color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: / ([\d.]+))?\)"
 )

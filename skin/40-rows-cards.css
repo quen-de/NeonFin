@@ -211,7 +211,7 @@
 /* Counts and the watched check: crimson wherever Jellyfin shows them, lists included. */
 .countIndicator,
 .playedIndicator {
-  color: var(--nf-light);
+  color: var(--nf-on-neon);
   background-color: var(--nf-neon);
   box-shadow: 0 2px 6px color-mix(in srgb, var(--nf-shade) 50%, transparent);
 }

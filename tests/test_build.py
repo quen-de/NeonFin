@@ -1,4 +1,5 @@
 import base64
+import re
 
 import pytest
 
@@ -104,3 +105,24 @@ def test_a_comment_that_joins_two_tokens_fails_with_its_file(tmp_path):
     root = make_skin(tmp_path, {"skin/30-header.css": ".h { border: 1px/* x */solid; }\n"})
     with pytest.raises(BuildError, match="skin/30-header.css: line 1: a comment is all that separates"):
         build.assemble(root)
+
+
+def test_the_palette_has_nine_inputs_each_a_token():
+    tokens = build.preset_tokens((build.ROOT / build.TOKENS).read_text())
+    assert build.PALETTE == ("neon", "teal", "ink", "ink-2", "chrome", "paper", "light", "shade", "on-neon")
+    assert set(build.PALETTE) <= set(tokens) and tokens["on-neon"] == "var(--nf-light)"
+
+
+def test_presets_set_only_palette_inputs_in_hex():
+    files = sorted((build.ROOT / "palettes").glob("*.css"))
+    assert [f.stem for f in files] == ["acid", "amber", "cyan", "violet"]
+    for f in files:
+        css = f.read_text()
+        assert build.PRESET_HEADER.match(css), f.name
+        tokens = build.preset_tokens(css)
+        assert tokens and set(tokens) <= set(build.PALETTE), f.name
+        assert all(re.fullmatch(r"#[0-9a-f]{3}|#[0-9a-f]{6}", v) for v in tokens.values()), f.name
+
+
+def test_hex6_spells_every_colour_out():
+    assert build.hex6("#ABC") == "#aabbcc" and build.hex6("#00e5ff") == "#00e5ff"

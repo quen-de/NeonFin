@@ -110,7 +110,7 @@
 }
 
 .jellyseerr-card .jellyseerr-status-badge:is(.status-requested, .status-pending, .status-processing) {
-  color: var(--nf-light) !important;
+  color: var(--nf-on-neon) !important;
   background-color: var(--nf-neon-deep) !important;
 }
 

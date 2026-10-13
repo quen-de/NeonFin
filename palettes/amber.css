@@ -1,0 +1,8 @@
+/* NeonFin palette: Amber. Paste after the skin in Custom CSS. */
+:root {
+  --nf-neon: #ffb020;
+  --nf-on-neon: #000;
+  --nf-ink: #070605;
+  --nf-ink-2: #0d0b08;
+  --nf-chrome: #1a1610;
+}

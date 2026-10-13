@@ -27,26 +27,29 @@ Bar plugin is not supported.
 
 ## Change the palette
 
-Every colour in the skin comes from eight tokens. To restyle it, add a block after the skin
-in Custom CSS and set only the ones you want to change. For a cyan neon:
+Every colour in the skin comes from nine tokens. To restyle it, add a block after the skin
+in Custom CSS and set only the ones you want to change.
 
-    :root { --nf-neon: #00e5ff; }
+Four presets are ready in `palettes/`: Cyan neon, Amber, Violet and Acid green. Paste one
+after the skin.
 
-The eight, with their defaults:
+The nine, with their defaults:
 
     :root {
-      --nf-neon: #ff2448;   /* accent: Play, focus rings, lit titles, progress */
-      --nf-teal: #19d3c5;   /* second accent, in the background light */
-      --nf-ink: #05060a;    /* page background */
-      --nf-ink-2: #090b12;  /* raised background */
-      --nf-chrome: #121420; /* header, menus and panels */
-      --nf-paper: #f6f3f0;  /* text */
-      --nf-light: #fff;     /* highlights, rims and washes */
-      --nf-shade: #000;     /* shadows */
+      --nf-neon: #ff2448;            /* accent: Play, focus rings, lit titles, progress */
+      --nf-on-neon: var(--nf-light); /* labels and ticks drawn on the accent */
+      --nf-teal: #19d3c5;            /* second accent, in the background light */
+      --nf-ink: #05060a;             /* page background */
+      --nf-ink-2: #090b12;           /* raised background */
+      --nf-chrome: #121420;          /* header, menus and panels */
+      --nf-paper: #f6f3f0;           /* text */
+      --nf-light: #fff;              /* highlights, rims and washes */
+      --nf-shade: #000;              /* shadows */
     }
 
-The defaults keep every label readable over the brightest artwork. A lighter ink or chrome,
-or a darker paper, can cost that.
+A light accent needs dark labels: the cyan, amber and acid green presets set
+`--nf-on-neon: #000`. The defaults keep every label readable over the brightest artwork. A
+lighter ink or chrome, or a darker paper, can cost that.
 
 ## Licence
 

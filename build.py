@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 import skinlint
-from cssscan import BuildError, brace_scan, line_of, strip_comments
+from cssscan import BuildError, brace_scan, declarations, leaf_rules, line_of, strip_comments
 
 ROOT = pathlib.Path(__file__).resolve().parent
 TOKENS = "skin/00-tokens.css"
@@ -28,6 +28,24 @@ FONT_FILE = "skin/fonts/neonfin-sign-800.woff2"
 FONT_FAMILY = "NeonFin Sign"
 FONT_WEIGHT = 800
 HEADER_RE = re.compile(r"^/\* neonfin ([0-9a-f]{40}|unknown)(-dirty)?")
+# The palette's inputs, in the order a picker shows them; each is a --nf- token.
+PALETTE = ("neon", "teal", "ink", "ink-2", "chrome", "paper", "light", "shade", "on-neon")
+PRESET_HEADER = re.compile(r"/\* NeonFin palette: ([^.]+)\. Paste after the skin in Custom CSS\. \*/\n")
+
+
+def preset_tokens(css: str) -> dict[str, str]:
+    """The --nf- properties a stylesheet's :root rules set, by name without the prefix."""
+    out: dict[str, str] = {}
+    for rule in leaf_rules(css):
+        if rule.prelude == ":root":
+            out |= {p.removeprefix("--nf-"): v for p, v in declarations(rule.body) if p.startswith("--nf-")}
+    return out
+
+
+def hex6(value: str) -> str:
+    """A hex colour as #rrggbb, lower case."""
+    v = value.strip().lower()
+    return "#" + "".join(c * 2 for c in v[1:]) if re.fullmatch(r"#[0-9a-f]{3}", v) else v
 
 
 def skin_files(root: pathlib.Path | None = None) -> list[str]:

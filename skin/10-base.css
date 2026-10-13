@@ -24,7 +24,7 @@ html {
 
 ::selection {
   background-color: var(--nf-neon-deep);
-  color: var(--nf-light);
+  color: var(--nf-on-neon);
 }
 
 ::-webkit-scrollbar {
@@ -71,7 +71,7 @@ html {
   --jf-palette-primary-main: var(--nf-neon);
   --jf-palette-primary-light: var(--nf-neon-text);
   --jf-palette-primary-dark: var(--nf-neon-deep);
-  --jf-palette-primary-contrastText: var(--nf-light);
+  --jf-palette-primary-contrastText: var(--nf-on-neon);
   --jf-palette-primary-mainChannel: 255 255 255;
   --jf-palette-primary-lightChannel: 255 255 255;
   --jf-palette-primary-darkChannel: 255 255 255;
@@ -79,7 +79,7 @@ html {
   --jf-palette-secondary-main: var(--nf-neon);
   --jf-palette-secondary-light: var(--nf-neon-text);
   --jf-palette-secondary-dark: var(--nf-neon-deep);
-  --jf-palette-secondary-contrastText: var(--nf-light);
+  --jf-palette-secondary-contrastText: var(--nf-on-neon);
   --jf-palette-secondary-mainChannel: 255 255 255;
   --jf-palette-secondary-lightChannel: 255 255 255;
   --jf-palette-secondary-darkChannel: 255 255 255;

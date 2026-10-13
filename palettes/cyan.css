@@ -1,0 +1,9 @@
+/* NeonFin palette: Cyan neon. Paste after the skin in Custom CSS. */
+:root {
+  --nf-neon: #00e5ff;
+  --nf-on-neon: #000;
+  --nf-teal: #ff3dbb;
+  --nf-ink: #04070a;
+  --nf-ink-2: #08101a;
+  --nf-chrome: #0f1a24;
+}

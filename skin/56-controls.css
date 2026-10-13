@@ -34,14 +34,14 @@
   background: color-mix(in srgb, var(--nf-light) 14%, transparent);
 }
 
-/* Checkboxes: crimson when on, with a white tick; an empty box takes focus in crimson. */
+/* Checkboxes: crimson when on, with a tick in the label colour; an empty box takes focus in crimson. */
 input.emby-checkbox:checked + span + .checkboxOutline {
   background-color: var(--nf-neon);
   border-color: var(--nf-neon);
 }
 
 input.emby-checkbox:checked + span + .checkboxOutline > .checkboxIcon-checked {
-  color: var(--nf-light);
+  color: var(--nf-on-neon);
 }
 
 /* The input itself is invisible, so keyboard focus rings its box: a ticked box keeps its fill. */
