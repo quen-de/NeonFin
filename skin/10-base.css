@@ -17,6 +17,7 @@ html {
   color: var(--nf-text);
   color-scheme: dark;
   caret-color: var(--nf-neon);
+  accent-color: var(--nf-neon);
   scrollbar-color: color-mix(in srgb, var(--nf-light) 18%, transparent) transparent;
   scrollbar-width: thin;
 }
@@ -61,4 +62,32 @@ html {
 
 :is(button, a).paper-icon-button-light.show-focus:focus {
   color: var(--nf-neon-text);
+}
+
+/* Jellyfin's MUI theme paints from these variables at (0,1,0); its blue becomes the accent.
+   MUI mixes its hover and focus tints from the channel triplets, which a colour token cannot
+   be split into, so those tints are neutral white. */
+:root:root {
+  --jf-palette-primary-main: var(--nf-neon);
+  --jf-palette-primary-light: var(--nf-neon-text);
+  --jf-palette-primary-dark: var(--nf-neon-deep);
+  --jf-palette-primary-contrastText: var(--nf-light);
+  --jf-palette-primary-mainChannel: 255 255 255;
+  --jf-palette-primary-lightChannel: 255 255 255;
+  --jf-palette-primary-darkChannel: 255 255 255;
+  --jf-palette-primary-contrastTextChannel: 255 255 255;
+  --jf-palette-secondary-main: var(--nf-neon);
+  --jf-palette-secondary-light: var(--nf-neon-text);
+  --jf-palette-secondary-dark: var(--nf-neon-deep);
+  --jf-palette-secondary-contrastText: var(--nf-light);
+  --jf-palette-secondary-mainChannel: 255 255 255;
+  --jf-palette-secondary-lightChannel: 255 255 255;
+  --jf-palette-secondary-darkChannel: 255 255 255;
+  --jf-palette-secondary-contrastTextChannel: 255 255 255;
+}
+
+/* Links in MUI pages read in the crimson for text, like the rest. */
+.MuiTypography-root.MuiLink-root {
+  color: var(--nf-neon-text);
+  text-decoration-color: color-mix(in srgb, var(--nf-neon-text) 50%, transparent);
 }

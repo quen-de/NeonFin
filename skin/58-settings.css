@@ -9,3 +9,14 @@
   color: var(--nf-light);
   background-color: var(--nf-oxblood);
 }
+
+/* Working pages, so no signs: headings in semibold interface type (spec 6.14). */
+.userPreferencesPage :is(.sectionTitle, .MuiTypography-h2) {
+  font-weight: 600;
+}
+
+/* The sample behind the subtitle preview: oxblood into the ink, not Jellyfin's blue, which it
+   sets inline. */
+.userPreferencesPage .subtitleappearance-preview {
+  background: linear-gradient(135deg, var(--nf-oxblood), var(--nf-ink-2)) !important;
+}

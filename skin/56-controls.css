@@ -1,7 +1,8 @@
-/* Legacy form controls. Jellyfin paints them in its blue from global rules (spec 6.10), so
+/* Legacy form controls and MUI's contained buttons. Jellyfin paints them in its blue from global rules (spec 6.10), so
    the fix is global too: the primary button is the neon tube, every other raised button a
    tinted pill, and focus keeps the fill and shows the crimson ring. */
-.raised.button-submit {
+.raised.button-submit,
+.MuiButton-root.MuiButton-contained {
   color: var(--nf-light);
   font-weight: 600;
   text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
@@ -12,7 +13,9 @@
 }
 
 .raised.button-submit:hover,
-.raised.button-submit:focus {
+.raised.button-submit:focus,
+.MuiButton-root.MuiButton-contained:hover,
+.MuiButton-root.MuiButton-contained:focus-visible {
   color: var(--nf-light);
   background: color-mix(in srgb, var(--nf-neon) 22%, transparent);
 }

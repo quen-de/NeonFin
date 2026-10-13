@@ -13,6 +13,12 @@ COLOUR_ROUTES = [
     ("movies", "phone"),
     ("homeprefs", "desktop"),
     ("quickconnect", "desktop"),
+    ("prefs", "desktop"),
+    ("display", "desktop"),
+    ("display", "phone"),
+    ("playback", "desktop"),
+    ("subtitles", "desktop"),
+    ("profile", "desktop"),
 ]
 
 
