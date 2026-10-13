@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import pathlib
+import re
 
 from PIL import Image
 
@@ -105,6 +106,58 @@ def palette_hits(page, colours) -> dict[str, int]:
     """Paint still in any of these (r, g, b) colours, by element and property."""
     at_rest(page)
     return page.evaluate(_js("palette.js"), [list(c) for c in colours])
+
+
+# Every palette input moved off its default. Run after the skin, a colour that stays put was
+# written out somewhere instead of taken from the palette.
+SWAP_PALETTE = """:root { --nf-neon: #00e5ff; --nf-teal: #ffb000; --nf-ink: #140a1e; --nf-ink-2: #1a0f26;
+  --nf-chrome: #2a1838; --nf-paper: #e6f2ff; --nf-light: #fff8e0; --nf-shade: #100008; }"""
+COLOUR_VALUE = re.compile(
+    r"rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)|color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: / ([\d.]+))?\)"
+)
+# Colours the palette is not meant to move: rating stars, artwork drawn in SVG (studio and
+# rating logos), and the categories Jellyfin Enhanced's calendar codes by colour. Icons MUI
+# draws in its theme colour are not artwork.
+ON_PURPOSE = re.compile(r"\bstar\b|jellyseerr-rating > svg |je-calendar-(?:legend-item|agenda-event-marker|play-btn)")
+ARTWORK = re.compile(r"(?:^|> )(?:svg|g|path)\b[^>]* (?:fill|stroke)$")
+
+
+def colour_values(value: str) -> list[tuple[float, float, float, float]]:
+    out = []
+    for m in COLOUR_VALUE.finditer(value):
+        if m[1] is not None:
+            out.append((float(m[1]), float(m[2]), float(m[3]), float(m[4] or 1)))
+        else:
+            out.append((float(m[5]) * 255, float(m[6]) * 255, float(m[7]) * 255, float(m[8] or 1)))
+    return out
+
+
+def neutral(c) -> bool:
+    """Black, white, clear, and the faint gray veils Jellyfin lays over things."""
+    r, g, b, a = c
+    return a == 0 or (r, g, b) in ((0, 0, 0), (255, 255, 255)) or (r == g == b and a <= 0.2)
+
+
+def fixed_on_purpose(key: str) -> bool:
+    return bool(ON_PURPOSE.search(key)) or ("MuiSvgIcon" not in key and bool(ARTWORK.search(key)))
+
+
+def paint(page) -> dict[str, list[str]]:
+    at_rest(page)
+    return page.evaluate(_js("colours.js"))
+
+
+def unmoved(before: dict[str, list[str]], after: dict[str, list[str]]) -> dict[str, list[str]]:
+    """What an element painted the same before and after the palette swap, neutrals and the
+    colours kept on purpose aside: a colour written out instead of taken from the palette."""
+    out = {}
+    for key in sorted(before.keys() & after.keys()):
+        if fixed_on_purpose(key):
+            continue
+        same = sorted(v for v in set(before[key]) & set(after[key]) if any(not neutral(c) for c in colour_values(v)))
+        if same:
+            out[key] = same
+    return out
 
 
 def relative_luminance(rgb) -> float:

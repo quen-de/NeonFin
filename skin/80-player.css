@@ -62,3 +62,9 @@
 .upNextDialog-countdownText {
   color: var(--nf-neon-text);
 }
+
+/* The now-playing bar: solid chrome, like every bar over content. */
+.appfooter {
+  background-color: var(--nf-chrome-solid);
+  box-shadow: inset 0 1px 0 var(--nf-rim);
+}

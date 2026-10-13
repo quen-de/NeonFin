@@ -99,6 +99,16 @@
   border-radius: var(--nf-radius-card);
 }
 
+/* The placeholder under the artwork, and the type icon on it, in the page's own ink. */
+.card .cardPadder,
+.cardBox:not(.visualCardBox) .cardPadder {
+  background-color: var(--nf-ink-2);
+}
+
+.card .cardPadder .cardImageIcon {
+  color: color-mix(in srgb, var(--nf-light) 22%, transparent);
+}
+
 .card .cardImageContainer {
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 10%, transparent),

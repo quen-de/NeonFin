@@ -1,0 +1,11 @@
+/* Settings pages and the lists on them. */
+.userPreferencesPage .paperList {
+  background-color: var(--nf-chrome-tint);
+  border-radius: var(--nf-radius-card);
+}
+
+/* A list item's round icon: oxblood, like the avatars, not Jellyfin's blue. */
+.listItemIcon:not(.listItemIcon-transparent) {
+  color: var(--nf-light);
+  background-color: var(--nf-oxblood);
+}

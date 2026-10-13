@@ -104,3 +104,46 @@ def test_checks_survive_a_transition_that_cannot_finish(page, tmp_path, monkeypa
       p.style.color = '#eee'; p.getAnimations()[0].playbackRate = 0; }""")
     checks.contrast_failures(page, "t", tmp_path / "c.png")  # must not raise
     checks.blue_hits(page)
+
+
+def test_paint_reads_text_colour_only_where_text_is_drawn(page):
+    page.set_content("""<div id=a style="color:rgb(1, 2, 3);width:9px;height:9px"></div>
+      <p id=b style="color:rgb(1, 2, 3)">text</p><span class=material-icons style="color:rgb(4, 5, 6)">star</span>
+      <div id=z style="width:0;height:0;background:rgb(7, 8, 9)"></div>""")
+    got = checks.paint(page)
+    assert "body > div#a color" not in got and got["body > p#b color"] == ["rgb(1, 2, 3)"]
+    assert got["body > span.material-icons[star] color"] == ["rgb(4, 5, 6)"]
+    assert not any("rgb(7, 8, 9)" in v for vs in got.values() for v in vs)
+
+
+def test_unmoved_keeps_only_colours_the_swap_left_in_place():
+    before = {
+        "div.x bg": ["rgb(32, 32, 32)"],
+        "div.y bg": ["rgb(255, 36, 72)"],
+        "div.z bg": ["rgba(255, 255, 255, 0.5)"],
+        "div.v bg": ["rgba(40, 40, 40, 0.1)"],
+        "div.c bg": ["rgba(0, 0, 0, 0)"],
+        "div > span.material-icons[star] color": ["rgb(242, 176, 30)"],
+    }
+    after = {**before, "div.y bg": ["rgb(0, 229, 255)"]}
+    assert checks.unmoved(before, after) == {"div.x bg": ["rgb(32, 32, 32)"]}
+
+
+@pytest.mark.parametrize(
+    ("key", "on_purpose"),
+    [
+        ("div.star-rating-container > span.material-icons.community-rating-star.star color", True),
+        ("a.itemAction > span.material-icons[star] color", True),
+        ("div.jellyseerr-rating > svg fill", True),
+        ("svg > g#layer1 fill", True),
+        ("g#layer1 > path fill", True),
+        ("div.je-calendar-legend-item > span.je-msym-rounded color", True),
+        ("div.je-calendar-agenda-indicators > button.je-calendar-play-btn bg", True),
+        ("span.MuiCheckbox-root > svg.MuiSvgIcon-root fill", False),
+        ("svg.MuiSvgIcon-root > path fill", False),
+        ("div.MuiButton-startIcon > svg bg", False),
+        ("div > h3 color", False),
+    ],
+)
+def test_only_stars_artwork_and_calendar_categories_keep_their_colours(key, on_purpose):
+    assert checks.fixed_on_purpose(key) is on_purpose
