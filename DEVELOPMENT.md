@@ -34,7 +34,8 @@ nothing is ever written to the server.
 3. `uv run python -m harness.run --label NAME --css dist` captures every route on desktop and
    phone into `harness/runs/NAME/` (`--css live` uses the server's own custom CSS).
    The `picker` route shows the sign-in page's user picker with two made-up users that the
-   harness answers itself; no request about real users reaches the server.
+   harness answers itself from the first request on, so no request about real users reaches
+   the server. Every page the harness opens refuses plugin writes and sign-in requests.
 4. `uv run python -m harness.compare harness/runs/A harness/runs/B` diffs two runs.
 
 ## Gates

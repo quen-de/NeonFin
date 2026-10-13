@@ -58,10 +58,14 @@ PICKER_USERS = [
 ]
 
 
-def picker(page):
+def picker_users(page):
     body = json.dumps(PICKER_USERS)
     page.route(api_path("/users/public"), lambda route: route.fulfill(status=200, content_type="application/json", body=body))
-    page.reload()
+
+
+def picker(page):
+    # The picker shows the made-up users only if the harness's answer was used.
+    page.locator("#divUsers .card", has_text="Alex").first.wait_for(state="visible", timeout=10_000)
 
 
 def jepanel(page):
@@ -70,3 +74,5 @@ def jepanel(page):
 
 
 STATES = {f.__name__: f for f in (usermenu, select, actionsheet, tooltip, osd, dialog, picker, jepanel)}
+# Run before the route's page loads, so its first request is already answered.
+PREPARE = {"picker": picker_users}

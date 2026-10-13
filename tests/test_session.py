@@ -345,3 +345,33 @@ def test_new_page_can_leave_the_clock_running(browser):
     page.goto("about:blank")
     assert abs(page.evaluate("Date.now()") - time.time() * 1000) < 60_000
     ctx.close()
+
+
+def test_new_page_refuses_plugin_writes_and_sign_in_but_lets_reads_through(browser, server):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/")
+    _Handler.posts.clear()
+    got = page.evaluate("""() => Promise.all([
+        ['/JellyfinEnhanced/jellyseerr/request', 'POST'], ['/HomeScreen/Sections', 'POST'], ['/MediaBarEnhanced/x', 'DELETE'],
+        ['/Users/AuthenticateByName', 'POST'], ['/users/authenticatebyname', 'POST'],
+        ['/JellyfinEnhanced/x.js', 'GET'], ['/other', 'POST'],
+      ].map(([u, m]) => fetch(u, { method: m }).then((r) => r.status, () => 'refused')))""")
+    assert got == ["refused"] * 5 + [200, 204]
+    assert _Handler.posts == ["/other"]
+    ctx.close()
+
+
+def test_open_route_prepares_a_state_before_the_page_loads(browser, server, monkeypatch):
+    from harness.config import Config
+    from harness.profiles import Route
+
+    seen = []
+    monkeypatch.setitem(session.PREPARE, "s", lambda page: seen.append(("prepare", page.url)))
+    monkeypatch.setitem(session.STATES, "s", lambda page: seen.append(("state", page.url)))
+    monkeypatch.setattr(session, "route_url", lambda cfg, route: cfg.url + "/")
+    cfg = Config(url=server, user="u", password="p", items={})
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    session.open_route(page, cfg, Route("x", "", "#out", ready="#out", state="s"), [])
+    assert [s for s, _ in seen] == ["prepare", "state"]
+    assert not seen[0][1].startswith(server) and seen[1][1].startswith(server)
+    ctx.close()

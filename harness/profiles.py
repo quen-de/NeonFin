@@ -75,8 +75,9 @@ ROUTES = (
     Route("actionsheet", "#/details?id={movie}", ".actionSheet", ready=DETAIL, state="actionsheet"),
     # More, then Add to playlist: a form dialog. Nothing is submitted.
     Route("dialog", "#/details?id={movie}", ".formDialog", ready=DETAIL, state="dialog"),
-    # The sign-in page's user picker, with two made-up users (states.picker).
-    Route("picker", "#/login", "#divUsers .card", ready="#txtManualName, .btnManual", state="picker", logged_in=False),
+    # The sign-in page's user picker, with two made-up users answered from the first request
+    # (states.picker_users), so the manual form never shows: wait on the cards themselves.
+    Route("picker", "#/login", "#divUsers .card", state="picker", logged_in=False),
     Route("tooltip", "#/home", ".MuiTooltip-tooltip", ready=".homeSectionsContainer", state="tooltip"),
     Route("osd", "#/details?id={playable}", ".videoOsdBottom", ready=DETAIL, state="osd"),
     # Jellyfin Enhanced's own surfaces: its calendar page, which Plugin Pages hosts, and its

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 import weakref
 from dataclasses import dataclass
 
 from harness import plugins
-from harness.states import STATES
+from harness.states import PREPARE, STATES
 
 
 class LoginError(RuntimeError):
@@ -57,6 +58,17 @@ LOCALE = "en-US"
 # Playing the OSD item would otherwise store a resume point on the server and
 # change the detail pages the next run captures.
 PLAYBACK_REPORTS = "**/Sessions/Playing**"
+# Plugins save their settings and Seerr requests under these paths, and signing in is a write
+# too: a page the harness opens may read, never write. Matched in the browser driver, so the
+# guard costs nothing on the requests it does not match.
+WRITES = re.compile(r"/(?:JellyfinEnhanced|HomeScreen|MediaBarEnhanced)/|/users/authenticatebyname", re.IGNORECASE)
+
+
+def _refuse_writes(route):
+    if route.request.method in ("GET", "HEAD"):
+        route.fallback()
+    else:
+        route.abort()
 # Requests still in flight keep a page unsettled; streams never finish.
 UNTRACKED = {"media", "websocket", "eventsource"}
 _pending: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
@@ -99,6 +111,8 @@ def new_page(browser, profile, state, override: Override | None, plugins_off: fr
 
         ctx.route("**/Branding/Configuration*", branding)
         ctx.route("**/Branding/Css*", css)
+    # Registered last so it runs first.
+    ctx.route(WRITES, _refuse_writes)
     page = ctx.new_page()
     _track_requests(page)
     return ctx, page
@@ -262,6 +276,8 @@ def route_url(cfg, route) -> str:
 
 
 def open_route(page, cfg, route, volatile) -> bool:
+    if route.state in PREPARE:
+        PREPARE[route.state](page)
     navigate(page, route_url(cfg, route), route.ready or route.anchor)
     settle(page, volatile)
     prime(page)
