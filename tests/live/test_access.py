@@ -85,6 +85,7 @@ SLOW = """() => {
   const secs = (v) => Math.max(...v.split(',').map((d) => parseFloat(d) * (d.trim().endsWith('ms') ? 0.001 : 1)));
   const out = new Set();
   for (const e of document.querySelectorAll('*')) for (const p of [null, '::before', '::after']) {
+    if (e.closest('.mdl-spinner')) continue;
     const cs = getComputedStyle(e, p);
     if (secs(cs.transitionDuration) > 0.001 || (cs.animationName !== 'none' && secs(cs.animationDuration) > 0.001))
       out.add(e.tagName.toLowerCase() + [...e.classList].slice(0, 2).map((c) => '.' + c).join('') + (p || ''));
@@ -97,6 +98,28 @@ SLOW = """() => {
 def test_reduced_motion_stops_every_transition_and_animation(open_page, route):
     page = open_page(route, "desktop", "all", media=(("prefers-reduced-motion", "reduce"),))
     assert page.evaluate(SLOW) == []
+
+
+# Jellyfin's loading spinner, as its loading module builds it.
+SPINNER = """() => {
+  const layer = (n) => `<div class="mdl-spinner__layer mdl-spinner__layer-${n}">`
+    + '<div class="mdl-spinner__circle-clipper mdl-spinner__left"><div class="mdl-spinner__circle mdl-spinner__circleLeft"></div></div>'
+    + '<div class="mdl-spinner__circle-clipper mdl-spinner__right"><div class="mdl-spinner__circle mdl-spinner__circleRight"></div></div></div>';
+  const e = document.createElement('div');
+  e.className = 'docspinner mdl-spinner mdlSpinnerActive';
+  e.innerHTML = [1, 2, 3, 4].map(layer).join('');
+  document.body.append(e);
+  const cs = getComputedStyle(e.querySelector('.mdl-spinner__layer'));
+  return [cs.animationDuration, cs.animationIterationCount];
+}"""
+
+
+def test_the_loading_spinner_still_turns_with_reduced_motion(open_page):
+    # Stilled, its arc shrinks to a sliver and the page looks stuck: it is the one motion that
+    # says the page is still loading, so it keeps Jellyfin's own.
+    page = open_page("home", "desktop", "none", media=(("prefers-reduced-motion", "reduce"),), variant="spinner")
+    duration, count = page.evaluate(SPINNER)
+    assert float(duration.split(",")[0].rstrip("s")) >= 1 and count.split(",")[0] == "infinite", (duration, count)
 
 
 def tab_to(page, selector, limit=80):

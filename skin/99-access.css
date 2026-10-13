@@ -28,8 +28,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Everything still: no fade, no slide, no spin. */
-  *,
+  /* Everything still: no fade, no slide, no spin. Jellyfin's loading spinner keeps its own: stilled,
+     its arc shrinks to a sliver and the page looks stuck. */
+  *:not(.mdl-spinner, .mdl-spinner *),
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
