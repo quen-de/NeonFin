@@ -144,3 +144,8 @@
     transparent 70%
   ) !important;
 }
+
+/* Play is a tube: a light focus ring, not one lost in its glow. */
+#slides-container .play-button:focus-visible {
+  outline-color: var(--nf-light) !important;
+}

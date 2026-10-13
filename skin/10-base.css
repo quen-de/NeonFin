@@ -91,3 +91,13 @@ html {
   color: var(--nf-neon-text);
   text-decoration-color: color-mix(in srgb, var(--nf-neon-text) 50%, transparent);
 }
+
+/* On a neon tube a crimson ring disappears into the tube's own glow: these take a light one. */
+:is(
+    .raised.button-submit,
+    .cardOverlayContainer > .cardOverlayFab-primary,
+    .mainDetailButtons > .detailButton.btnPlay,
+    .MuiButton-root.MuiButton-contained
+  ):focus-visible {
+  outline-color: var(--nf-light) !important;
+}

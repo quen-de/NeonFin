@@ -125,3 +125,8 @@
 .cardText .jellyseerr-rating > span {
   color: var(--nf-text-2) !important;
 }
+
+/* Request is a tube: a light focus ring, not one lost in its glow. */
+.jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request:focus-visible {
+  outline-color: var(--nf-light) !important;
+}

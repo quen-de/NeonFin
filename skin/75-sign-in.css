@@ -16,6 +16,8 @@
 
 .layout-mobile #loginPage > .margin-auto-y {
   padding: 22px 18px 18px !important;
+  /* iPhones keep their home bar clear of the last line. */
+  padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
   background-color: color-mix(in srgb, var(--nf-chrome-deep) 96%, transparent);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -74,6 +76,8 @@
 
 #loginPage .loginDisclaimer a {
   color: var(--nf-neon-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* The panel ends one padding under its last line: the disclaimer's paragraph margins and the

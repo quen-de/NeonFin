@@ -1,4 +1,4 @@
-/* Accessibility: solid instead of glass, still instead of moving. Phones' capsules are already
+/* Accessibility: solid instead of glass, still instead of moving (spec 6.17). Phones' capsules are already
    solid but not opaque, at a higher specificity, so they are named again. */
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
   .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
@@ -28,6 +28,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Everything still: no fade, no slide, no spin. */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
   .card .cardScalable,
   .card:hover .cardScalable::after,
   .card:focus-within .cardScalable::after {
