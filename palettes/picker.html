@@ -146,8 +146,17 @@ textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(
 </main>
 <script>
 const PRESETS = /*@PRESETS@*/null;
-const DEFAULTS = PRESETS.Crimson;
-const NAMES = Object.keys(DEFAULTS);
+const NAMES = Object.keys(PRESETS.Crimson);
+// Labels on the accent follow the highlights, as in the skin, until a palette sets them
+// otherwise: null is following.
+const FOLLOWS = { 'on-neon': 'light' };
+const palette = (preset) => {
+  const p = { ...PRESETS.Crimson, ...preset };
+  for (const [n, leader] of Object.entries(FOLLOWS)) if (p[n] === p[leader]) p[n] = null;
+  return p;
+};
+const shown = (p, n) => p[n] ?? p[FOLLOWS[n]];
+const DEFAULTS = palette({});
 const LABELS = {
   neon: 'Accent', teal: 'Background light', ink: 'Page', 'ink-2': 'Raised page', chrome: 'Header, menus, panels',
   paper: 'Text', light: 'Highlights', shade: 'Shadows', 'on-neon': 'Labels on the accent',
@@ -164,7 +173,7 @@ const PAIRS = [
   ['Labels on the deep accent', 'on-neon', 'neon-deep', 4.5],
 ];
 const preview = document.getElementById('preview');
-let values = { ...DEFAULTS };
+let values = palette({});
 
 const hex = (v) => {
   v = String(v).trim().toLowerCase().replace(/^#?/, '#');
@@ -208,7 +217,7 @@ function contrast() {
 }
 
 function block() {
-  const changed = NAMES.filter((n) => values[n] !== DEFAULTS[n]);
+  const changed = NAMES.filter((n) => (n in FOLLOWS ? values[n] !== null : values[n] !== DEFAULTS[n]));
   if (!changed.length) return '/* The default palette: nothing to paste. */\n';
   return '/* NeonFin palette. Paste after the skin in Custom CSS. */\n:root {\n'
     + changed.map((n) => `  --nf-${n}: ${values[n]};`).join('\n') + '\n}\n';
@@ -216,14 +225,15 @@ function block() {
 
 function render() {
   for (const n of NAMES) {
-    preview.style.setProperty(`--nf-${n}`, values[n]);
+    if (values[n] === null) preview.style.removeProperty(`--nf-${n}`);
+    else preview.style.setProperty(`--nf-${n}`, values[n]);
     const row = document.querySelector(`[data-token="${n}"]`);
-    row.querySelector('input[type="color"]').value = values[n];
-    row.querySelector('input[type="text"]').value = values[n];
+    row.querySelector('input[type="color"]').value = shown(values, n);
+    row.querySelector('input[type="text"]').value = shown(values, n);
   }
   for (const b of document.querySelectorAll('[data-preset]')) {
-    const p = { ...DEFAULTS, ...PRESETS[b.dataset.preset] };
-    b.setAttribute('aria-pressed', String(NAMES.every((n) => p[n] === values[n])));
+    const p = palette(PRESETS[b.dataset.preset]);
+    b.setAttribute('aria-pressed', String(NAMES.every((n) => shown(p, n) === shown(values, n))));
   }
   contrast();
   const out = document.getElementById('output');
@@ -240,7 +250,7 @@ for (const name of Object.keys(PRESETS)) {
   b.className = 'preset';
   b.dataset.preset = name;
   b.textContent = name;
-  b.addEventListener('click', () => { values = { ...DEFAULTS, ...PRESETS[name] }; render(); });
+  b.addEventListener('click', () => { values = palette(PRESETS[name]); render(); });
   document.getElementById('presets').append(b);
 }
 for (const n of NAMES) {

@@ -87,6 +87,19 @@ def test_an_unreadable_palette_is_flagged_before_copying(picker):
     assert picker.locator("#warning").is_visible()
 
 
+def test_labels_on_the_accent_follow_the_highlights_until_set(picker):
+    # In the skin they default to the highlights colour: a block that changes only the
+    # highlights changes them too, and the check has to read what the block will paint.
+    choose(picker, "Crimson")
+    type_colour(picker, "light", "#c0c0c0")
+    assert re.findall(r"--nf-[\w-]+: [^;]+;", output(picker)) == ["--nf-light: #c0c0c0;"]
+    assert picker.locator("[data-token='on-neon'] input[type=text]").input_value() == "#c0c0c0"
+    assert "Labels on the accent" in picker.locator(".contrast-row.is-failing .contrast-label").all_inner_texts()
+    type_colour(picker, "on-neon", "#000000")
+    assert re.findall(r"--nf-[\w-]+: [^;]+;", output(picker)) == ["--nf-light: #c0c0c0;", "--nf-on-neon: #000000;"]
+    assert "Labels on the accent" not in picker.locator(".contrast-row.is-failing .contrast-label").all_inner_texts()
+
+
 def test_the_page_fits_a_phone(picker):
     picker.set_viewport_size({"width": 360, "height": 800})
     try:
