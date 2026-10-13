@@ -89,5 +89,18 @@ def test_main_writes_the_stylesheet(tmp_path, monkeypatch):
 
 def test_real_tree_builds_within_budget():
     css = build.assemble()
+    assert "/*" not in css
     assert brace_scan(css) == (0, [])
     assert len(css.encode()) - len(build.font_face().encode()) <= 60_000
+
+
+def test_the_built_sheet_keeps_only_the_stamp_comment(tmp_path):
+    root = make_skin(tmp_path, {"skin/30-header.css": "/* area */\n.h { color: inherit; } /* why */\n"})
+    css = build.build(root)
+    assert css.startswith("/* neonfin ") and css.count("/*") == 1
+
+
+def test_a_comment_that_joins_two_tokens_fails_with_its_file(tmp_path):
+    root = make_skin(tmp_path, {"skin/30-header.css": ".h { border: 1px/* x */solid; }\n"})
+    with pytest.raises(BuildError, match="skin/30-header.css: line 1: a comment is all that separates"):
+        build.assemble(root)

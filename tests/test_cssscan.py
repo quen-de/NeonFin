@@ -1,6 +1,6 @@
 import pytest
 
-from cssscan import BuildError, brace_scan, declarations, leaf_rules, selectors, split_imports
+from cssscan import BuildError, brace_scan, declarations, leaf_rules, selectors, split_imports, strip_comments
 
 
 def test_brace_scan_ignores_comments_and_strings():
@@ -50,3 +50,17 @@ def test_leaf_rules_keep_a_nesting_rule_own_declarations():
 def test_declarations_can_keep_strings():
     body = 'content: "a;b"; background: url("x.svg") /* "c" */;'
     assert declarations(body, keep_strings=True) == [("content", '"a;b"'), ("background", 'url("x.svg")')]
+
+
+def test_strip_comments_keeps_code_and_strings_only():
+    css = (
+        "/* head */\n.a { color: inherit; } /* tail */\n\n"
+        '.b::before { content: "/* kept */"; }\n.c/**/.d { color: inherit; }\n'
+    )
+    assert strip_comments(css) == '.a { color: inherit; }\n.b::before { content: "/* kept */"; }\n.c.d { color: inherit; }\n'
+
+
+def test_a_comment_that_alone_separates_two_tokens_is_an_error():
+    # Removed, it would join 1px and solid into one token and the browser would drop the line.
+    with pytest.raises(BuildError, match="line 2: a comment is all that separates 'x' from 's'"):
+        strip_comments(".a {\n  border: 1px/* x */solid;\n}\n")

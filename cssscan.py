@@ -174,3 +174,29 @@ def selectors(prelude: str) -> list[str]:
                 out.append(part)
             start = i + 1
     return out
+
+
+def _name_char(ch: str) -> bool:
+    return ch.isalnum() or ch in "-_" or ord(ch) > 127
+
+
+def strip_comments(css: str) -> str:
+    """css without comments, blank lines or trailing spaces: what the browser reads, smaller.
+    Strings are kept whole. A comment that alone separates two name characters (1px/**/solid)
+    would join two tokens once removed, so it is an error rather than a silent change."""
+    mask = code_mask(css, strings=True)
+    out: list[str] = []
+    i, n = 0, len(css)
+    while i < n:
+        if mask[i]:
+            out.append(css[i])
+            i += 1
+            continue
+        start = i
+        while i < n and not mask[i]:
+            i += 1
+        before, after = css[start - 1 : start], css[i : i + 1]
+        if before and after and _name_char(before) and _name_char(after):
+            raise BuildError(f"line {line_of(css, start)}: a comment is all that separates {before!r} from {after!r}; add a space")
+    lines = (line.rstrip() for line in "".join(out).split("\n"))
+    return "\n".join(line for line in lines if line) + "\n"

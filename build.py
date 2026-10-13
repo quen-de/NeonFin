@@ -3,8 +3,9 @@
 
 Concatenates skin/ in cascade order (numbered core files, then one file per
 plugin, then the files numbered 99), embeds the sign font as a data: URI,
-enforces the skin rules in skinlint.py, and stamps the commit into a header
-comment. Stdlib only, so any deploy script can run it with a system python3.
+enforces the skin rules in skinlint.py, strips comments, and stamps the commit
+into a header comment. Stdlib only, so any deploy script can run it with a
+system python3.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ import subprocess
 import sys
 
 import skinlint
-from cssscan import BuildError, brace_scan, line_of
+from cssscan import BuildError, brace_scan, line_of, strip_comments
 
 ROOT = pathlib.Path(__file__).resolve().parent
 TOKENS = "skin/00-tokens.css"
@@ -70,7 +71,13 @@ def assemble(root: pathlib.Path | None = None) -> str:
     problems = skinlint.lint(parts)
     if problems:
         raise BuildError("skin rules broken:\n  " + "\n  ".join(problems))
-    return font_face(root) + "\n".join(parts[name] for name in names)
+    stripped = []
+    for name in names:
+        try:
+            stripped.append(strip_comments(parts[name]))
+        except BuildError as e:
+            raise BuildError(f"{name}: {e}") from None
+    return font_face(root) + "".join(stripped)
 
 
 def repo_state(root: pathlib.Path) -> tuple[str, bool]:
