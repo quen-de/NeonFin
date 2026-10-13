@@ -140,7 +140,8 @@ def lint(files: dict[str, str]) -> list[str]:
                 if "[aria-label" in sel:
                     problems.append(f"{where}: {sel!r} selects by aria-label, which is localized")
                 if name in roots:
-                    if roots[name] and not any(r in sel for r in roots[name]):
+                    variables_only = sel == ":root" and decls and all(p.startswith("--") for p, _ in decls)
+                    if roots[name] and not variables_only and not any(r in sel for r in roots[name]):
                         problems.append(f"{where}: {sel!r} selects outside this plugin's roots")
                 else:
                     leaked = [r for r in every_root if r in sel]

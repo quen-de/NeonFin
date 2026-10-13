@@ -128,3 +128,11 @@ def test_tokens_masks_and_keywords_are_not_colour_literals():
         ".c { border-color: currentColor; white-space: nowrap; }\n/* a white backdrop */"
     )
     assert core(css) == []
+
+
+def test_a_plugin_may_hand_its_own_variables_the_palette_on_root():
+    head = "/* plugin: P; roots: .p- */\n"
+    assert lint({"skin/plugins/p.css": head + ":root { --p-accent: var(--nf-neon); }"}) == []
+    assert lint({"skin/plugins/p.css": head + ":root { --p-accent: var(--nf-neon); color: inherit; }"}) == [
+        "skin/plugins/p.css:2: ':root' selects outside this plugin's roots"
+    ]

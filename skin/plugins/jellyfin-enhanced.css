@@ -1,4 +1,17 @@
-/* plugin: Jellyfin Enhanced; roots: .je-, .jellyseerr- */
+/* plugin: Jellyfin Enhanced; roots: .je-, .jellyseerr-, #jellyfin-enhanced-panel */
+/* The plugin themes its panel, calendar and dialogs from the Jellyfish theme's variables when
+   that theme is present, which it tells by --theme-updated-on. Answering as that theme hands
+   the plugin the palette; nothing else reads these names. */
+:root {
+  --theme-updated-on: 1;
+  --primary-accent-color: var(--nf-neon);
+  --primary-background-transparent: var(--nf-ink-2);
+  --secondary-background-transparent: var(--nf-chrome-deep);
+  --text-color: var(--nf-text);
+  --alt-accent-color: color-mix(in srgb, var(--nf-light) 12%, transparent);
+  --blur: 0px;
+}
+
 /* The plugin marks Jellyfin's own actions box; keep it content-width so the core capsule holds. */
 .je-header-actions-host {
   flex: 0 0 auto !important;
@@ -54,4 +67,32 @@
 .jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request:hover:not(:disabled) {
   background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent) !important;
   box-shadow: var(--nf-tube);
+}
+
+/* The settings panel is a dialog: solid, with a rim, like the core's. */
+#jellyfin-enhanced-panel {
+  background: var(--nf-ink-2) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--nf-rim),
+    0 24px 60px -20px color-mix(in srgb, var(--nf-shade) 80%, transparent) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Its two footer actions are secondary: tinted pills. */
+#jellyfin-enhanced-panel :is(#releaseNotesBtn, #clearTranslationCacheButton) {
+  color: var(--nf-text) !important;
+  background: color-mix(in srgb, var(--nf-light) 8%, transparent) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim) !important;
+}
+
+/* The calendar's view in use is a selected pill, as in the header. Its category colours are
+   data and stay. */
+.je-calendar-nav .je-calendar-view-btn.active {
+  color: var(--nf-light) !important;
+  background-color: var(--nf-selected) !important;
+  border-color: transparent !important;
+  box-shadow: var(--nf-selected-edge);
 }

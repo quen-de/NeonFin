@@ -21,6 +21,9 @@ COLOUR_ROUTES = [
     ("profile", "desktop"),
     ("home", "desktop"),
     ("home", "phone"),
+    ("calendar", "desktop"),
+    ("calendar", "phone"),
+    ("jepanel", "desktop"),
 ]
 
 
