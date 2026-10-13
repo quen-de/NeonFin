@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeonFin palette</title>
+<style>
+/*@FONT@*/
+/*@TOKENS@*/
+:root {
+  color-scheme: dark;
+  --ui-ground: #101114;
+  --ui-panel: #17181c;
+  --ui-line: #2a2c33;
+  --ui-text: #ececef;
+  --ui-text-2: #a3a5ad;
+  --ui-pass: #8fd9a0;
+  --ui-fail: #ffa197;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ui-ground); color: var(--ui-text); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+main { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 32px; max-width: 1180px; margin: 0 auto; padding: 32px 16px 56px; }
+h1 { margin: 0 0 6px; font-size: 20px; font-weight: 600; }
+h2 { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ui-text-2); }
+.lede { margin: 0 0 22px; color: var(--ui-text-2); }
+:focus-visible { outline: 2px solid var(--ui-text); outline-offset: 2px; }
+button { font: inherit; color: inherit; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+.preset { padding: 6px 12px; border: 1px solid var(--ui-line); border-radius: 999px; background: transparent; cursor: pointer; }
+.preset[aria-pressed="true"] { border-color: var(--ui-text); background: var(--ui-text); color: var(--ui-ground); }
+.token { display: grid; grid-template-columns: minmax(0, 1fr) 36px 88px; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--ui-line); }
+.token label { display: flex; flex-direction: column; min-width: 0; }
+.token code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ui-text-2); }
+.token input[type="color"] { width: 36px; height: 28px; padding: 0; border: 1px solid var(--ui-line); border-radius: 6px; background: none; cursor: pointer; }
+.token input[type="text"] { width: 88px; padding: 5px 7px; border: 1px solid var(--ui-line); border-radius: 6px; background: var(--ui-panel); color: var(--ui-text); font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.results { display: grid; gap: 28px; min-width: 0; }
+.contrast-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto 64px; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--ui-line); font-variant-numeric: tabular-nums; }
+.contrast-need { color: var(--ui-text-2); }
+.contrast-mark { text-align: right; color: var(--ui-pass); }
+.contrast-row.is-failing .contrast-mark { color: var(--ui-fail); font-weight: 600; }
+.warning { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--ui-fail); border-radius: 8px; color: var(--ui-fail); }
+textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-panel); color: var(--ui-text); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; }
+.copy-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+#copy { padding: 8px 18px; border: 0; border-radius: 999px; background: var(--ui-text); color: var(--ui-ground); font-weight: 600; cursor: pointer; }
+#copied { color: var(--ui-text-2); }
+@media (max-width: 820px) { main { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: 24px; } }
+@media (max-width: 380px) { .contrast-row { grid-template-columns: minmax(0, 1fr) auto 56px; } .contrast-need { display: none; } }
+
+/* The preview: the skin's own tokens, scoped to it, drawing a slice of the interface. */
+.nf-preview { overflow: hidden; padding: 18px; border-radius: 16px; color: var(--nf-text); font-family: var(--nf-ui);
+  background:
+    radial-gradient(70% 60% at 92% -10%, color-mix(in srgb, var(--nf-neon) 22%, transparent), transparent 70%),
+    radial-gradient(60% 55% at -10% 75%, color-mix(in srgb, var(--nf-teal) 16%, transparent), transparent 70%),
+    var(--nf-ink); }
+.pv-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.pv-capsule { display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--nf-chrome-tint); box-shadow: var(--nf-chrome-edge); }
+.pv-pill { padding: 5px 12px; border-radius: 999px; font-size: 13px; color: var(--nf-text-2); }
+.pv-pill.is-selected { color: var(--nf-light); background: var(--nf-selected); box-shadow: var(--nf-selected-edge); }
+.pv-avatar { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 600; color: var(--nf-light); background: var(--nf-oxblood); }
+.pv-sign { margin: 24px 0 12px; font: 800 1.55rem/1 var(--nf-sign-font); letter-spacing: 0.08em; text-transform: uppercase; color: var(--nf-sign); text-shadow: var(--nf-sign-glow); }
+.pv-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pv-card { position: relative; aspect-ratio: 16 / 10; border-radius: var(--nf-radius-card); background: linear-gradient(155deg, var(--nf-chrome), var(--nf-ink-2) 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 10%, transparent), inset 0 1px 0 color-mix(in srgb, var(--nf-light) 18%, transparent); }
+.pv-card.is-ringed { box-shadow: var(--nf-ring); }
+.pv-count { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--nf-on-neon); background: var(--nf-neon); }
+.pv-progress { position: absolute; right: 10px; bottom: 10px; left: 10px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--nf-light) 16%, transparent); }
+.pv-progress > span { display: block; width: 62%; height: 100%; border-radius: inherit; background: var(--nf-neon); }
+.pv-caption { margin: 6px 0 0; font-size: 13px; }
+.pv-caption small { display: block; font-size: 12px; color: var(--nf-text-2); }
+.pv-details { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; margin-top: 22px; }
+.pv-title { margin: 0; font-size: 18px; font-weight: 600; }
+.pv-meta { margin: 2px 0 0; font-size: 13px; color: var(--nf-text-2); }
+.pv-play { margin-top: 14px; padding: 9px 24px; border: 0; border-radius: 999px; font: 600 14px var(--nf-ui); color: var(--nf-light); background: color-mix(in srgb, var(--nf-neon) 12%, transparent); box-shadow: var(--nf-tube); text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent); }
+.pv-check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; }
+.pv-box { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; font-size: 12px; font-weight: 700; color: var(--nf-on-neon); background: var(--nf-neon); }
+.pv-link { color: var(--nf-neon-text); text-decoration: underline; text-underline-offset: 2px; }
+.pv-menu { align-self: start; min-width: 200px; padding: 6px; border-radius: var(--nf-radius-menu); font-size: 13px; background: var(--nf-chrome-solid); box-shadow: var(--nf-chrome-edge); }
+.pv-menu > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 10px; border-radius: 8px; }
+.pv-menu .is-current { background: color-mix(in srgb, var(--nf-light) 6%, transparent); }
+.pv-menu small { color: var(--nf-text-2); }
+.pv-tick { font-weight: 700; color: var(--nf-neon); }
+.pv-swatches { display: none; }
+@media (max-width: 520px) { .pv-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pv-row > :nth-child(3) { display: none; } .pv-menu { min-width: 0; width: 100%; } }
+</style>
+</head>
+<body>
+<main>
+  <section aria-labelledby="title">
+    <h1 id="title">NeonFin palette</h1>
+    <p class="lede">Start from a preset or set your own colours. The preview draws with the skin's own tokens. Paste the block after the skin in your server's Custom CSS.</p>
+    <h2>Presets</h2>
+    <div class="presets" id="presets"></div>
+    <h2>Colours</h2>
+    <div id="tokens"></div>
+  </section>
+  <div class="results">
+    <section aria-label="Preview">
+      <div class="nf-preview" id="preview">
+        <div class="pv-bar">
+          <div class="pv-capsule"><span class="pv-pill is-selected">Home</span><span class="pv-pill">Movies</span><span class="pv-pill">Shows</span></div>
+          <span class="pv-avatar" aria-hidden="true">A</span>
+        </div>
+        <p class="pv-sign">Continue watching</p>
+        <div class="pv-row">
+          <div><div class="pv-card is-ringed"><span class="pv-count">3</span><div class="pv-progress"><span></span></div></div><p class="pv-caption">Night Train<small>2024</small></p></div>
+          <div><div class="pv-card"><div class="pv-progress"><span style="width: 28%"></span></div></div><p class="pv-caption">Harbour Lights<small>S1, E4</small></p></div>
+          <div><div class="pv-card"></div><p class="pv-caption">Glasshouse<small>1h 52m</small></p></div>
+        </div>
+        <div class="pv-details">
+          <div>
+            <p class="pv-title">Night Train</p>
+            <p class="pv-meta">2024 · Thriller · 1h 48m</p>
+            <button class="pv-play" type="button" tabindex="-1">Play</button>
+            <div class="pv-check"><span class="pv-box" aria-hidden="true">✓</span>Play the next episode automatically</div>
+            <p class="pv-meta"><span class="pv-link">More like this</span></p>
+          </div>
+          <div class="pv-menu" aria-hidden="true">
+            <div class="is-current"><span>Original</span><span class="pv-tick">✓</span></div>
+            <div><span>English</span><small>AAC 5.1</small></div>
+            <div><span>French</span><small>AC3 2.0</small></div>
+          </div>
+        </div>
+        <div class="pv-swatches" aria-hidden="true">
+          <i data-swatch="ink" style="background-color: var(--nf-ink)"></i>
+          <i data-swatch="chrome-deep" style="background-color: var(--nf-chrome-deep)"></i>
+          <i data-swatch="neon" style="background-color: var(--nf-neon)"></i>
+          <i data-swatch="neon-deep" style="background-color: var(--nf-neon-deep)"></i>
+          <i data-swatch="neon-text" style="background-color: var(--nf-neon-text)"></i>
+          <i data-swatch="on-neon" style="background-color: var(--nf-on-neon)"></i>
+          <i data-swatch="text" style="background-color: var(--nf-text)"></i>
+          <i data-swatch="text-2" style="background-color: var(--nf-text-2)"></i>
+          <i data-swatch="sign" style="background-color: var(--nf-sign)"></i>
+        </div>
+      </div>
+    </section>
+    <section aria-labelledby="contrast-title">
+      <h2 id="contrast-title">Contrast</h2>
+      <p class="warning" id="warning" hidden>Some text will be hard to read in these colours. The block still works; the rows marked below are the ones to fix.</p>
+      <div id="rows"></div>
+    </section>
+    <section aria-labelledby="output-title">
+      <h2 id="output-title">Your block</h2>
+      <textarea id="output" readonly spellcheck="false" aria-labelledby="output-title"></textarea>
+      <div class="copy-row"><button id="copy" type="button">Copy</button><span id="copied" role="status"></span></div>
+    </section>
+  </div>
+</main>
+<script>
+const PRESETS = /*@PRESETS@*/null;
+const DEFAULTS = PRESETS.Crimson;
+const NAMES = Object.keys(DEFAULTS);
+const LABELS = {
+  neon: 'Accent', teal: 'Background light', ink: 'Page', 'ink-2': 'Raised page', chrome: 'Header, menus, panels',
+  paper: 'Text', light: 'Highlights', shade: 'Shadows', 'on-neon': 'Labels on the accent',
+};
+// What is read, the token it is drawn in, the token under it, the ratio it needs.
+const PAIRS = [
+  ['Text on the page', 'text', 'ink', 4.5],
+  ['Secondary text on the page', 'text-2', 'ink', 4.5],
+  ['Secondary text in menus', 'text-2', 'chrome-deep', 4.5],
+  ['Links in menus', 'neon-text', 'chrome-deep', 4.5],
+  ['Titles on the page', 'sign', 'ink', 3],
+  ['Accent on the page', 'neon', 'ink', 3],
+  ['Labels on the accent', 'on-neon', 'neon', 3],
+  ['Labels on the deep accent', 'on-neon', 'neon-deep', 4.5],
+];
+const preview = document.getElementById('preview');
+let values = { ...DEFAULTS };
+
+const hex = (v) => {
+  v = String(v).trim().toLowerCase().replace(/^#?/, '#');
+  if (/^#[0-9a-f]{3}$/.test(v)) v = '#' + [...v.slice(1)].map((c) => c + c).join('');
+  return /^#[0-9a-f]{6}$/.test(v) ? v : null;
+};
+const rgba = (v) => {
+  let m = v.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
+  if (m) return [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]];
+  m = v.match(/color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: \/ ([\d.]+))?\)/);
+  if (m) return [m[1] * 255, m[2] * 255, m[3] * 255, m[4] === undefined ? 1 : +m[4]];
+  return null;
+};
+const over = (top, under) => top.slice(0, 3).map((c, i) => top[3] * c + (1 - top[3]) * under[i]);
+const luminance = (c) => {
+  const f = (x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; };
+  return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+};
+const ratio = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+const swatch = (name) => rgba(getComputedStyle(preview.querySelector(`[data-swatch="${name}"]`)).backgroundColor);
+
+function contrast() {
+  const page = swatch('ink').slice(0, 3);
+  let failing = 0;
+  document.getElementById('rows').replaceChildren(...PAIRS.map(([what, fg, bg, need]) => {
+    const ground = over(swatch(bg), page);
+    const r = ratio(over(swatch(fg), ground), ground);
+    const ok = r >= need;
+    if (!ok) failing += 1;
+    const row = document.createElement('div');
+    row.className = 'contrast-row' + (ok ? '' : ' is-failing');
+    for (const [cls, text] of [['contrast-label', what], ['contrast-ratio', `${r.toFixed(1)}:1`], ['contrast-need', `needs ${need}:1`], ['contrast-mark', ok ? 'Pass' : 'Too low']]) {
+      const cell = document.createElement('span');
+      cell.className = cls;
+      cell.textContent = text;
+      row.append(cell);
+    }
+    return row;
+  }));
+  document.getElementById('warning').hidden = failing === 0;
+}
+
+function block() {
+  const changed = NAMES.filter((n) => values[n] !== DEFAULTS[n]);
+  if (!changed.length) return '/* The default palette: nothing to paste. */\n';
+  return '/* NeonFin palette. Paste after the skin in Custom CSS. */\n:root {\n'
+    + changed.map((n) => `  --nf-${n}: ${values[n]};`).join('\n') + '\n}\n';
+}
+
+function render() {
+  for (const n of NAMES) {
+    preview.style.setProperty(`--nf-${n}`, values[n]);
+    const row = document.querySelector(`[data-token="${n}"]`);
+    row.querySelector('input[type="color"]').value = values[n];
+    row.querySelector('input[type="text"]').value = values[n];
+  }
+  for (const b of document.querySelectorAll('[data-preset]')) {
+    const p = { ...DEFAULTS, ...PRESETS[b.dataset.preset] };
+    b.setAttribute('aria-pressed', String(NAMES.every((n) => p[n] === values[n])));
+  }
+  contrast();
+  const out = document.getElementById('output');
+  out.value = block();
+  // The field grows to the block, so every line shows without scrolling inside it.
+  out.style.height = '';
+  out.style.height = `${out.scrollHeight + out.offsetHeight - out.clientHeight}px`;
+  document.getElementById('copied').textContent = '';
+}
+
+for (const name of Object.keys(PRESETS)) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'preset';
+  b.dataset.preset = name;
+  b.textContent = name;
+  b.addEventListener('click', () => { values = { ...DEFAULTS, ...PRESETS[name] }; render(); });
+  document.getElementById('presets').append(b);
+}
+for (const n of NAMES) {
+  const row = document.createElement('div');
+  row.className = 'token';
+  row.dataset.token = n;
+  row.innerHTML = `<label for="token-${n}">${LABELS[n] || n}<code>--nf-${n}</code></label>`
+    + `<input type="color" aria-label="${LABELS[n] || n}, colour"><input type="text" id="token-${n}" spellcheck="false" autocomplete="off" maxlength="7">`;
+  const [picker, field] = row.querySelectorAll('input');
+  picker.addEventListener('input', () => { values[n] = picker.value; render(); });
+  field.addEventListener('change', () => { const v = hex(field.value); if (v) values[n] = v; render(); });
+  document.getElementById('tokens').append(row);
+}
+document.getElementById('copy').addEventListener('click', async () => {
+  const out = document.getElementById('output');
+  const note = document.getElementById('copied');
+  try {
+    await navigator.clipboard.writeText(out.value);
+    note.textContent = 'Copied.';
+  } catch (e) {
+    out.focus();
+    out.select();
+    note.textContent = 'Selected: press Cmd+C or Ctrl+C.';
+  }
+});
+render();
+</script>
+</body>
+</html>

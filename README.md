@@ -33,6 +33,10 @@ in Custom CSS and set only the ones you want to change.
 Four presets are ready in `palettes/`: Cyan neon, Amber, Violet and Acid green. Paste one
 after the skin.
 
+To make your own, open `dist/palette.html` (written by `python3 build.py` next to the
+stylesheet) in a browser. It previews the skin in your colours, checks that text stays
+readable, and gives you the block to paste.
+
 The nine, with their defaults:
 
     :root {
@@ -49,7 +53,7 @@ The nine, with their defaults:
 
 A light accent needs dark labels: the cyan, amber and acid green presets set
 `--nf-on-neon: #000`. The defaults keep every label readable over the brightest artwork. A
-lighter ink or chrome, or a darker paper, can cost that.
+lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 
 ## Licence
 

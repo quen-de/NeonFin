@@ -11,7 +11,12 @@ FONT = b"wOF2-test-bytes"
 
 def make_skin(root, files=None):
     tree = {
-        "skin/00-tokens.css": ":root { --nf-x: 1; }\n",
+        "skin/00-tokens.css": (
+            ":root { --nf-neon: #f00; --nf-teal: #0f0; --nf-ink: #000; --nf-ink-2: #111; --nf-chrome: #222;"
+            " --nf-paper: #eee; --nf-light: #fff; --nf-shade: #000; --nf-on-neon: var(--nf-light); }\n"
+        ),
+        "palettes/picker.html": "<style>/*@FONT@*/ /*@TOKENS@*/</style><script>const PRESETS = /*@PRESETS@*/null;</script>\n",
+        "palettes/test.css": "/* NeonFin palette: Test. Paste after the skin in Custom CSS. */\n:root { --nf-neon: #abc; }\n",
         "skin/30-header.css": ".h { color: inherit; }\n",
         "skin/plugins/b-plugin.css": "/* plugin: B; roots: .b- */\n.b-x { color: inherit; }\n",
         "skin/plugins/a-plugin.css": "/* plugin: A; roots: .a- */\n.a-x { color: inherit; }\n",
@@ -86,6 +91,7 @@ def test_main_writes_the_stylesheet(tmp_path, monkeypatch):
     out = tmp_path / "out.css"
     assert build.main(["-o", str(out)]) == 0
     assert out.read_text().startswith("/* neonfin unknown-dirty */\n@font-face")
+    assert (tmp_path / "palette.html").read_text().startswith("<style>@font-face")
 
 
 def test_real_tree_builds_within_budget():
@@ -126,3 +132,27 @@ def test_presets_set_only_palette_inputs_in_hex():
 
 def test_hex6_spells_every_colour_out():
     assert build.hex6("#ABC") == "#aabbcc" and build.hex6("#00e5ff") == "#00e5ff"
+
+
+def test_the_palette_page_carries_the_tokens_the_presets_and_the_font(tmp_path):
+    page = build.palette_page(make_skin(tmp_path))
+    assert ".nf-preview {" in page and ":root" not in page and page.count("@font-face") == 1
+    assert '"Crimson": {"neon": "#ff0000", "teal": "#00ff00"' in page and '"on-neon": "#ffffff"}' in page
+    assert '"Test": {"neon": "#aabbcc"}' in page
+
+
+def test_a_palette_page_without_its_marks_fails(tmp_path):
+    root = make_skin(tmp_path, {"palettes/picker.html": "<p>no marks</p>"})
+    with pytest.raises(BuildError, match="palettes/picker.html has no /\\*@FONT@\\*/ mark"):
+        build.palette_page(root)
+
+
+def test_a_preset_without_its_header_fails(tmp_path):
+    root = make_skin(tmp_path, {"palettes/bad.css": ":root { --nf-neon: #abc; }\n"})
+    with pytest.raises(BuildError, match="palettes/bad.css starts with"):
+        build.palette_page(root)
+
+
+def test_the_real_palette_page_builds():
+    page = build.palette_page()
+    assert all(name in page for name in ('"Cyan neon"', '"Amber"', '"Violet"', '"Acid green"'))
