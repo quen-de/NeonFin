@@ -3,7 +3,8 @@
 They need the env vars and harness/config.local.json the harness uses (see
 DEVELOPMENT.md) and are skipped without them. Run them with `-m live`. Pages are
 opened once per argument set and shared, so tests that hover or click ask for
-their own variant.
+their own variant. A page left unused the longest is closed past OPEN_PAGES, and
+opened again if a later test asks for it.
 """
 
 import re
@@ -16,6 +17,8 @@ from harness import config, player, plugins, session
 from harness.profiles import PROFILES, ROUTES
 
 ROUTE = {r.name: r for r in ROUTES}
+# Enough for any test's pages at once (two at most) and a file's worth of reuse.
+OPEN_PAGES = 12
 STYLE_JS = """([sel, props, pseudo]) => {
   const el = document.querySelector(sel);
   if (!el) return null;
@@ -61,13 +64,13 @@ def skin_css():
 
 @pytest.fixture(scope="session")
 def open_page(cfg, browser, skin_css):
-    states, opened = {}, {}
+    states, opened = {}, session.Pages(OPEN_PAGES)
 
     # after: CSS a user adds below the skin in the same Custom CSS field, such as a palette.
     def get(route="home", profile="desktop", plugin_state="all", media=(), viewport=None, variant="", after=""):
-        key = (route, profile, plugin_state, tuple(media), viewport, variant, after)
-        if key not in opened:
-            prof = PROFILES[profile]
+        prof = PROFILES[profile]
+
+        def open_():
             if profile not in states:
                 states[profile] = session.login_state(browser, cfg, prof)
             ctx, page = session.new_page(
@@ -79,12 +82,12 @@ def open_page(cfg, browser, skin_css):
             if viewport:
                 page.set_viewport_size({"width": viewport[0], "height": viewport[1]})
             session.open_route(page, cfg, ROUTE[route], cfg.volatile)
-            opened[key] = (ctx, page)
-        return opened[key][1]
+            return ctx, page
+
+        return opened.get((route, profile, plugin_state, tuple(media), viewport, variant, after), open_)
 
     yield get
-    for ctx, _ in opened.values():
-        ctx.close()
+    opened.close()
 
 
 @pytest.fixture(scope="session")

@@ -375,3 +375,29 @@ def test_open_route_prepares_a_state_before_the_page_loads(browser, server, monk
     assert [s for s, _ in seen] == ["prepare", "state"]
     assert not seen[0][1].startswith(server) and seen[1][1].startswith(server)
     ctx.close()
+
+
+class FakeContext:
+    def __init__(self, closed, name):
+        self.closed, self.name = closed, name
+
+    def close(self):
+        self.closed.append(self.name)
+
+
+def test_shared_pages_close_the_least_recently_used_past_the_limit():
+    # Each shared page is a context with the page's timers still running: a long run that kept
+    # them all filled the machine and timed tests out.
+    closed = []
+    pages = session.Pages(2)
+
+    def opener(name):
+        return lambda: (FakeContext(closed, name), name)
+
+    assert pages.get("a", opener("a")) == "a"
+    pages.get("b", opener("b"))
+    assert pages.get("a", opener("a again")) == "a"
+    pages.get("c", opener("c"))
+    assert closed == ["b"]
+    pages.close()
+    assert sorted(closed) == ["a", "b", "c"]

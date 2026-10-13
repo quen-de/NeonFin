@@ -118,6 +118,31 @@ def new_page(browser, profile, state, override: Override | None, plugins_off: fr
     return ctx, page
 
 
+class Pages:
+    """Pages opened once per key and shared, at most `limit` at a time. Each is a context whose
+    page keeps its timers running, so a long run that kept every one filled the machine; the
+    least recently used is closed first."""
+
+    def __init__(self, limit: int):
+        self.limit, self.opened = limit, {}
+
+    def get(self, key, open_):
+        """The page for key, from open_() -> (context, page) when it is not open."""
+        if key in self.opened:
+            self.opened[key] = self.opened.pop(key)
+        else:
+            while len(self.opened) >= self.limit:
+                ctx, _ = self.opened.pop(next(iter(self.opened)))
+                ctx.close()
+            self.opened[key] = open_()
+        return self.opened[key][1]
+
+    def close(self) -> None:
+        for ctx, _ in self.opened.values():
+            ctx.close()
+        self.opened.clear()
+
+
 def login_state(browser, cfg, profile) -> dict:
     ctx = browser.new_context(service_workers="block", **profile.context)
     page = ctx.new_page()
