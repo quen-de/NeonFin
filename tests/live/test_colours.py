@@ -24,6 +24,9 @@ COLOUR_ROUTES = [
     ("calendar", "desktop"),
     ("calendar", "phone"),
     ("jepanel", "desktop"),
+    ("search", "desktop"),
+    ("movie", "desktop"),
+    ("show", "desktop"),
 ]
 
 

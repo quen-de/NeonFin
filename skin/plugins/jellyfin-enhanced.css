@@ -96,3 +96,32 @@
   border-color: transparent !important;
   box-shadow: var(--nf-selected-edge);
 }
+
+/* A result's Seerr status: available on dark teal, on its way on the deep accent, gone on a
+   dark chip. The plugin sets purple and green, with !important. A status is not a control,
+   so teal may mark it. */
+.jellyseerr-card .jellyseerr-status-badge {
+  border-color: transparent !important;
+}
+
+.jellyseerr-card .jellyseerr-status-badge:is(.status-available, .status-partially-available) {
+  color: var(--nf-light) !important;
+  background-color: color-mix(in srgb, var(--nf-teal) 45%, var(--nf-shade)) !important;
+}
+
+.jellyseerr-card .jellyseerr-status-badge:is(.status-requested, .status-pending, .status-processing) {
+  color: var(--nf-light) !important;
+  background-color: var(--nf-neon-deep) !important;
+}
+
+.jellyseerr-card .jellyseerr-status-badge:is(.status-blocklisted, .status-deleted) {
+  color: var(--nf-text) !important;
+  background-color: color-mix(in srgb, var(--nf-ink-2) 85%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+
+/* Ratings read as secondary text; the star keeps its gold. */
+.cardText .jellyseerr-rating,
+.cardText .jellyseerr-rating > span {
+  color: var(--nf-text-2) !important;
+}

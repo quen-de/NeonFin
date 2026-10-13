@@ -310,3 +310,45 @@ def test_discover_media_badges_are_quiet_dark_chips(open_page, color, profile):
     for bg in badges:
         r, g, b, a = color(bg)
         assert max(r, g, b) <= 20 and a >= 0.7, bg
+
+
+INK = (5, 6, 10)
+BADGE = """(status) => { const b = document.createElement('span');
+  b.className = 'jellyseerr-status-badge status-' + status; b.textContent = 'Status';
+  document.querySelector('.jellyseerr-card').append(b);
+  const cs = getComputedStyle(b), out = [cs.backgroundColor, cs.color]; b.remove(); return out; }"""
+
+
+@pytest.mark.parametrize(
+    ("status", "kind"),
+    [
+        ("available", "teal"),
+        ("partially-available", "teal"),
+        ("requested", "crimson"),
+        ("pending", "crimson"),
+        ("processing", "crimson"),
+        ("blocklisted", "dark"),
+        ("deleted", "dark"),
+    ],
+)
+def test_seerr_status_badges_take_the_palette(open_page, color, status, kind):
+    # Only some statuses show on a given server; the badge is styled by class, so each is drawn
+    # on a real result card.
+    page = open_page("search", "desktop", "all", variant="seerr-badges")
+    seerr_card(page)
+    bg, fg = (color(v) for v in page.evaluate(BADGE, status))
+    if kind == "teal":
+        assert bg[1] > 2 * bg[0] and bg[3] == 1, bg
+    elif kind == "crimson":
+        assert bg[0] > 2 * bg[1] and bg[3] == 1, bg
+    else:
+        assert max(bg[:3]) <= 20 and bg[3] >= 0.8, bg
+    base = checks.blend(bg, INK)
+    assert checks.contrast_ratio(checks.blend(fg, base), base) >= 4.5, (status, bg, fg)
+
+
+def test_seerr_ratings_are_secondary_text(open_page, color):
+    page = open_page("search", "desktop", "all")
+    seerr_card(page)
+    c = color(page.evaluate("() => getComputedStyle(document.querySelector('.cardText .jellyseerr-rating')).color"))
+    assert c[:3] == (246, 243, 240) and abs(c[3] - 0.62) < 0.01, c
