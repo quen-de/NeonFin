@@ -46,7 +46,7 @@ Speed comes from a paired bench, the other checks from capture-only runs:
     uv run python -m harness.bench --label speed --plugins all --plugins none
     uv run python -m harness.captures --label checks --plugins all --plugins none
     uv run python -m harness.gates --bench harness/runs/speed \
-        harness/runs/checks-dist-all harness/runs/checks-dist-none --scope home
+        harness/runs/checks-dist-all harness/runs/checks-dist-none --scope all
 
 The bench alternates vanilla and skin trials in one process, so drift between runs cannot
 tilt the comparison, and stops a cell (plugin state, profile, route) once its verdict is
@@ -67,6 +67,11 @@ and repeats for several states: the harness aborts a plugin's requests so the pa
 as if it were not installed. `harness.run` still captures and times one CSS mode in one go,
 and `harness.gates VANILLA_RUN SKIN_RUN` still judges two such runs.
 `uv run python -m harness.sheet harness/runs/skin` writes a contact sheet per device.
+
+A route that cannot exist without a plugin (Jellyfin Enhanced's calendar and panel) is
+skipped, not failed, in a state with that plugin off. Every page the harness opens refuses
+plugin writes and sign-in requests, and a capture that finds its session ended signs in
+again once and says so in the gate notes.
 
 ## Player timing
 
