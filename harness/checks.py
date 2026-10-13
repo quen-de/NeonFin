@@ -195,7 +195,8 @@ def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
     items = page.evaluate(_js("contrast.js"), list(selectors))
     if not items:
         return []
-    hide = ", ".join(selectors) + " { color: transparent !important; text-shadow: none !important; }"
+    # Three ids outrank any skin rule that colours the text with !important.
+    hide = f":is({', '.join(selectors)}):not(#_):not(#_):not(#_) {{ color: transparent !important; text-shadow: none !important; }}"
     # Icons beside the text (a rating's star) are not the background it sits on.
     hide += (
         ", ".join(f"{s} {icon}" for s in selectors for icon in ("img", "svg", ".material-icons")) + " { visibility: hidden !important; }"

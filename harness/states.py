@@ -71,6 +71,9 @@ def picker(page):
 def jepanel(page):
     # Jellyfin Enhanced opens its panel on "?"; its user menu entry is a translated label.
     page.keyboard.press("?")
+    # It closes the panel 20 s later unless the pointer is inside, and pages are shared
+    # between tests: tell it the pointer came in.
+    page.locator("#jellyfin-enhanced-panel").dispatch_event("mouseenter")
 
 
 STATES = {f.__name__: f for f in (usermenu, select, actionsheet, tooltip, osd, dialog, picker, jepanel)}

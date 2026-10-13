@@ -147,3 +147,21 @@ def test_unmoved_keeps_only_colours_the_swap_left_in_place():
 )
 def test_only_stars_artwork_and_calendar_categories_keep_their_colours(key, on_purpose):
     assert checks.fixed_on_purpose(key) is on_purpose
+
+
+def test_contrast_hides_text_a_more_specific_rule_colours(page, tmp_path, monkeypatch):
+    # The text is hidden for the background sample even when a skin rule that outranks the
+    # target selector sets its colour with !important; left showing, the text is the sample.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".nav .btn",))
+    page.set_content("""<style>.nav .btn.on { color: #fff !important; }</style>
+      <body style="margin:0;background:#000"><div class=nav>
+      <p class="btn on" style="display:inline-block;margin:0;font-size:16px;font-weight:700">Agenda</p></div></body>""")
+    assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []
+
+
+def test_contrast_skips_text_inside_a_transparent_ancestor(page, tmp_path, monkeypatch):
+    # A collapsed panel fades its content to nothing: no one reads it.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".item",))
+    page.set_content("""<body style="margin:0;background:#000"><div style="opacity:0">
+      <p class=item style="color:#222;margin:0;font-size:16px">Hidden</p></div></body>""")
+    assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []

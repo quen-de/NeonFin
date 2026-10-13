@@ -18,7 +18,11 @@
       const r = el.getBoundingClientRect();
       if (r.width < 1 || r.height < 1 || r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) continue;
       const cs = getComputedStyle(el);
-      if (cs.visibility === 'hidden' || cs.opacity === '0') continue;
+      if (cs.visibility === 'hidden') continue;
+      // A collapsed panel fades its content out: text under a transparent ancestor is unseen.
+      let faded = false;
+      for (let a = el; a && !faded; a = a.parentElement) faded = getComputedStyle(a).opacity === '0';
+      if (faded) continue;
       const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10);
       out.push({
         label: name(el), text: text.slice(0, 40), color: rgba(cs.color), raw: cs.color,
