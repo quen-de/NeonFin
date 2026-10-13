@@ -295,3 +295,18 @@ def test_a_long_enhanced_details_line_wraps_between_items(open_page, profile, vi
     r = page.evaluate(LONG_DETAILS)
     assert r["broken"] == [], r
     assert r["right"] <= (r["plot"] + 1 if profile == "desktop" else r["width"]), r
+
+
+DISCOVER_BADGES = """() => [...document.querySelectorAll('.cardScalable:is(.discoverCard-movie, .discoverCard-tv)')]
+  .slice(0, 8).map((c) => getComputedStyle(c, '::before').backgroundColor)"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_discover_media_badges_are_quiet_dark_chips(open_page, color, profile):
+    # Home Screen Sections labels Discover cards Movie or Series in its own blue and purple.
+    badges = open_page("home", profile, "all").evaluate(DISCOVER_BADGES)
+    if not badges:
+        pytest.skip("no Discover section on this server's home")
+    for bg in badges:
+        r, g, b, a = color(bg)
+        assert max(r, g, b) <= 20 and a >= 0.7, bg

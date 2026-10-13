@@ -1,0 +1,8 @@
+/* plugin: Home Screen Sections; roots: .discoverCard- */
+/* Discover cards label their media type in the plugin's blue and purple, with !important: a
+   quiet dark chip here, like Seerr's on search. */
+.cardScalable:is(.discoverCard-movie, .discoverCard-tv)::before {
+  color: var(--nf-text) !important;
+  background-color: color-mix(in srgb, var(--nf-ink-2) 78%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}

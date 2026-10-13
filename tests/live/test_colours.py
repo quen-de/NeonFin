@@ -19,6 +19,8 @@ COLOUR_ROUTES = [
     ("playback", "desktop"),
     ("subtitles", "desktop"),
     ("profile", "desktop"),
+    ("home", "desktop"),
+    ("home", "phone"),
 ]
 
 
