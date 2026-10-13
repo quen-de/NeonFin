@@ -8,7 +8,7 @@ Status: early development, not ready for use.
 
 - Never slower than plain Jellyfin. Every effect is measured against it.
 - Glass only where it reads as glass: the header and menus, never on cards or over video.
-- Works with or without popular plugins: Media Bar or Media Bar Enhanced, Home Screen Sections, Jellyfin Enhanced, Custom Tabs.
+- Works with or without popular plugins: Media Bar Enhanced, Home Screen Sections, Jellyfin Enhanced, Custom Tabs.
 - One stylesheet, no external requests: system fonts for the interface, one embedded display face.
 
 ## Install
@@ -20,14 +20,10 @@ Jellyfin 12, modern layout, desktop browsers and phones. The legacy layout is no
 
 ## Plugin notes
 
-Media Bar shows one dot per slide only while it has no more slides than dots. With more
-slides, each dot stands for a run of them, so the lit dot stays put for several slides.
-That is the plugin's design, not the skin. Raise its maximum number of dots to the number
-of slides, or lower the number of slides, to give each slide its own dot.
-
 Media Bar Enhanced gives each slide its own dot, and above its maximum number of dots shows a
 counter instead. Its stylesheet imports a web font from Google; the skin sets the hero in its
-own face, so the font itself is never downloaded, but the import still is.
+own face, so the font itself is never downloaded, but the import still is. The original Media
+Bar plugin is not supported.
 
 ## Change the palette
 

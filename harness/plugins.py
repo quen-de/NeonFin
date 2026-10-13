@@ -10,7 +10,6 @@ from __future__ import annotations
 from urllib.parse import urlsplit
 
 PLUGINS: dict[str, tuple[str, ...]] = {
-    "media-bar": ("/MediaBar/",),
     "media-bar-enhanced": ("/MediaBarEnhanced/",),
     "home-screen-sections": ("/HomeScreen/",),
     "jellyfin-enhanced": ("/JellyfinEnhanced/",),

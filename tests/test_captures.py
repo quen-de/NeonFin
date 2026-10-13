@@ -5,12 +5,12 @@ from harness import captures
 
 
 def test_one_capture_only_run_per_css_mode_and_plugin_state():
-    cmds = captures.commands("m2", ["dist", "vanilla"], ["all", "without:media-bar,custom-tabs"], ["--show-volatile"])
+    cmds = captures.commands("m2", ["dist", "vanilla"], ["all", "without:media-bar-enhanced,custom-tabs"], ["--show-volatile"])
     assert [label for label, _ in cmds] == [
         "m2-dist-all",
-        "m2-dist-no-media-bar-custom-tabs",
+        "m2-dist-no-media-bar-enhanced-custom-tabs",
         "m2-vanilla-all",
-        "m2-vanilla-no-media-bar-custom-tabs",
+        "m2-vanilla-no-media-bar-enhanced-custom-tabs",
     ]
     label, argv = cmds[1]
     assert argv[1:] == [
@@ -21,7 +21,7 @@ def test_one_capture_only_run_per_css_mode_and_plugin_state():
         "--css",
         "dist",
         "--plugins",
-        "without:media-bar,custom-tabs",
+        "without:media-bar-enhanced,custom-tabs",
         "--no-perf",
         "--show-volatile",
     ]

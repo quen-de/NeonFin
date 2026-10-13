@@ -241,13 +241,13 @@ def test_benched_states_are_captured_and_all_on_and_off_are_benched(tmp_path, ca
     # Speed is gated with every plugin on and every plugin off (spec 7.2); a state with one
     # plugin removed needs captures only.
     both = bench(full_cells("all", CLEAR) | full_cells("none", CLEAR))
-    code, out = judge(tmp_path, [both], [capture("all"), capture("without:media-bar")], capsys)
-    assert code == 1 and "none: benched but never captured" in out and "without:media-bar" not in out
+    code, out = judge(tmp_path, [both], [capture("all"), capture("without:custom-tabs")], capsys)
+    assert code == 1 and "none: benched but never captured" in out and "without:custom-tabs" not in out
     (tmp_path / "2").mkdir()
     code, out = judge(tmp_path / "2", [bench(full_cells("all", CLEAR))], [capture("all"), capture("none")], capsys)
     assert code == 1 and "none: captured but never benched" in out
     (tmp_path / "3").mkdir()
-    code, out = judge(tmp_path / "3", [bench(full_cells("all", CLEAR))], [capture("all"), capture("without:media-bar")], capsys)
+    code, out = judge(tmp_path / "3", [bench(full_cells("all", CLEAR))], [capture("all"), capture("without:custom-tabs")], capsys)
     assert code == 0, out
 
 

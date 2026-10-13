@@ -1,8 +1,60 @@
 /* plugin: Media Bar Enhanced; roots: #slides-container */
-/* Media Bar Enhanced builds the same hero as Media Bar, so media-bar.css already draws most of
-   it: the dimmed column, the Play tube, the round buttons and the dots. This file covers what
-   only this plugin has, under the version class it puts on the body, since Media Bar shares
-   several of these class names. */
+/* The home hero. The plugin colours most of its parts itself at higher specificity, hence the
+   !important flags. What its Jellyfin 12 build added sits under the version class it puts on
+   the body. */
+
+/* The artwork fades to the page at the bottom and the left. */
+#slides-container .gradient-overlay {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--nf-ink) 85%, transparent) 0%, color-mix(in srgb, var(--nf-ink) 35%, transparent) 45%, transparent 70%),
+    linear-gradient(0deg, var(--nf-ink) 0%, color-mix(in srgb, var(--nf-ink) 40%, transparent) 30%, transparent 55%) !important;
+}
+
+/* Desktop capsules are glass: dim the hero under them so the header reads over any slide.
+   The title, details and plot keep to the left column, dimmed just enough for full-white text
+   to pass AA over a white slide; the artwork shows from mid-screen. */
+.layout-desktop #slides-container .gradient-overlay {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--nf-ink) 72%, transparent) 0, color-mix(in srgb, var(--nf-ink) 60%, transparent) 56px, transparent 160px),
+    linear-gradient(90deg, color-mix(in srgb, var(--nf-ink) 66%, transparent) 0%, color-mix(in srgb, var(--nf-ink) 62%, transparent) 38%, color-mix(in srgb, var(--nf-ink) 14%, transparent) 54%, transparent 66%),
+    linear-gradient(0deg, var(--nf-ink) 0%, color-mix(in srgb, var(--nf-ink) 25%, transparent) 20%, transparent 40%) !important;
+}
+
+#slides-container .plot {
+  color: var(--nf-text) !important;
+}
+
+/* The plot keeps to the dimmed column: three narrower lines hold what two wide ones did. */
+.layout-desktop #slides-container .plot {
+  max-width: 34vw;
+  -webkit-line-clamp: 3;
+}
+
+#slides-container .dots-container .dot {
+  background-color: color-mix(in srgb, var(--nf-light) 28%, transparent) !important;
+}
+
+#slides-container .dots-container .dot.active {
+  background-color: var(--nf-neon) !important;
+}
+
+#slides-container .play-button {
+  color: var(--nf-light) !important;
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent) !important;
+  box-shadow: var(--nf-tube) !important;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+}
+
+/* The plugin blurs these itself; tinted instead, so the hero adds no live glass. */
+#slides-container .detail-button,
+#slides-container .favorite-button,
+#slides-container .arrow {
+  color: var(--nf-text) !important;
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
 
 /* The interface face, not the plugin's web font. */
 .jellyfin-v12 #slides-container :is(.misc-info, .date, .runTime, .genre, .plot, .play-button, .trailer-button, .slide-counter) {

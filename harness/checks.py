@@ -43,7 +43,7 @@ SIGN_IN_TEXT = (
 )
 TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "*": (".MuiAppBar-root > .MuiToolbar-root:first-child .MuiButton-root",),
-    "home": tuple(f"#slides-container .slide.active {s}" for s in (".plot", ".spec-line", ".misc-info", ".genre")),
+    "home": tuple(f"#slides-container .slide.active {s}" for s in (".plot", ".misc-info", ".genre")),
     "movies": LIBRARY_TEXT,
     "series": LIBRARY_TEXT,
     "movie": TITLE_TEXT,

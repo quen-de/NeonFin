@@ -30,11 +30,11 @@ def test_a_borderline_cell_runs_every_pair():
 
 
 def test_cells_cover_every_plugin_state_profile_and_route():
-    assert bench.cells(["all", "without:media-bar"], ["desktop"], ["home", "movies"]) == [
+    assert bench.cells(["all", "without:custom-tabs"], ["desktop"], ["home", "movies"]) == [
         ("all", "desktop", "home"),
         ("all", "desktop", "movies"),
-        ("without:media-bar", "desktop", "home"),
-        ("without:media-bar", "desktop", "movies"),
+        ("without:custom-tabs", "desktop", "home"),
+        ("without:custom-tabs", "desktop", "movies"),
     ]
 
 

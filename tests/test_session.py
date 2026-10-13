@@ -64,8 +64,8 @@ class _Handler(BaseHTTPRequestHandler):
         elif self.path.startswith("/Branding/Configuration"):
             body, ctype = json.dumps({"CustomCss": "live", "LoginDisclaimer": ""}).encode(), "application/json"
         elif self.path == "/plugpage":
-            body, ctype = b"<html><body><script src='/MediaBar/x.js'></script></body></html>", "text/html"
-        elif self.path == "/MediaBar/x.js":
+            body, ctype = b"<html><body><script src='/MediaBarEnhanced/x.js'></script></body></html>", "text/html"
+        elif self.path == "/MediaBarEnhanced/x.js":
             body, ctype = b"window.mb = 1;", "application/javascript"
         else:
             body = (
@@ -289,7 +289,7 @@ def test_decode_images_waits_for_background_and_img_sources(browser, server):
     ctx.close()
 
 
-@pytest.mark.parametrize("off, loaded", [(frozenset(), 1), (frozenset({"media-bar"}), None)])
+@pytest.mark.parametrize("off, loaded", [(frozenset(), 1), (frozenset({"media-bar-enhanced"}), None)])
 def test_new_page_can_switch_a_plugin_off(browser, server, off, loaded):
     ctx, page = session.new_page(browser, PROFILES["desktop"], None, None, off)
     page.goto(server + "/plugpage")
