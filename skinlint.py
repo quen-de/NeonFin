@@ -25,7 +25,10 @@ PLUGIN_DIR = "skin/plugins/"
 PLUGIN_HEADER = re.compile(r"\s*/\*\s*plugin:\s*(?P<name>[^;*]+?)\s*;\s*roots:\s*(?P<roots>[^*]+?)\s*\*/")
 FILTERS = ("backdrop-filter", "-webkit-backdrop-filter")
 # Text added through content would show in one language to everyone.
-CONTENT_TEXT = re.compile(r"""\bcontent\s*:\s*(?:"[^"]+"|'[^']+')""")
+# content may only be empty or absent: any string, attr(), url(), counter() or quote shows
+# something. Not justify-content and the like, which the lookbehind leaves alone.
+CONTENT = re.compile(r"(?<![\w-])content\s*:\s*([^;}]*)")
+CONTENT_EMPTY = {'""', "''", "none", "normal"}
 # Emotion classes (css-1x2y3z) change on every jellyfin-web build.
 EMOTION = re.compile(r"\.css-[0-9a-z]+\b")
 # Every colour comes from the palette in the tokens file, so one block restyles the skin.
@@ -117,8 +120,8 @@ def lint(files: dict[str, str]) -> list[str]:
         mask = code_mask(css)
         problems += [
             f"{name}:{line_of(css, m.start())}: content adds visible text; only empty strings are allowed"
-            for m in CONTENT_TEXT.finditer(css)
-            if mask[m.start()]
+            for m in CONTENT.finditer(css)
+            if mask[m.start()] and re.sub(r"\s*!important\s*$", "", m.group(1).strip()) not in CONTENT_EMPTY
         ]
         for rule in leaf_rules(css):
             where = f"{name}:{line_of(css, rule.offset)}"

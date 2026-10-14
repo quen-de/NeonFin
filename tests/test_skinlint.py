@@ -83,6 +83,13 @@ def test_content_never_adds_visible_text():
     assert p == ["skin/30-header.css:1: content adds visible text; only empty strings are allowed"]
 
 
+def test_content_takes_no_text_from_anywhere():
+    css = ('.a::before { content: attr(title); }\n.b::after { content: "" "x"; }\n'
+           '.c::after { content: url(x.svg); }\n.d::after { content: counter(n); }\n'
+           '.e::after { content: none; }\n.f::after { content: \'\' !important; }\n.g { justify-content: center; }\n')
+    assert core(css) == [f"skin/30-header.css:{n}: content adds visible text; only empty strings are allowed" for n in (1, 2, 3, 4)]
+
+
 def test_selectors_avoid_emotion_hashes_and_localized_labels():
     p = core(".css-1x2y3z { color: inherit; }\n[aria-label] .x { color: inherit; }")
     assert len(p) == 2
