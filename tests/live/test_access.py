@@ -187,3 +187,6 @@ def test_the_phone_panel_leaves_room_for_the_home_bar(open_page):
           return r.style.getPropertyValue('padding-bottom'); }
       return null; }""")
     assert pad and "safe-area-inset-bottom" in pad, pad
+    # The inset is zero unless the page extends under the home bar, which Jellyfin asks for.
+    meta = open_page("login", "phone", "none").evaluate("() => document.querySelector('meta[name=viewport]')?.content")
+    assert "viewport-fit=cover" in meta, meta

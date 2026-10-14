@@ -9,6 +9,8 @@
   --secondary-background-transparent: var(--nf-chrome-deep);
   --text-color: var(--nf-text);
   --alt-accent-color: color-mix(in srgb, var(--nf-light) 12%, transparent);
+  /* Read by its script and written inline as blur(<value>): 0px keeps that inert, where an
+     empty value would hand the script its own default. */
   --blur: 0px;
 }
 
