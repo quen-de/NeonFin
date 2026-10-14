@@ -61,18 +61,26 @@ LOCALE = "en-US"
 # change the detail pages the next run captures.
 PLAYBACK_REPORTS = "**/Sessions/Playing**"
 # A page the harness opens may read, never write: not a plugin's settings or a Seerr request,
-# not signing in or out, and not the server's own writes a stray click could make (favourite,
-# played, rating, display and user settings, Quick Connect, playlists and collections, an
-# item's metadata, images or the item itself). Only methods other than GET and HEAD are
-# refused, so the same paths still read; the player's PlaybackInfo POST is not matched.
-# Matched in the browser driver, so the guard costs nothing on the requests it does not match.
+# not signing in by any route or out, not the server's own writes a stray click could make
+# (favourite, played, rating, user data, display and user settings, Quick Connect, playlists
+# and collections, an item's metadata, images, lyrics or the item itself), and nothing a page
+# that strays into the dashboard, live TV, SyncPlay or another session's remote control could
+# change. Only methods other than GET and HEAD are refused, so the same paths still read; the
+# player's PlaybackInfo POST and its ActiveEncodings DELETE are not matched. The leading
+# [^?]* keeps every match in the path, never the query. Matched in the browser driver, so the
+# guard costs nothing on the requests it does not match.
 WRITES = re.compile(
+    r"^[^?]*(?:"
     r"/(?:JellyfinEnhanced|HomeScreen|MediaBarEnhanced)/"
-    r"|/users/authenticatebyname|/Sessions/Logout"
-    r"|/(?:User)?(?:FavoriteItems|PlayedItems)/|/Rating\b|/DisplayPreferences/"
-    r"|/Users/(?:[^/?]+/)?(?:Configuration|Password|Policy|Images)\b|/UserImage\b|/QuickConnect/Authorize"
-    r"|/(?:Playlists|Collections)\b|/Library/"
-    r"|/Items/[^/?]+(?:/(?:Refresh|Images|RemoteImages|ContentType|ExternalIdInfos)\b[^?]*)?(?:\?|$)",
+    r"|/Users/(?:[^/?]+/)?(?:Authenticate\w*|Configuration|Password|Policy|Images|ForgotPassword)\b"
+    r"|/Users/[^/?]+(?:\?|$)|/UserImage\b|/QuickConnect/(?:Initiate|Authorize)"
+    r"|/Sessions/Logout|/Sessions/[^/?]+/(?:Viewing|Playing|System|Command|Message|User)\b"
+    r"|/(?:User)?(?:FavoriteItems|PlayedItems)/|/Rating\b|/UserData\b|/DisplayPreferences/"
+    r"|/(?:Playlists|Collections)\b|/Library/|/LiveTv/|/SyncPlay/"
+    r"|/System/(?!Ping\b)|/(?:Plugins|ScheduledTasks|Packages|Auth|Startup|Backup)/|/Devices\b"
+    r"|/Videos/(?:MergeVersions\b|[^/?]+/(?:Subtitles|AlternateSources)\b)|/Items/RemoteSearch/"
+    r"|/Items(?:/[^/?]+(?:/(?:Refresh|Images|RemoteImages|ContentType|ExternalIdInfos|Lyrics)\b[^?]*)?)?(?:\?|$)"
+    r")",
     re.IGNORECASE,
 )
 

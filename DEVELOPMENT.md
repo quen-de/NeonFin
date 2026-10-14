@@ -57,8 +57,9 @@ nothing is ever written to the server.
    The `picker` route shows the sign-in page's user picker with two made-up users that the
    harness answers itself from the first request on, so no request about real users reaches
    the server. Every page the harness opens refuses writes: a plugin's settings and Seerr
-   requests, signing in or out, and the server's own writes a stray click could make
-   (favourites, played marks, settings, playlists, item edits and deletes).
+   requests, signing in by any route or out, the server's own writes a stray click could
+   make (favourites, played marks, ratings, settings, playlists, item edits and deletes),
+   and the dashboard's, live TV's and remote control's (`WRITES` in `harness/session.py`).
 4. `uv run python -m harness.compare harness/runs/A harness/runs/B` diffs two runs.
 
 ## Gates

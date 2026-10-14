@@ -27,6 +27,8 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
 
+    do_DELETE = do_POST
+
     def do_GET(self):
         if self.path.startswith("/pixel.svg"):
             body, ctype = b"<svg xmlns='http://www.w3.org/2000/svg' width='4' height='3'/>", "image/svg+xml"
@@ -386,12 +388,37 @@ def test_new_page_refuses_the_servers_own_writes_but_lets_playback_through(brows
         ["/Playlists/p1/Items?ids=abc", "POST"], ["/Collections/c1/Items", "DELETE"], ["/Items/abc", "DELETE"],
         ["/Items/abc", "POST"], ["/Items/abc/Refresh", "POST"], ["/Items/abc/Images/Primary", "DELETE"],
         ["/UserImage?userId=u1", "POST"], ["/Sessions/Logout", "POST"], ["/Library/Refresh", "POST"],
+        ["/UserItems/abc/UserData", "POST"], ["/Users/u1/Items/abc/UserData", "POST"], ["/Items?ids=abc", "DELETE"],
     ]
     allowed = [["/Items/abc/PlaybackInfo?userId=u1", "POST"], ["/Sessions/Capabilities/Full", "POST"],
+               ["/Videos/ActiveEncodings?deviceId=d1", "DELETE"], ["/other?then=/Library/Refresh", "POST"],
                ["/Items/abc", "GET"], ["/DisplayPreferences/usersettings", "GET"]]
     got = page.evaluate("""(calls) => Promise.all(calls.map(([u, m]) =>
       fetch(u, { method: m }).then((r) => r.status, () => 'refused')))""", writes + allowed)
-    assert got == ["refused"] * len(writes) + [204, 204, 200, 200], list(zip([w[0] for w in writes + allowed], got))
+    assert got == ["refused"] * len(writes) + [204, 204, 204, 204, 200, 200], list(zip([w[0] for w in writes + allowed], got))
+    ctx.close()
+
+
+def test_new_page_refuses_every_way_in_and_the_servers_admin_writes(browser, server):
+    # Signing in by any route, and anything a page that strays into the dashboard, live TV or
+    # another session's remote control could change.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/")
+    writes = [
+        ["/Users/u1/Authenticate?pw=x", "POST"], ["/Users/AuthenticateWithQuickConnect", "POST"],
+        ["/Users/ForgotPassword", "POST"], ["/Users/ForgotPassword/Pin", "POST"], ["/QuickConnect/Initiate", "POST"],
+        ["/Users/New", "POST"], ["/Users/u1", "POST"], ["/Users/u1", "DELETE"], ["/Users/u1/Policy", "POST"],
+        ["/Sessions/s1/Playing/Pause", "POST"], ["/Sessions/s1/Message", "POST"], ["/Sessions/s1/User/u2", "DELETE"],
+        ["/System/Restart", "POST"], ["/Plugins/p1/Configuration", "POST"], ["/ScheduledTasks/Running/t1", "POST"],
+        ["/Packages/Installed/x", "POST"], ["/Auth/Keys?app=x", "POST"], ["/Startup/Complete", "POST"],
+        ["/Devices?id=d1", "DELETE"], ["/LiveTv/Timers", "POST"], ["/SyncPlay/New", "POST"],
+        ["/Videos/v1/Subtitles/0", "DELETE"], ["/Videos/MergeVersions?ids=a,b", "POST"],
+        ["/Items/RemoteSearch/Apply/abc", "POST"], ["/Items/abc/Lyrics", "DELETE"],
+    ]
+    allowed = [["/Sessions/Viewing?itemId=abc", "POST"], ["/System/Ping", "POST"], ["/Users/u1", "GET"]]
+    got = page.evaluate("""(calls) => Promise.all(calls.map(([u, m]) =>
+      fetch(u, { method: m }).then((r) => r.status, () => 'refused')))""", writes + allowed)
+    assert got == ["refused"] * len(writes) + [204, 204, 200], list(zip([w[0] for w in writes + allowed], got))
     ctx.close()
 
 
