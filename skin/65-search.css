@@ -45,3 +45,14 @@
 #searchPage .noItemsMessage {
   color: var(--nf-text-2);
 }
+
+/* Suggestions: titles in the text colour, lighting up crimson under the pointer like links on
+   title pages. Jellyfin gives them the accent at rest. */
+#searchPage .searchSuggestionsList .button-link {
+  color: var(--nf-text);
+  transition: color var(--nf-fast) var(--nf-ease);
+}
+
+#searchPage .searchSuggestionsList .button-link:is(:hover, :focus-visible) {
+  color: var(--nf-neon-text);
+}

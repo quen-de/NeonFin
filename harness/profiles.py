@@ -53,6 +53,8 @@ ROUTES = (
     Route("season", "#/details?id={season}", DETAIL),
     Route("episode", "#/details?id={playable}", DETAIL),
     Route("search", "#/search?query={search_term}", "#searchPage .card"),
+    # No query: Jellyfin lists a few titles as suggestions.
+    Route("suggestions", "#/search", "#searchPage .searchSuggestionsList .button-link"),
     # A query nothing matches: the empty-results line.
     Route("noresults", "#/search?query=zzqxjvw", "#searchPage .noItemsMessage"),
     Route("prefs", "#/mypreferencesmenu", ".listItem"),

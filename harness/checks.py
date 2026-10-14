@@ -61,6 +61,7 @@ TEXT_TARGETS: dict[str, tuple[str, ...]] = {
     "season": TITLE_TEXT,
     "episode": TITLE_TEXT,
     "noresults": ("#searchPage .noItemsMessage",),
+    "suggestions": ("#searchPage .searchSuggestionsList .button-link",),
     "usermenu": ("#app-user-menu .MuiMenuItem-root",),
     "actionsheet": (".actionSheet .actionSheetItemText", ".actionSheet .actionSheetItemAsideText"),
     "login": SIGN_IN_TEXT,

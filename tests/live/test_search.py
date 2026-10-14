@@ -56,3 +56,21 @@ def test_results_are_rows_under_lit_signs(open_page, style):
     # Guard: milestone 1's row titles already apply here.
     s = style(open_page("search", "desktop", "none"), "#searchPage .sectionTitle", "font-family")
     assert s["font-family"].startswith('"NeonFin Sign"')
+
+
+SUGGESTION = "#searchPage .searchSuggestionsList .button-link"
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_suggestions_are_primary_text_not_crimson(open_page, style, color, profile):
+    s = style(open_page("suggestions", profile, "none"), SUGGESTION, "color")
+    assert color(s["color"]) == pytest.approx((246, 243, 240, 0.94), abs=0.01), s
+
+
+def test_a_suggestion_lights_up_crimson_on_hover(open_page, color):
+    page = open_page("suggestions", "desktop", "none", variant="hover")
+    link = page.locator(f"{SUGGESTION} >> visible=true").first
+    link.hover()
+    page.wait_for_timeout(300)
+    assert color(link.evaluate("(e) => getComputedStyle(e).color"))[:3] == (255, 124, 145)
+    page.mouse.move(0, 0)
