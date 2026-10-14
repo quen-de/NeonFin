@@ -372,6 +372,29 @@ def test_new_page_refuses_plugin_writes_and_sign_in_but_lets_reads_through(brows
     ctx.close()
 
 
+def test_new_page_refuses_the_servers_own_writes_but_lets_playback_through(browser, server):
+    # A stray click must not favourite, mark played, rate, rearrange, delete or sign out on the
+    # real server. The player still asks for its stream, which is a POST.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.goto(server + "/")
+    _Handler.posts.clear()
+    writes = [
+        ["/UserFavoriteItems/abc", "POST"], ["/Users/u1/FavoriteItems/abc", "DELETE"], ["/UserPlayedItems/abc", "POST"],
+        ["/Users/u1/PlayedItems/abc", "POST"], ["/UserItems/abc/Rating?likes=true", "POST"],
+        ["/DisplayPreferences/usersettings?client=emby", "POST"], ["/Users/Configuration?userId=u1", "POST"],
+        ["/Users/Password", "POST"], ["/QuickConnect/Authorize?code=1", "POST"], ["/Playlists", "POST"],
+        ["/Playlists/p1/Items?ids=abc", "POST"], ["/Collections/c1/Items", "DELETE"], ["/Items/abc", "DELETE"],
+        ["/Items/abc", "POST"], ["/Items/abc/Refresh", "POST"], ["/Items/abc/Images/Primary", "DELETE"],
+        ["/UserImage?userId=u1", "POST"], ["/Sessions/Logout", "POST"], ["/Library/Refresh", "POST"],
+    ]
+    allowed = [["/Items/abc/PlaybackInfo?userId=u1", "POST"], ["/Sessions/Capabilities/Full", "POST"],
+               ["/Items/abc", "GET"], ["/DisplayPreferences/usersettings", "GET"]]
+    got = page.evaluate("""(calls) => Promise.all(calls.map(([u, m]) =>
+      fetch(u, { method: m }).then((r) => r.status, () => 'refused')))""", writes + allowed)
+    assert got == ["refused"] * len(writes) + [204, 204, 200, 200], list(zip([w[0] for w in writes + allowed], got))
+    ctx.close()
+
+
 def test_open_route_prepares_a_state_before_the_page_loads(browser, server, monkeypatch):
     from harness.config import Config
     from harness.profiles import Route

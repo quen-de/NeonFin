@@ -60,10 +60,21 @@ LOCALE = "en-US"
 # Playing the OSD item would otherwise store a resume point on the server and
 # change the detail pages the next run captures.
 PLAYBACK_REPORTS = "**/Sessions/Playing**"
-# Plugins save their settings and Seerr requests under these paths, and signing in is a write
-# too: a page the harness opens may read, never write. Matched in the browser driver, so the
-# guard costs nothing on the requests it does not match.
-WRITES = re.compile(r"/(?:JellyfinEnhanced|HomeScreen|MediaBarEnhanced)/|/users/authenticatebyname", re.IGNORECASE)
+# A page the harness opens may read, never write: not a plugin's settings or a Seerr request,
+# not signing in or out, and not the server's own writes a stray click could make (favourite,
+# played, rating, display and user settings, Quick Connect, playlists and collections, an
+# item's metadata, images or the item itself). Only methods other than GET and HEAD are
+# refused, so the same paths still read; the player's PlaybackInfo POST is not matched.
+# Matched in the browser driver, so the guard costs nothing on the requests it does not match.
+WRITES = re.compile(
+    r"/(?:JellyfinEnhanced|HomeScreen|MediaBarEnhanced)/"
+    r"|/users/authenticatebyname|/Sessions/Logout"
+    r"|/(?:User)?(?:FavoriteItems|PlayedItems)/|/Rating\b|/DisplayPreferences/"
+    r"|/Users/(?:[^/?]+/)?(?:Configuration|Password|Policy|Images)\b|/UserImage\b|/QuickConnect/Authorize"
+    r"|/(?:Playlists|Collections)\b|/Library/"
+    r"|/Items/[^/?]+(?:/(?:Refresh|Images|RemoteImages|ContentType|ExternalIdInfos)\b[^?]*)?(?:\?|$)",
+    re.IGNORECASE,
+)
 
 
 def _refuse_writes(route):
