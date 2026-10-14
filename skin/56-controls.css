@@ -20,6 +20,24 @@
   background: color-mix(in srgb, var(--nf-neon) 22%, transparent);
 }
 
+/* A disabled button is a dim pill, an error one a solid pill in the error colour, deepened
+   for its label: neither is Play. */
+.raised.button-submit:disabled,
+.MuiButton-root.MuiButton-contained:is(.Mui-disabled, :disabled) {
+  color: var(--nf-text-2);
+  text-shadow: none;
+  background: color-mix(in srgb, var(--nf-light) 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+
+.MuiButton-root.MuiButton-containedError,
+.MuiButton-root.MuiButton-containedError:is(:hover, :focus-visible) {
+  color: var(--nf-light);
+  text-shadow: none;
+  background: color-mix(in srgb, var(--nf-error) 70%, var(--nf-shade));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 18%, transparent);
+}
+
 .raised:not(.button-submit) {
   color: var(--nf-text);
   background: color-mix(in srgb, var(--nf-light) 8%, transparent);
