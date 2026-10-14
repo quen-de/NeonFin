@@ -67,11 +67,35 @@ def test_editing_one_colour_outputs_that_token_alone(picker):
     assert re.findall(r"--nf-[\w-]+: [^;]+;", output(picker)) == ["--nf-neon: #00ff88;"]
 
 
-def test_a_value_that_is_not_a_colour_is_ignored(picker):
+def test_a_value_that_is_not_a_colour_is_kept_and_flagged_not_used(picker):
+    # Reverting it silently left the user wondering what happened to their typing.
     choose(picker, "Crimson")
     type_colour(picker, "ink", "dark")
+    field = picker.locator("[data-token='ink'] input[type=text]")
     assert "nothing to paste" in output(picker)
-    assert picker.locator("[data-token='ink'] input[type=text]").input_value() == "#05060a"
+    assert field.input_value() == "dark" and field.get_attribute("aria-invalid") == "true"
+    note = picker.locator("#" + field.get_attribute("aria-describedby"))
+    assert note.is_visible() and "#" in note.inner_text()
+    type_colour(picker, "ink", "#04070a")
+    assert field.get_attribute("aria-invalid") is None and not note.is_visible()
+    choose(picker, "Crimson")
+
+
+def test_a_preset_clears_a_flagged_value(picker):
+    choose(picker, "Crimson")
+    type_colour(picker, "ink", "dark")
+    choose(picker, "Amber")
+    field = picker.locator("[data-token='ink'] input[type=text]")
+    assert field.get_attribute("aria-invalid") is None and field.input_value().startswith("#")
+
+
+def test_the_contrast_warning_is_announced_and_names_the_rows(picker):
+    choose(picker, "Crimson")
+    warning = picker.locator("#warning")
+    assert warning.get_attribute("role") == "status" and not warning.is_visible()
+    type_colour(picker, "ink", "#f0f0f0")
+    assert warning.is_visible() and "Text on the page" in warning.inner_text()
+    choose(picker, "Crimson")
 
 
 def test_the_preview_draws_in_the_palette(picker):

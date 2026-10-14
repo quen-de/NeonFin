@@ -39,6 +39,9 @@ button { font: inherit; color: inherit; }
 .contrast-mark { text-align: right; color: var(--ui-pass); }
 .contrast-row.is-failing .contrast-mark { color: var(--ui-fail); font-weight: 600; }
 .warning { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--ui-fail); border-radius: 8px; color: var(--ui-fail); }
+.warning:empty { display: none; }
+.token input[aria-invalid="true"] { border-color: var(--ui-fail); }
+.token-note { grid-column: 1 / -1; color: var(--ui-fail); font-size: 12px; }
 textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-panel); color: var(--ui-text); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; }
 .copy-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
 #copy { padding: 8px 18px; border: 0; border-radius: 999px; background: var(--ui-text); color: var(--ui-ground); font-weight: 600; cursor: pointer; }
@@ -134,7 +137,7 @@ textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(
     </section>
     <section aria-labelledby="contrast-title">
       <h2 id="contrast-title">Contrast</h2>
-      <p class="warning" id="warning" hidden>Some text will be hard to read in these colours. The block still works; the rows marked below are the ones to fix.</p>
+      <p class="warning" id="warning" role="status"></p>
       <div id="rows"></div>
     </section>
     <section aria-labelledby="output-title">
@@ -197,12 +200,12 @@ const swatch = (name) => rgba(getComputedStyle(preview.querySelector(`[data-swat
 
 function contrast() {
   const page = swatch('ink').slice(0, 3);
-  let failing = 0;
+  const failing = [];
   document.getElementById('rows').replaceChildren(...PAIRS.map(([what, fg, bg, need]) => {
     const ground = over(swatch(bg), page);
     const r = ratio(over(swatch(fg), ground), ground);
     const ok = r >= need;
-    if (!ok) failing += 1;
+    if (!ok) failing.push(what);
     const row = document.createElement('div');
     row.className = 'contrast-row' + (ok ? '' : ' is-failing');
     for (const [cls, text] of [['contrast-label', what], ['contrast-ratio', `${r.toFixed(1)}:1`], ['contrast-need', `needs ${need}:1`], ['contrast-mark', ok ? 'Pass' : 'Too low']]) {
@@ -213,7 +216,10 @@ function contrast() {
     }
     return row;
   }));
-  document.getElementById('warning').hidden = failing === 0;
+  // Announced as it changes: a screen reader hears which rows to fix.
+  document.getElementById('warning').textContent = failing.length
+    ? `Some text will be hard to read in these colours: ${failing.join(', ')}. The block still works; the rows marked below are the ones to fix.`
+    : '';
 }
 
 function block() {
@@ -229,7 +235,10 @@ function render() {
     else preview.style.setProperty(`--nf-${n}`, values[n]);
     const row = document.querySelector(`[data-token="${n}"]`);
     row.querySelector('input[type="color"]').value = shown(values, n);
-    row.querySelector('input[type="text"]').value = shown(values, n);
+    const field = row.querySelector('input[type="text"]');
+    field.value = shown(values, n);
+    field.removeAttribute('aria-invalid');
+    row.querySelector('.token-note').hidden = true;
   }
   for (const b of document.querySelectorAll('[data-preset]')) {
     const p = palette(PRESETS[b.dataset.preset]);
@@ -258,10 +267,21 @@ for (const n of NAMES) {
   row.className = 'token';
   row.dataset.token = n;
   row.innerHTML = `<label for="token-${n}">${LABELS[n] || n}<code>--nf-${n}</code></label>`
-    + `<input type="color" aria-label="${LABELS[n] || n}, colour"><input type="text" id="token-${n}" spellcheck="false" autocomplete="off" maxlength="7">`;
+    + `<input type="color" aria-label="${LABELS[n] || n}, colour"><input type="text" id="token-${n}" spellcheck="false" autocomplete="off" maxlength="7" aria-describedby="note-${n}">`
+    + `<span class="token-note" id="note-${n}" hidden>Not a colour: type it as #rrggbb or #rgb.</span>`;
   const [picker, field] = row.querySelectorAll('input');
   picker.addEventListener('input', () => { values[n] = picker.value; render(); });
-  field.addEventListener('change', () => { const v = hex(field.value); if (v) values[n] = v; render(); });
+  // Text that is not a colour stays in the field, flagged, and the palette keeps its value.
+  field.addEventListener('change', () => {
+    const v = hex(field.value);
+    if (!v && field.value.trim()) {
+      field.setAttribute('aria-invalid', 'true');
+      row.querySelector('.token-note').hidden = false;
+      return;
+    }
+    if (v) values[n] = v;
+    render();
+  });
   document.getElementById('tokens').append(row);
 }
 document.getElementById('copy').addEventListener('click', async () => {
