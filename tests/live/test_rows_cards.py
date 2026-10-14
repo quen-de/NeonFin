@@ -320,3 +320,32 @@ def test_played_and_favourite_marks_on_library_cards_are_crimson(open_page, colo
     page.mouse.move(0, 0)
     for v in got:
         assert color(v)[:3] == (255, 36, 72), v
+
+
+MY_MEDIA_NAMES = """(bare) => {
+  const s = [...document.querySelectorAll('.homeSectionsContainer > .verticalSection')]
+    .find((x) => x.querySelector('.card[data-type="CollectionFolder"]'));
+  if (!s) return null;
+  const cards = [...s.querySelectorAll('.card')].filter((c) => c.getBoundingClientRect().width > 0);
+  if (bare) cards[0].querySelector('.cardImageContainer').classList.add('defaultCardBackground');
+  return cards.map((c) => { const t = c.querySelector('.cardText'), r = t.getBoundingClientRect();
+    return { text: t.textContent.trim(), w: r.width, h: r.height, art: !c.querySelector('.defaultCardBackground') }; });
+}"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+@pytest.mark.parametrize("plugin_state", ["all", "none"])
+def test_my_media_tiles_with_artwork_drop_their_names(open_page, profile, plugin_state):
+    # Library artwork carries its own lettering; the name under it doubled it.
+    got = open_page("home", profile, plugin_state).evaluate(MY_MEDIA_NAMES, False)
+    if got is None:
+        pytest.skip("no My Media row on this user's home")
+    tiles = [t for t in got if t["art"]]
+    assert tiles and all(t["w"] <= 1 and t["h"] <= 1 and t["text"] for t in tiles), got  # still read out
+
+
+def test_a_my_media_tile_without_artwork_keeps_its_name(open_page):
+    got = open_page("home", "desktop", "none", variant="bare-tile").evaluate(MY_MEDIA_NAMES, True)
+    if got is None:
+        pytest.skip("no My Media row on this user's home")
+    assert not got[0]["art"] and got[0]["h"] > 10, got[0]

@@ -48,6 +48,19 @@
   white-space: nowrap;
 }
 
+/* Its tiles' artwork carries the library's name in its own lettering, so the name under a
+   tile leaves the screen but stays for screen readers. A tile without artwork keeps it. */
+.homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) .card:not(:has(.defaultCardBackground)) .cardText {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Room for the lift and the ring's glow inside the scroller. */
 .verticalSection .emby-scroller {
   padding-top: 12px;
