@@ -89,6 +89,39 @@ def test_a_preset_clears_a_flagged_value(picker):
     assert field.get_attribute("aria-invalid") is None and field.input_value().startswith("#")
 
 
+def test_a_flagged_value_survives_an_edit_to_another_colour(picker):
+    choose(picker, "Crimson")
+    type_colour(picker, "ink", "dark")
+    type_colour(picker, "teal", "#00ffaa")
+    field = picker.locator("[data-token='ink'] input[type=text]")
+    assert field.input_value() == "dark" and field.get_attribute("aria-invalid") == "true"
+    choose(picker, "Crimson")
+
+
+def test_a_flagged_value_is_announced(picker):
+    choose(picker, "Crimson")
+    type_colour(picker, "ink", "dark")
+    alert = picker.locator("[role=alert]")
+    assert "Page" in alert.inner_text() and "not a colour" in alert.inner_text()
+    type_colour(picker, "ink", "#05060a")
+    assert alert.inner_text() == ""
+    choose(picker, "Crimson")
+
+
+def test_the_warning_region_stays_rendered_and_changes_only_with_the_rows(picker):
+    # A live region shown and filled in the same moment is often skipped by screen readers, and
+    # one rewritten on every drag repeats itself.
+    choose(picker, "Crimson")
+    assert picker.evaluate("() => getComputedStyle(document.getElementById('warning')).display") != "none"
+    type_colour(picker, "ink", "#f0f0f0")
+    picker.evaluate("""() => { window.warningChanges = 0;
+      new MutationObserver((m) => { window.warningChanges += m.length; })
+        .observe(document.getElementById('warning'), { childList: true, characterData: true, subtree: true }); }""")
+    type_colour(picker, "teal", "#00ffaa")
+    assert picker.evaluate("() => window.warningChanges") == 0
+    choose(picker, "Crimson")
+
+
 def test_the_contrast_warning_is_announced_and_names_the_rows(picker):
     choose(picker, "Crimson")
     warning = picker.locator("#warning")
