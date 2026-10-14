@@ -58,9 +58,42 @@
   border-radius: 6px;
 }
 
-/* About 75 characters a line. */
+/* About 75 characters a line. Jellyfin writes the overview as paragraphs inside the clamped
+   box; their outer margins move outside it, so the text starts at the top of the box, folded
+   or unfolded. Folded, the paragraphs run on as one, so the clamp holds whole lines in every
+   engine: Firefox on Windows showed half of the line under the ellipsis. */
 .detailPagePrimaryContainer .overview {
   max-width: 54ch;
+  margin-top: 2em;
+}
+
+.detailPagePrimaryContainer .overview p:first-child {
+  margin-top: 0;
+}
+
+.detailPagePrimaryContainer .overview p:last-child {
+  margin-bottom: 0;
+}
+
+.detailPagePrimaryContainer .overview.detail-clamp-text p {
+  display: inline;
+}
+
+.detailPagePrimaryContainer .overview.detail-clamp-text p + p {
+  margin-inline-start: 0.3em;
+}
+
+/* Show more sits under the end of the text, at the column's edge rather than the page's. */
+.detailPagePrimaryContainer .overview-controls {
+  max-width: 54ch;
+}
+
+.detailPagePrimaryContainer .overview-controls:has(.overview-expand:not(.hide)) {
+  margin-top: -1em;
+}
+
+.detailPagePrimaryContainer .overview-expand {
+  margin: 0 -1em 0 0;
 }
 
 /* Tags, external links and credit labels step back; links light up on hover. */
@@ -163,4 +196,23 @@
 
 .defaultCardBackground.defaultCardBackground5 {
   background-color: color-mix(in srgb, var(--nf-neon) 36%, var(--nf-ink-2));
+}
+
+/* Cast and crew are round portraits, the crop leaning to the top, where faces sit. */
+#castCollapsible .personCard .cardPadder {
+  padding-bottom: 100%;
+}
+
+#castCollapsible .personCard :is(.cardScalable, .cardPadder, .cardImageContainer, .blurhash-canvas, .cardOverlayContainer) {
+  border-radius: 50%;
+}
+
+#castCollapsible .personCard .cardImageContainer {
+  background-position: 50% 25%;
+}
+
+/* The menu button moves in from the square's empty corner onto the portrait's edge. */
+#castCollapsible .personCard .cardOverlayButton-br {
+  right: 8%;
+  bottom: 8%;
 }

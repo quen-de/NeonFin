@@ -298,3 +298,76 @@ def test_play_brightens_on_hover(open_page, color):
     assert before[3] == pytest.approx(0.12, abs=0.01)
     assert after[:3] == (255, 36, 72) and after[3] == pytest.approx(0.22, abs=0.01), after
     page.mouse.move(0, 0)
+
+
+# Jellyfin renders the overview as paragraphs inside a <bdi>, inside the clamped box.
+PARAGRAPHS = "<bdi><p>" + PROSE + "</p><p>" + PROSE + "</p></bdi>"
+CLAMP = """(html) => { const o = document.querySelector('.detailPagePrimaryContainer .overview');
+  if (html) { o.innerHTML = html; o.classList.add('detail-clamp-text'); }
+  const r = o.getBoundingClientRect(), lh = parseFloat(getComputedStyle(o).lineHeight), lines = [];
+  const w = document.createTreeWalker(o, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())) { const g = document.createRange(); g.selectNodeContents(n);
+    for (const q of g.getClientRects()) lines.push([q.top - r.top, q.bottom - r.top]); }
+  const shown = lines.filter(([t]) => t < r.height);
+  return { h: r.height, lh, first: Math.min(...lines.map(([t]) => t)), partial: shown.filter(([t, b]) => b > r.height + 1).length,
+           lines: new Set(shown.map(([t]) => Math.round(t / lh))).size }; }"""
+
+
+@pytest.mark.parametrize("profile, lines", [("desktop", 6), ("phone", 12)])
+def test_the_clamped_overview_shows_whole_lines_from_its_top(open_page, profile, lines):
+    # Margins inside the clamped box left a gap above the text, and on Firefox for Windows a
+    # half line under the ellipsis. The clamp now holds lines only.
+    got = open_page("movie", profile, "none", variant="clamp").evaluate(CLAMP, PARAGRAPHS)
+    assert got["first"] < got["lh"] / 2, got
+    assert got["h"] == pytest.approx(lines * got["lh"], abs=1) and got["partial"] == 0, got
+
+
+def test_the_unfolded_overview_keeps_its_paragraphs_and_its_place(open_page):
+    page = open_page("movie", "desktop", "none", variant="unfold")
+    clamped = page.evaluate(CLAMP, PARAGRAPHS)
+    top = page.evaluate("() => document.querySelector('.detailPagePrimaryContainer .overview').getBoundingClientRect().top")
+    page.evaluate("() => document.querySelector('.detailPagePrimaryContainer .overview').classList.remove('detail-clamp-text')")
+    open_ = page.evaluate(CLAMP, None)
+    gap = page.evaluate("""() => { const [a, b] = document.querySelectorAll('.detailPagePrimaryContainer .overview p');
+      return b.getBoundingClientRect().top - a.getBoundingClientRect().bottom; }""")
+    assert open_["first"] == pytest.approx(clamped["first"], abs=1) and open_["h"] > clamped["h"], (clamped, open_)
+    assert page.evaluate("() => document.querySelector('.detailPagePrimaryContainer .overview').getBoundingClientRect().top") == pytest.approx(top, abs=1)
+    assert gap >= open_["lh"] / 2, gap
+
+
+SHOW_MORE = """() => { const o = document.querySelector('.detailPagePrimaryContainer .overview');
+  const b = document.querySelector('.detailPagePrimaryContainer .overview-expand'); b.classList.remove('hide');
+  const t = o.getBoundingClientRect(), q = b.getBoundingClientRect(), cs = getComputedStyle(b);
+  return { text_right: t.right, label_right: q.right - parseFloat(cs.paddingRight), text_bottom: t.bottom,
+           label_top: q.top + parseFloat(cs.paddingTop) }; }"""
+
+
+@pytest.mark.parametrize("profile, viewport", [("desktop", None), ("desktop", (2560, 1300)), ("phone", None)])
+def test_show_more_sits_under_the_end_of_the_text(open_page, profile, viewport):
+    got = open_page("movie", profile, "none", viewport=viewport, variant="show-more").evaluate(SHOW_MORE)
+    assert got["label_right"] == pytest.approx(got["text_right"], abs=2), got
+    assert 0 <= got["label_top"] - got["text_bottom"] <= 16, got
+
+
+CAST = """() => { const c = document.querySelector('#castCollapsible .personCard'); if (!c) return null;
+  const s = c.querySelector('.cardScalable'), r = s.getBoundingClientRect();
+  const radius = (e) => getComputedStyle(e).borderTopLeftRadius;
+  return { w: r.width, h: r.height, scalable: radius(s), image: radius(c.querySelector('.cardImageContainer')),
+           ring: getComputedStyle(s, '::after').borderTopLeftRadius,
+           place: getComputedStyle(c.querySelector('.cardImageContainer')).backgroundPositionY,
+           // How far the menu button's centre sits from the circle's, in radii.
+           menu: (() => { const m = c.querySelector('.cardOverlayButton'); if (!m) return 0; const q = m.getBoundingClientRect();
+             return Math.hypot(q.left + q.width / 2 - r.left - r.width / 2, q.top + q.height / 2 - r.top - r.height / 2) / (r.width / 2); })() }; }"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+@pytest.mark.parametrize("route", ["movie", "show"])
+def test_cast_and_crew_are_circles(open_page, profile, route):
+    got = open_page(route, profile, "none").evaluate(CAST)
+    if got is None:
+        pytest.skip("no cast on this title")
+    assert got["w"] == pytest.approx(got["h"], abs=1), got
+    assert got["scalable"] == got["image"] == got["ring"] == "50%", got
+    # Portraits keep the face: the crop leans to the top third.
+    assert got["place"] == "25%", got
+    assert got["menu"] < 0.95, got  # on the portrait, not in the empty corner
