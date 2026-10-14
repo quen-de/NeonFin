@@ -52,3 +52,8 @@ def test_dolby_vision_alone_is_not_the_hdr_film():
     # A browser asked about Dolby Vision alone is asked a different question from HDR10 or HLG.
     films = [film("dv", "mkv", "hevc", "HDR", vrange_type="DOVI"), film("dvhdr", "mkv", "hevc", "HDR", vrange_type="DOVIWithHDR10")]
     assert discover.pick_player_titles(films) == {"play_hdr": "dvhdr"}
+
+
+def test_dolby_vision_over_hdr10_plus_is_an_hdr_film():
+    films = [film("dv", "mkv", "hevc", "HDR", vrange_type="DOVI"), film("dvplus", "mkv", "hevc", "HDR", vrange_type="DOVIWithHDR10Plus")]
+    assert discover.pick_player_titles(films) == {"play_hdr": "dvplus"}

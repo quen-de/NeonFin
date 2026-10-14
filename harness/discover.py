@@ -32,7 +32,7 @@ def _streams(film: dict) -> tuple[dict, dict, dict]:
 
 # HDR a browser is asked about as HDR. Dolby Vision alone is a different question, and a
 # browser that cannot answer it makes the server convert for a reason that is not HDR.
-HDR_TYPES = {"HDR10", "HDR10Plus", "HLG", "DOVIWithHDR10", "DOVIWithHLG"}
+HDR_TYPES = {"HDR10", "HDR10Plus", "HLG", "DOVIWithHDR10", "DOVIWithHDR10Plus", "DOVIWithHLG"}
 
 
 def pick_player_titles(films: list[dict]) -> dict[str, str]:
