@@ -154,6 +154,22 @@ def test_a_preset_without_its_header_fails(tmp_path):
         build.palette_page(root)
 
 
+@pytest.mark.parametrize(
+    "body, problem",
+    [
+        (":root { --nf-glow: #abc; }", "--nf-glow is not a palette input"),
+        (":root { --nf-neon: red; }", "--nf-neon: red is not a hex colour"),
+        (":root { --nf-neon: var(--nf-teal); }", "--nf-neon: var(--nf-teal) is not a hex colour"),
+        ("", "sets no palette input"),
+    ],
+)
+def test_a_preset_that_sets_more_than_the_palette_in_hex_fails(tmp_path, body, problem):
+    head = "/* NeonFin palette: Bad. Paste after the skin in Custom CSS. */\n"
+    root = make_skin(tmp_path, {"palettes/bad.css": head + body + "\n"})
+    with pytest.raises(BuildError, match=f"palettes/bad.css: {re.escape(problem)}"):
+        build.palette_page(root)
+
+
 def test_the_real_palette_page_builds():
     page = build.palette_page()
     assert all(name in page for name in ('"Cyan neon"', '"Amber"', '"Violet"', '"Acid green"'))

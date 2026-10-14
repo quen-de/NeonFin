@@ -66,7 +66,15 @@ def palette_presets(root: pathlib.Path | None = None) -> dict[str, dict[str, str
         head = PRESET_HEADER.match(css)
         if not head:
             raise BuildError(f"palettes/{path.name} starts with /* NeonFin palette: <Name>. Paste after the skin in Custom CSS. */")
-        out[head[1]] = {k: hex6(v) for k, v in preset_tokens(css).items()}
+        tokens = preset_tokens(css)
+        if not tokens:
+            raise BuildError(f"palettes/{path.name}: sets no palette input")
+        for k, v in tokens.items():
+            if k not in PALETTE:
+                raise BuildError(f"palettes/{path.name}: --nf-{k} is not a palette input")
+            if not re.fullmatch(r"#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}", v.strip()):
+                raise BuildError(f"palettes/{path.name}: --nf-{k}: {v} is not a hex colour")
+        out[head[1]] = {k: hex6(v) for k, v in tokens.items()}
     return out
 
 
