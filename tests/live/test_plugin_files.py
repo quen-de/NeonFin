@@ -352,3 +352,15 @@ def test_seerr_ratings_are_secondary_text(open_page, color):
     seerr_card(page)
     c = color(page.evaluate("() => getComputedStyle(document.querySelector('.cardText .jellyseerr-rating')).color"))
     assert c[:3] == (246, 243, 240) and abs(c[3] - 0.62) < 0.01, c
+
+
+CENTRE = """() => { const d = document.querySelector('#slides-container .dots-container'); if (!d) return null;
+  const r = d.getBoundingClientRect(); return { centre: r.left + r.width / 2, vw: document.documentElement.clientWidth }; }"""
+
+
+@pytest.mark.parametrize("profile, viewport", [("desktop", None), ("desktop", (1280, 800)), ("desktop", (2560, 1300)), ("phone", None)])
+def test_the_enhanced_counter_and_progress_sit_centre_screen(open_page, profile, viewport):
+    page = open_page("home", profile, "all", viewport=viewport)
+    hero_is(page)
+    got = page.evaluate(CENTRE)
+    assert got and got["centre"] == pytest.approx(got["vw"] / 2, abs=2), got

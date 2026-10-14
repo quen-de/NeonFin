@@ -100,6 +100,16 @@
   backdrop-filter: none;
 }
 
+/* The counter and its progress bar sit centre screen. Phones held upright already centre
+   them, with a scale of their own. */
+@media not all and (max-width: 767px) and (orientation: portrait) {
+  #slides-container .dots-container {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 .jellyfin-v12 #slides-container .media-bar-progress-bar {
   background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
 }
