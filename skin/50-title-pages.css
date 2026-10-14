@@ -58,7 +58,7 @@
   border-radius: 6px;
 }
 
-/* About 75 characters a line. Jellyfin writes the overview as paragraphs inside the clamped
+/* A 54ch reading column. Jellyfin writes the overview as paragraphs inside the clamped
    box; their outer margins move outside it, so the text starts at the top of the box, folded
    or unfolded. Folded, the paragraphs run on as one, so the clamp holds whole lines in every
    engine: Firefox on Windows showed half of the line under the ellipsis. */
