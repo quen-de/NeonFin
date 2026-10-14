@@ -8,6 +8,8 @@ import time
 import weakref
 from dataclasses import dataclass
 
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
+
 from harness import plugins
 from harness.states import PREPARE, STATES
 
@@ -195,11 +197,15 @@ def settle(page, volatile, quiet_ms: int = 800, cap_ms: int = 15_000) -> bool:
     """True once neither the DOM (outside volatile subtrees) nor the network
     has been busy for quiet_ms; False if that never happens within cap_ms.
     networkidle alone misses lazy images requested after it fires."""
-    page.wait_for_load_state("networkidle")
+    start = time.monotonic()
+    try:
+        page.wait_for_load_state("networkidle", timeout=cap_ms)
+    except PlaywrightTimeout:
+        return False
     page.evaluate("() => document.fonts.ready.then(() => true)")
     pending = _pending.get(page, set())
     page.evaluate(WATCH_JS, list(volatile))
-    start = last_busy = time.monotonic()
+    last_busy = time.monotonic()
     seen = 0
     try:
         while True:
