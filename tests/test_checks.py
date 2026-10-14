@@ -165,3 +165,25 @@ def test_contrast_skips_text_inside_a_transparent_ancestor(page, tmp_path, monke
     page.set_content("""<body style="margin:0;background:#000"><div style="opacity:0">
       <p class=item style="color:#222;margin:0;font-size:16px">Hidden</p></div></body>""")
     assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []
+
+
+def test_contrast_waits_out_a_keyframe_entrance(page, tmp_path, monkeypatch):
+    # Text fading in from nothing is read as it lands, not skipped as transparent.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".item",))
+    page.set_content("""<style>@keyframes in { from { opacity: 0 } }</style><body style="margin:0;background:#000">
+      <div style="animation:in 10s"><p class=item style="color:#222;margin:0;font-size:16px">Arriving</p></div></body>""")
+    assert len(checks.contrast_failures(page, "t", tmp_path / "c.png")) == 1
+
+
+def test_checks_leave_an_endless_animation_running(page):
+    page.set_content("<style>@keyframes spin { to { rotate: 1turn } }</style><div id=s style='animation:spin 1s infinite'></div>")
+    checks.at_rest(page)  # must not raise
+    assert page.evaluate("() => document.getElementById('s').getAnimations()[0].playState") == "running"
+
+
+def test_checks_leave_a_timer_animation_running(page):
+    # A plugin's slideshow times its slides with a keyframe animation on a progress bar;
+    # finishing it would move the slideshow on in the middle of a check.
+    page.set_content("<style>@keyframes bar { from { scale: 0 1 } }</style><div id=b style='animation:bar 5s'></div>")
+    checks.at_rest(page)
+    assert page.evaluate("() => document.getElementById('b').getAnimations()[0].playState") == "running"
