@@ -55,6 +55,9 @@ A light accent needs dark labels: the cyan, amber and acid green presets set
 `--nf-on-neon: #000`. The defaults keep every label readable over the brightest artwork. A
 lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 
+A block made before `--nf-on-neon` existed, with a light accent, now shows white labels on
+that accent: add `--nf-on-neon: #000;` to it, or rebuild it in the picker.
+
 ## Licence
 
 MIT. The embedded sign font is a subset of Big Shoulders Display, under the SIL Open Font

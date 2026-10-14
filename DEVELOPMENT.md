@@ -22,6 +22,27 @@
 appear in the repository: your server's name, host names, people, addresses. The neutrality
 test checks every tracked file against it.
 
+## Skin rules
+
+`python3 build.py` refuses a skin that breaks these, naming the file and line; the checks live
+in `skinlint.py` and the offline tests run them too.
+
+- Colours come from the palette in `skin/00-tokens.css`. No other file writes one out.
+- Glass is literal, on the allowlist in `skinlint.py`, with `-webkit-backdrop-filter` first.
+- No `@import`, no `@font-face` (the build embeds the font), no `will-change`, and `content`
+  only as an empty string: the skin adds no visible text.
+- Selectors never use an emotion hash class (it changes on every Jellyfin build) or
+  `aria-label` (it is translated).
+- The built sheet has no comments, so a comment can never be all that separates two tokens:
+  `1px/* x */solid` fails.
+- A plugin file in `skin/plugins/` starts with `/* plugin: <Name>; roots: <selector>, ... */`
+  and selects only under those roots, and core files never select them. Its one exception is
+  a `:root` block of custom properties, where it may hand its plugin's own variables the
+  palette; it may not set the skin's `--nf-*` or Jellyfin's `--jf-*` tokens.
+- A preset in `palettes/` starts with
+  `/* NeonFin palette: <Name>. Paste after the skin in Custom CSS. */` and sets only the nine
+  palette inputs, in hex. A new preset needs only its file: the picker offers every one.
+
 ## The harness
 
 The harness renders real pages of a Jellyfin 12 server with your local build injected, so
@@ -35,7 +56,9 @@ nothing is ever written to the server.
    phone into `harness/runs/NAME/` (`--css live` uses the server's own custom CSS).
    The `picker` route shows the sign-in page's user picker with two made-up users that the
    harness answers itself from the first request on, so no request about real users reaches
-   the server. Every page the harness opens refuses plugin writes and sign-in requests.
+   the server. Every page the harness opens refuses writes: a plugin's settings and Seerr
+   requests, signing in or out, and the server's own writes a stray click could make
+   (favourites, played marks, settings, playlists, item edits and deletes).
 4. `uv run python -m harness.compare harness/runs/A harness/runs/B` diffs two runs.
 
 ## Gates
@@ -69,9 +92,8 @@ and `harness.gates VANILLA_RUN SKIN_RUN` still judges two such runs.
 `uv run python -m harness.sheet harness/runs/skin` writes a contact sheet per device.
 
 A route that cannot exist without a plugin (Jellyfin Enhanced's calendar and panel) is
-skipped, not failed, in a state with that plugin off. Every page the harness opens refuses
-plugin writes and sign-in requests, and a capture that finds its session ended signs in
-again once and says so in the gate notes.
+skipped, not failed, in a state with that plugin off. A capture that finds its session ended
+signs in again once and says so in the gate notes.
 
 ## Player timing
 

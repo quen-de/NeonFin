@@ -121,7 +121,8 @@ def test_the_palette_has_nine_inputs_each_a_token():
 
 def test_presets_set_only_palette_inputs_in_hex():
     files = sorted((build.ROOT / "palettes").glob("*.css"))
-    assert [f.stem for f in files] == ["acid", "amber", "cyan", "violet"]
+    # The four that ship; a new preset needs only its file.
+    assert {"acid", "amber", "cyan", "violet"} <= {f.stem for f in files}
     for f in files:
         css = f.read_text()
         assert build.PRESET_HEADER.match(css), f.name
