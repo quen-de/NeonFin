@@ -136,3 +136,11 @@ def test_a_plugin_may_hand_its_own_variables_the_palette_on_root():
     assert lint({"skin/plugins/p.css": head + ":root { --p-accent: var(--nf-neon); color: inherit; }"}) == [
         "skin/plugins/p.css:2: ':root' selects outside this plugin's roots"
     ]
+
+
+def test_a_plugin_may_not_override_the_skin_or_jellyfin_tokens_on_root():
+    head = "/* plugin: P; roots: .p- */\n"
+    assert lint({"skin/plugins/p.css": head + ":root { --p-accent: 1px; --nf-neon: var(--nf-teal); --jf-palette-primary-main: 1px; }"}) == [
+        "skin/plugins/p.css:2: --nf-neon belongs to the skin or Jellyfin; a plugin file sets only its plugin's variables",
+        "skin/plugins/p.css:2: --jf-palette-primary-main belongs to the skin or Jellyfin; a plugin file sets only its plugin's variables",
+    ]

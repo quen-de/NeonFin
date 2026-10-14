@@ -143,6 +143,12 @@ def lint(files: dict[str, str]) -> list[str]:
                     variables_only = sel == ":root" and decls and all(p.startswith("--") for p, _ in decls)
                     if roots[name] and not variables_only and not any(r in sel for r in roots[name]):
                         problems.append(f"{where}: {sel!r} selects outside this plugin's roots")
+                    if variables_only:
+                        problems += [
+                            f"{where}: {prop} belongs to the skin or Jellyfin; a plugin file sets only its plugin's variables"
+                            for prop, _ in decls
+                            if prop.startswith(("--nf-", "--jf-"))
+                        ]
                 else:
                     leaked = [r for r in every_root if r in sel]
                     if leaked:
