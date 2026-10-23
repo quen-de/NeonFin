@@ -316,7 +316,7 @@ RTL).
 
 ### Cards and rows
 - **Card**: artwork at 12px with the hairline and card drop; placeholder `ink-2`, its type icon at `light` 22%. Text under it `--nf-text-2`, first line `--nf-text` 600. Cards without artwork use five steps of `neon` 12% to 36% into `ink-2`.
-- **Lit card**: the ring is pre-painted on a pseudo-element at opacity 0. Pointer hover lifts the artwork 4px at once and fades the ring in over 180ms; it goes out at once. Keyboard focus lifts and glows with a 180ms glide and suppresses the global outline (kept in forced colours). Touch screens get no hover state.
+- **Lit card**: the ring is pre-painted on a pseudo-element at opacity 0. Pointer hover lifts the artwork 4px at once and fades the ring in over 180ms; it goes out at once. Keyboard focus, not focus a click leaves on a card's button, lifts and glows with a 180ms glide and suppresses the global outline (kept in forced colours). Touch screens get no hover state.
 - **Indicators**: counts and the watched check are accent pills with `--nf-on-neon` text; on cards they merge into one tinted tab (`neon` 52% over `ink-2` at 42%), not blurred. Played and favourite icons are crimson. Progress bars are 4px pills, crimson on an 18% track.
 - **Rows**: titles are row signs; the see-all chevron in `--nf-text-2`. The home "My Media" row hides its own title, and hides the name under each library tile that has artwork (the artwork carries the name), visually only: screen readers keep both. A tile without artwork keeps its name.
 
