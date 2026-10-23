@@ -1,3 +1,7 @@
 #!/bin/sh
-# Offline tests, the neutrality check among them, pass before any commit.
+# What CI runs passes before any commit: lint, format, and the offline tests, the neutrality
+# check among them.
+set -e
+uv run --quiet ruff check .
+uv run --quiet ruff format --check .
 exec uv run --quiet pytest -q

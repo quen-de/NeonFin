@@ -96,3 +96,11 @@ def test_a_missing_local_config_is_announced(tmp_path):
     r = subprocess.run([sys.executable, str(HOOKS / "commit-msg"), str(msg)], capture_output=True, text=True, env=env)
     assert r.returncode == 0
     assert "instance terms are not checked" in r.stderr
+
+
+def test_pre_commit_runs_every_check_ci_runs():
+    # A lint that CI ran and the hook did not once kept CI red unnoticed.
+    ci = (HOOKS.parent / ".github" / "workflows" / "ci.yml").read_text()
+    checks = [line.split("uv run", 1)[1].strip() for line in ci.splitlines() if "run: uv run" in line]
+    hook = (HOOKS / "pre-commit").read_text()
+    assert checks and [c for c in checks if c not in hook] == [], checks
