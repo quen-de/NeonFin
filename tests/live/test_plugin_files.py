@@ -180,6 +180,39 @@ def test_the_desktop_hero_shows_more_of_the_artwork(open_page, tmp_path):
     assert _hero_light(page, tmp_path, 720) >= 170  # mid-screen, beside the text column
 
 
+def test_the_hero_ends_without_a_seam(open_page, tmp_path):
+    # The page's light is fixed to the screen, so wherever the hero's bottom edge is scrolled
+    # to, the rows of pixels either side of it must match.
+    from PIL import Image
+
+    page = open_page("home", "desktop", "all")
+    hero_is(page)
+    _hold_the_slide(page)
+    width = page.evaluate("innerWidth")
+    for at in (None, 0.85, 0.55):
+        page.evaluate(
+            """(at) => { const b = document.querySelector('#slides-container').getBoundingClientRect();
+          if (at === null) window.scrollTo(0, 0); else window.scrollBy(0, b.bottom - innerHeight * at); }""",
+            at,
+        )
+        page.wait_for_timeout(200)
+        edge = page.evaluate("() => document.querySelector('#slides-container').getBoundingClientRect().bottom")
+        page.screenshot(path=str(tmp_path / "edge.png"))
+        dpr = page.evaluate("devicePixelRatio")
+        im = Image.open(tmp_path / "edge.png").convert("RGB")
+
+        # The page margins either side of the rows: nothing but the hero and the light there.
+        for side in (range(2, 30, 2), range(width - 30, width - 2, 2)):
+
+            def row(y):
+                px = [im.getpixel((round(x * dpr), round(y * dpr))) for x in side]
+                return [sum(p[i] for p in px) / len(px) for i in range(3)]
+
+            above, below = row(edge - 2), row(edge + 2)
+            assert max(abs(a - b) for a, b in zip(above, below)) <= 2, (at, side.start, edge, above, below)
+    page.evaluate("() => window.scrollTo(0, 0)")
+
+
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
 def test_hero_text_is_primary_white(open_page, style, color, profile):
     page = open_page("home", profile, "all")
