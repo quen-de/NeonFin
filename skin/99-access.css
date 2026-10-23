@@ -41,12 +41,12 @@
 
   .card .cardScalable,
   .card:hover .cardScalable::after,
-  .card:is(:focus-visible, :has(:focus-visible)) .cardScalable::after {
+  .card:focus-within:is(:focus-visible, :has(:focus-visible)) .cardScalable::after {
     transition: none;
   }
 
   .card:hover .cardScalable,
-  .card:is(:focus-visible, :has(:focus-visible)) .cardScalable {
+  .card:focus-within:is(:focus-visible, :has(:focus-visible)) .cardScalable {
     transform: none;
     transition: none;
   }
