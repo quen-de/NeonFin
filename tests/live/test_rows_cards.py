@@ -103,6 +103,25 @@ def test_keyboard_focus_matches_hover(open_page):
     assert card.evaluate("(c) => getComputedStyle(c.querySelector('.cardScalable')).transitionDuration") == "0.18s"
 
 
+def test_focus_left_by_a_mouse_click_leaves_the_card_dark(open_page):
+    # On Windows a click leaves focus on the card's button; once the pointer leaves, the card
+    # goes dark. Chromium on macOS focuses no button on click, so the test sets that state up:
+    # a click focuses a spot in the margin, and focus moved on from there is not keyboard focus.
+    page = open_page("home", "desktop", "none", variant="click")
+    card = page.locator(f"{CARD} >> visible=true").nth(1)
+    page.evaluate(
+        """() => { const d = document.createElement('div'); d.tabIndex = -1; d.id = 'nf-test-spot';
+      d.style.cssText = 'position:fixed;left:0;bottom:0;width:8px;height:8px'; document.body.append(d); }"""
+    )
+    page.mouse.click(4, page.viewport_size["height"] - 4)
+    button = card.locator("button.cardOverlayButton").first
+    button.evaluate("(b) => b.focus()")
+    page.wait_for_timeout(400)
+    assert button.evaluate("(b) => b === document.activeElement && !b.matches(':focus-visible')")
+    s = card.evaluate(CARD_STATE)
+    assert s["transform"] == "none" and s["ring"] == "0", s
+
+
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
 @pytest.mark.parametrize("plugin_state", ["all", "none"])
 def test_no_jellyfin_blue_on_home(open_page, profile, plugin_state):

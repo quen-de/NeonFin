@@ -159,17 +159,18 @@
   }
 }
 
-/* Keyboard focus lights the card the same way, and glides. */
-.card:focus-within {
+/* Keyboard focus lights the card the same way, and glides. Focus a click leaves on one of
+   its buttons does not: the card goes dark when the pointer leaves. */
+.card:is(:focus-visible, :has(:focus-visible)) {
   contain: layout style;
 }
 
-.card:focus-within .cardScalable {
+.card:is(:focus-visible, :has(:focus-visible)) .cardScalable {
   transform: translateY(-4px);
   transition: transform var(--nf-fast) var(--nf-ease);
 }
 
-.card:focus-within .cardScalable::after {
+.card:is(:focus-visible, :has(:focus-visible)) .cardScalable::after {
   opacity: 1;
   transition: opacity var(--nf-fast) var(--nf-ease);
 }
