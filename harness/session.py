@@ -221,7 +221,13 @@ def settle(page, volatile, quiet_ms: int = 800, cap_ms: int = 15_000) -> bool:
         page.wait_for_load_state("networkidle", timeout=cap_ms)
     except PlaywrightTimeout:
         return False
-    page.evaluate("() => document.fonts.ready.then(() => true)")
+    # Fonts get what is left of the cap: a font that never loads leaves the page unsettled.
+    left_ms = max(0, cap_ms - (time.monotonic() - start) * 1000)
+    if not page.evaluate(
+        "(ms) => Promise.race([document.fonts.ready.then(() => true), new Promise((r) => setTimeout(() => r(false), ms))])",
+        left_ms,
+    ):
+        return False
     pending = _pending.get(page, set())
     page.evaluate(WATCH_JS, list(volatile))
     last_busy = time.monotonic()

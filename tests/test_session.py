@@ -146,6 +146,15 @@ def test_settle_gives_up_at_cap_on_a_request_that_never_ends(browser, server):
     ctx.close()
 
 
+def test_settle_gives_up_at_cap_on_fonts_that_never_load(browser):
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    page.set_content("<script>Object.defineProperty(document.fonts, 'ready', { get: () => new Promise(() => {}) })</script>")
+    t0 = time.monotonic()
+    assert session.settle(page, [], quiet_ms=300, cap_ms=1_500) is False
+    assert time.monotonic() - t0 < 5
+    ctx.close()
+
+
 def test_open_route_turns_failed_state_action_into_route_error(browser, server, monkeypatch):
     from harness.config import Config
     from harness.profiles import Route
