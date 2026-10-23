@@ -29,7 +29,8 @@ def test_forced_colors_drop_the_glass(open_page, style):
 # The skin stills motion with 0.01ms, not 0s, so Jellyfin's transitionend handlers still run.
 CARD_MOTION = "(c) => { const s = getComputedStyle(c.querySelector('.cardScalable')); return [s.transitionDuration, s.transform]; }"
 STILL = """(c) => { const s = getComputedStyle(c.querySelector('.cardScalable'));
-  return s.transform === 'none' && s.transitionDuration.split(',').every((d) => parseFloat(d) * (d.trim().endsWith('ms') ? 0.001 : 1) <= 0.001); }"""
+  const secs = (d) => parseFloat(d) * (d.trim().endsWith('ms') ? 0.001 : 1);
+  return s.transform === 'none' && s.transitionDuration.split(',').every((d) => secs(d) <= 0.001); }"""
 
 
 def test_reduced_motion_stills_the_cards(open_page):
@@ -103,8 +104,10 @@ def test_reduced_motion_stops_every_transition_and_animation(open_page, route):
 # Jellyfin's loading spinner, as its loading module builds it.
 SPINNER = """() => {
   const layer = (n) => `<div class="mdl-spinner__layer mdl-spinner__layer-${n}">`
-    + '<div class="mdl-spinner__circle-clipper mdl-spinner__left"><div class="mdl-spinner__circle mdl-spinner__circleLeft"></div></div>'
-    + '<div class="mdl-spinner__circle-clipper mdl-spinner__right"><div class="mdl-spinner__circle mdl-spinner__circleRight"></div></div></div>';
+    + '<div class="mdl-spinner__circle-clipper mdl-spinner__left">'
+    + '<div class="mdl-spinner__circle mdl-spinner__circleLeft"></div></div>'
+    + '<div class="mdl-spinner__circle-clipper mdl-spinner__right">'
+    + '<div class="mdl-spinner__circle mdl-spinner__circleRight"></div></div></div>';
   const e = document.createElement('div');
   e.className = 'docspinner mdl-spinner mdlSpinnerActive';
   e.innerHTML = [1, 2, 3, 4].map(layer).join('');

@@ -170,9 +170,17 @@ def test_the_whole_block_shows_on_a_phone(picker):
     picker.set_viewport_size({"width": 390, "height": 844})
     try:
         choose(picker, "Crimson")
-        for token, value in (("neon", "#00e5ff"), ("teal", "#ff3dbb"), ("ink", "#04070a"), ("ink-2", "#08101a"),
-                             ("chrome", "#0f1a24"), ("paper", "#eeeeee"), ("light", "#fafafa"), ("shade", "#010101"),
-                             ("on-neon", "#000000")):
+        for token, value in (
+            ("neon", "#00e5ff"),
+            ("teal", "#ff3dbb"),
+            ("ink", "#04070a"),
+            ("ink-2", "#08101a"),
+            ("chrome", "#0f1a24"),
+            ("paper", "#eeeeee"),
+            ("light", "#fafafa"),
+            ("shade", "#010101"),
+            ("on-neon", "#000000"),
+        ):
             type_colour(picker, token, value)
         assert picker.evaluate("() => { const o = document.getElementById('output'); return o.scrollHeight <= o.clientHeight; }")
     finally:

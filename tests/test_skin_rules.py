@@ -12,7 +12,6 @@ def test_the_nav_capsule_hides_its_scrollbar_where_scrollbar_width_is_unknown():
     assert rules and ("display", "none") in cssscan.declarations(rules[0].body)
 
 
-
 def test_a_card_looks_for_keyboard_focus_only_once_focus_is_inside_it():
     # :has(:focus-visible) on every card costs a grid page about a third more style time;
     # behind :focus-within it runs only on the card that holds focus.

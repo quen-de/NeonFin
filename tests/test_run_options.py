@@ -40,7 +40,9 @@ def test_a_lost_session_signs_in_again_once(monkeypatch):
 
     calls = _opener(monkeypatch, 1)
     pages = [FakePage("https://jf.example/web/#/login")]
-    got = run.open_signed_in(lambda: pages[-1], lambda: pages.append(FakePage("https://jf.example/web/#/home")), None, Route("home", "", "a"), [])
+    got = run.open_signed_in(
+        lambda: pages[-1], lambda: pages.append(FakePage("https://jf.example/web/#/home")), None, Route("home", "", "a"), []
+    )
     assert got == (True, True) and calls == ["https://jf.example/web/#/login", "https://jf.example/web/#/home"]
 
 

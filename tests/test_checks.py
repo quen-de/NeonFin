@@ -91,7 +91,9 @@ def test_contrast_reads_colours_at_rest_not_mid_transition(page, tmp_path, monke
 
 def test_blue_hits_read_colours_at_rest(page):
     page.set_content("<div id=d style='width:9px;height:9px;background:#000;transition:background-color 10s'></div>")
-    page.evaluate("() => { const d = document.getElementById('d'); getComputedStyle(d).backgroundColor; d.style.backgroundColor = '#00a4dc'; }")
+    page.evaluate(
+        "() => { const d = document.getElementById('d'); getComputedStyle(d).backgroundColor; d.style.backgroundColor = '#00a4dc'; }"
+    )
     assert checks.blue_hits(page) == {"div#d background": 1}
 
 

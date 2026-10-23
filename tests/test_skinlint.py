@@ -91,9 +91,11 @@ def test_content_never_adds_visible_text():
 
 
 def test_content_takes_no_text_from_anywhere():
-    css = ('.a::before { content: attr(title); }\n.b::after { content: "" "x"; }\n'
-           '.c::after { content: url(x.svg); }\n.d::after { content: counter(n); }\n'
-           '.e::after { content: none; }\n.f::after { content: \'\' !important; }\n.g { justify-content: center; }\n')
+    css = (
+        '.a::before { content: attr(title); }\n.b::after { content: "" "x"; }\n'
+        ".c::after { content: url(x.svg); }\n.d::after { content: counter(n); }\n"
+        ".e::after { content: none; }\n.f::after { content: '' !important; }\n.g { justify-content: center; }\n"
+    )
     assert core(css) == [f"skin/30-header.css:{n}: content adds visible text; only empty strings are allowed" for n in (1, 2, 3, 4)]
 
 

@@ -226,7 +226,9 @@ def test_controls_held_counts_only_a_hide_inside_the_window(browser, hide_at, wi
     page.evaluate(player.PLAYER_JS)
     page.evaluate(player.HELD_ARM)
     if hide_at is not None:
-        page.evaluate("(ms) => setTimeout(() => document.querySelector('.videoOsdBottom').classList.add('videoOsdBottom-hidden'), ms)", hide_at)
+        page.evaluate(
+            "(ms) => setTimeout(() => document.querySelector('.videoOsdBottom').classList.add('videoOsdBottom-hidden'), ms)", hide_at
+        )
     page.wait_for_timeout(400)
     assert page.evaluate(player.HELD, window) is held
     ctx.close()

@@ -53,10 +53,7 @@ def test_declarations_can_keep_strings():
 
 
 def test_strip_comments_keeps_code_and_strings_only():
-    css = (
-        "/* head */\n.a { color: inherit; } /* tail */\n\n"
-        '.b::before { content: "/* kept */"; }\n.c/**/.d { color: inherit; }\n'
-    )
+    css = '/* head */\n.a { color: inherit; } /* tail */\n\n.b::before { content: "/* kept */"; }\n.c/**/.d { color: inherit; }\n'
     assert strip_comments(css) == '.a { color: inherit; }\n.b::before { content: "/* kept */"; }\n.c.d { color: inherit; }\n'
 
 

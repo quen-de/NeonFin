@@ -19,8 +19,13 @@ def film(id, container="mp4", vcodec="h264", vrange="SDR", acodec="aac", height=
             {
                 "Container": container,
                 "MediaStreams": [
-                    {"Type": "Video", "Codec": vcodec, "VideoRange": vrange, "Height": height,
-                     "VideoRangeType": vrange_type or ("HDR10" if vrange == "HDR" else "SDR")},
+                    {
+                        "Type": "Video",
+                        "Codec": vcodec,
+                        "VideoRange": vrange,
+                        "Height": height,
+                        "VideoRangeType": vrange_type or ("HDR10" if vrange == "HDR" else "SDR"),
+                    },
                     {"Type": "Audio", "Codec": acodec},
                 ],
             }

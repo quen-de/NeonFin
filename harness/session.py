@@ -90,6 +90,8 @@ def _refuse_writes(route):
         route.fallback()
     else:
         route.abort()
+
+
 # Requests still in flight keep a page unsettled; streams never finish.
 UNTRACKED = {"media", "websocket", "eventsource"}
 _pending: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()

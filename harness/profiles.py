@@ -91,7 +91,11 @@ ROUTES = (
         needs=frozenset({"jellyfin-enhanced", "plugin-pages"}),
     ),
     Route(
-        "jepanel", "#/home", "#jellyfin-enhanced-panel", ready=".homeSectionsContainer", state="jepanel",
+        "jepanel",
+        "#/home",
+        "#jellyfin-enhanced-panel",
+        ready=".homeSectionsContainer",
+        state="jepanel",
         needs=frozenset({"jellyfin-enhanced"}),
     ),
 )

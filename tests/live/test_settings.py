@@ -22,7 +22,9 @@ def test_settings_headings_are_semibold_interface_type(open_page, style, route, 
 
 
 def test_a_contained_settings_button_is_a_neon_tube(open_page, style, color):
-    b = style(open_page("display", "desktop", "all"), ".userPreferencesPage .MuiButton-root.MuiButton-contained", "box-shadow", "background-color")
+    b = style(
+        open_page("display", "desktop", "all"), ".userPreferencesPage .MuiButton-root.MuiButton-contained", "box-shadow", "background-color"
+    )
     assert b["box-shadow"].count("inset") == 2 and color(b["background-color"])[:3] == (255, 36, 72), b
 
 
@@ -30,7 +32,8 @@ def test_a_contained_settings_button_is_a_neon_tube(open_page, style, color):
 # class; the clones keep the rest of the real button's classes.
 CLONE = """(extra) => { const b = document.querySelector('.userPreferencesPage .MuiButton-root.MuiButton-contained');
   const c = b.cloneNode(true); c.classList.add(...extra); if (extra.includes('Mui-disabled')) c.disabled = true;
-  b.after(c); const cs = getComputedStyle(c); return { shadow: cs.boxShadow, glow: cs.textShadow, color: cs.color, bg: cs.backgroundColor }; }"""
+  b.after(c); const cs = getComputedStyle(c);
+  return { shadow: cs.boxShadow, glow: cs.textShadow, color: cs.color, bg: cs.backgroundColor }; }"""
 
 
 def test_a_disabled_settings_button_is_a_dim_pill_not_a_tube(open_page, color):

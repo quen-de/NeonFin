@@ -87,7 +87,11 @@ def palette_page(root: pathlib.Path | None = None) -> str:
         raise BuildError(f"missing {PICKER}")
     tokens = strip_comments((root / TOKENS).read_text(encoding="utf-8")).replace(":root", ".nf-preview", 1)
     page = path.read_text(encoding="utf-8")
-    for mark, value in (("/*@FONT@*/", font_face(root)), ("/*@TOKENS@*/", tokens), ("/*@PRESETS@*/null", json.dumps(palette_presets(root)))):
+    for mark, value in (
+        ("/*@FONT@*/", font_face(root)),
+        ("/*@TOKENS@*/", tokens),
+        ("/*@PRESETS@*/null", json.dumps(palette_presets(root))),
+    ):
         if mark not in page:
             raise BuildError(f"{PICKER} has no {mark} mark")
         page = page.replace(mark, value)

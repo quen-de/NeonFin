@@ -331,7 +331,9 @@ def test_the_unfolded_overview_keeps_its_paragraphs_and_its_place(open_page):
     gap = page.evaluate("""() => { const [a, b] = document.querySelectorAll('.detailPagePrimaryContainer .overview p');
       return b.getBoundingClientRect().top - a.getBoundingClientRect().bottom; }""")
     assert open_["first"] == pytest.approx(clamped["first"], abs=1) and open_["h"] > clamped["h"], (clamped, open_)
-    assert page.evaluate("() => document.querySelector('.detailPagePrimaryContainer .overview').getBoundingClientRect().top") == pytest.approx(top, abs=1)
+    assert page.evaluate(
+        "() => document.querySelector('.detailPagePrimaryContainer .overview').getBoundingClientRect().top"
+    ) == pytest.approx(top, abs=1)
     assert gap >= open_["lh"] / 2, gap
 
 
@@ -357,7 +359,8 @@ CAST = """() => { const c = document.querySelector('#castCollapsible .personCard
            place: getComputedStyle(c.querySelector('.cardImageContainer')).backgroundPositionY,
            // How far the menu button's centre sits from the circle's, in radii.
            menu: (() => { const m = c.querySelector('.cardOverlayButton'); if (!m) return 0; const q = m.getBoundingClientRect();
-             return Math.hypot(q.left + q.width / 2 - r.left - r.width / 2, q.top + q.height / 2 - r.top - r.height / 2) / (r.width / 2); })() }; }"""
+             const dx = q.left + q.width / 2 - r.left - r.width / 2, dy = q.top + q.height / 2 - r.top - r.height / 2;
+             return Math.hypot(dx, dy) / (r.width / 2); })() }; }"""
 
 
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
