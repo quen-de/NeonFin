@@ -58,6 +58,13 @@ def test_comments_and_strings_are_not_code():
     assert core('/* @import "x"; will-change */ .a { font-family: "@font-face"; }') == []
 
 
+def test_a_string_left_open_ends_at_its_line_as_in_a_browser():
+    # Browsers end an unclosed string at the newline and read the next line as code.
+    p = core('.a { font-family: "x;\n}\n@import url(y.css);\n.b { will-change: transform; }')
+    assert p == ["skin/30-header.css:3: @import is not allowed", "skin/30-header.css:4: will-change is not allowed"]
+    assert core('.a { font-family: "x\\\ny"; }\n@import "z.css";') == ["skin/30-header.css:3: @import is not allowed"]
+
+
 def test_plugin_file_needs_its_header():
     assert lint({"skin/plugins/x.css": ".a { color: inherit; }"})[0].startswith("skin/plugins/x.css:1: a plugin file starts with")
 

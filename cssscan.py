@@ -23,9 +23,10 @@ def code_mask(css: str, strings: bool = False) -> list[bool]:
             end = n if end == -1 else end + 2
         elif css[i] in "\"'":
             quote, end = css[i], i + 1
-            while end < n and css[end] != quote:
+            while end < n and css[end] not in (quote, "\n"):
                 end += 2 if css[end] == "\\" else 1
-            end = min(end + 1, n)
+            # A string left open ends at its newline, as in a browser.
+            end = end + 1 if end < n and css[end] == quote else min(end, n)
             if strings:
                 i = end
                 continue
