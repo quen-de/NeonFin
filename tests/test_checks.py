@@ -189,3 +189,41 @@ def test_checks_leave_a_timer_animation_running(page):
     page.set_content("<style>@keyframes bar { from { scale: 0 1 } }</style><div id=b style='animation:bar 5s'></div>")
     checks.at_rest(page)
     assert page.evaluate("() => document.getElementById('b').getAnimations()[0].playState") == "running"
+
+
+def test_contrast_waits_out_a_colour_animation(page, tmp_path, monkeypatch):
+    # A finite animation of the text's own colour is read where it lands, not mid-way.
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".glow",))
+    page.set_content("""<style>@keyframes glow { from { color: #222 } }</style><body style="margin:0;background:#000">
+      <p class=glow style="color:#fff;animation:glow 10s;margin:0;font-size:16px">Glowing</p></body>""")
+    assert checks.contrast_failures(page, "t", tmp_path / "c.png") == []
+
+
+def test_text_items_list_what_the_contrast_check_samples(page, monkeypatch):
+    monkeypatch.setitem(checks.TEXT_TARGETS, "t", (".x",))
+    page.set_content("<p class=x>One</p><p class=x style='visibility:hidden'>Two</p><p class=y>Three</p>")
+    assert [i["text"] for i in checks.text_items(page, "t")] == ["One"]
+
+
+def snapshot(**styles):
+    return {k: {"label": k, "s": s} for k, s in styles.items()}
+
+
+def test_glass_that_still_shows_the_page_through_is_reported():
+    glass = {"backdrop-filter": "blur(20px)", "background-color": "rgba(9, 11, 18, 0.5)", "opacity": "1"}
+    card = {"backdrop-filter": "none", "background-color": "rgba(0, 0, 0, 0.2)", "opacity": "1"}
+    default = snapshot(bar=glass, card=card)
+    solid = snapshot(bar={"backdrop-filter": "none", "background-color": "rgb(9, 11, 18)", "opacity": "1"}, card=card)
+    tinted = snapshot(bar={"backdrop-filter": "none", "background-color": "rgba(9, 11, 18, 0.96)", "opacity": "1"}, card=card)
+    faded = snapshot(bar={"backdrop-filter": "none", "background-color": "rgb(9, 11, 18)", "opacity": "0.9"}, card=card)
+    still_glass = snapshot(bar={**glass, "background-color": "rgb(9, 11, 18)"}, card=card)
+    assert checks.see_through(default, solid) == []
+    assert checks.see_through(default, tinted) == checks.see_through(default, faded) == checks.see_through(default, still_glass) == ["bar"]
+
+
+def test_a_closed_menu_shows_nothing_through_it():
+    # MUI keeps closed menus mounted, glass at opacity 0 or hidden: nothing of them is drawn.
+    menu = {"backdrop-filter": "blur(22px)", "background-color": "rgba(18, 20, 32, 0.72)", "opacity": "0", "visibility": "visible"}
+    gone = {"backdrop-filter": "none", "background-color": "rgb(9, 11, 18)", "opacity": "1", "visibility": "hidden"}
+    reduced = snapshot(menu={**menu, "backdrop-filter": "none", "background-color": "rgb(9, 11, 18)"}, gone={**gone, "opacity": "0.5"})
+    assert checks.see_through(snapshot(menu=menu, gone={**gone, "backdrop-filter": "blur(4px)"}), reduced) == []

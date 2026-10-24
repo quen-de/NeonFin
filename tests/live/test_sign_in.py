@@ -1,6 +1,9 @@
+from urllib.parse import urlsplit
+
 import pytest
 
-from harness import checks
+from harness import checks, session, states
+from harness.profiles import PROFILES, ROUTES
 
 pytestmark = pytest.mark.live
 
@@ -131,3 +134,21 @@ def test_users_keep_their_names_on_desktop(open_page, width):
         return [t.innerText, t.scrollWidth <= t.clientWidth, c.querySelector('.cardScalable').getBoundingClientRect().width]; })""")
     assert [c[0] for c in cards] == ["Alex", "Sam"], cards
     assert all(fits and avatar >= 96 for _, fits, avatar in cards), cards
+
+
+def test_the_picker_asks_the_server_nothing_about_users(cfg, browser):
+    # Its users are the harness's own, answered before the first request; the sign-in page's
+    # app files still load from the server.
+    ctx, page = session.new_page(browser, PROFILES["desktop"], None, None)
+    reached = []
+
+    def record(route):
+        reached.append(urlsplit(route.request.url).path)
+        route.fallback()
+
+    ctx.route(states.api_path("/users"), record)
+    try:
+        session.open_route(page, cfg, {r.name: r for r in ROUTES}["picker"], cfg.volatile)
+    finally:
+        ctx.close()
+    assert reached == [], reached

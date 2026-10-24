@@ -271,11 +271,8 @@ def test_my_media_keeps_its_row_but_not_its_title(open_page, profile, plugin_sta
     assert got["text"] and got["display"] != "none" and got["visibility"] == "visible"  # still read out
 
 
-MOVIE_CARD = ".card[data-type='Movie'] >> visible=true"
-
-
-def hovered_card(page):
-    card = page.locator(MOVIE_CARD).first
+def hovered_card(page, kind="Movie"):
+    card = page.locator(f".card[data-type='{kind}'] >> visible=true").first
     card.scroll_into_view_if_needed()
     card.hover()
     page.wait_for_timeout(400)
@@ -307,10 +304,10 @@ def test_episode_list_actions_answer_hover_without_blue(open_page):
     page.mouse.move(0, 0)
 
 
-@pytest.mark.parametrize("route", ["home", "movies"])
-def test_card_play_is_a_neon_tube_on_a_dark_disc(open_page, color, route):
+@pytest.mark.parametrize(("route", "kind"), [("home", "Movie"), ("movies", "Movie"), ("series", "Series"), ("search", "Movie")])
+def test_card_play_is_a_neon_tube_on_a_dark_disc(open_page, color, route, kind):
     page = open_page(route, "desktop", "none", variant="card-play")
-    play = hovered_card(page).locator(".cardOverlayFab-primary")
+    play = hovered_card(page, kind).locator(".cardOverlayFab-primary")
     fg, bg, shadow = play.evaluate("(e) => { const cs = getComputedStyle(e); return [cs.color, cs.backgroundColor, cs.boxShadow]; }")
     r, g, b, a = color(bg)
     assert color(fg) == (255, 255, 255, 1.0) and shadow.count("inset") == 2, (fg, shadow)

@@ -37,6 +37,7 @@ CLIENT = 'MediaBrowser Client="neonfin-demo", Device="setup", DeviceId="neonfin-
 ADMIN, VIEWER, KEY_APP = "admin", "demo", "neonfin-demo"
 FFMPEG = "/usr/lib/jellyfin-ffmpeg/ffmpeg"
 OLDEST_ABI = (10, 11)
+SEARCH_TERM = "in"
 LIBRARIES = (("Movies", "movies", "/media/Movies"), ("Shows", "tvshows", "/media/Shows"))
 HDR10 = (
     "hdr10=1:repeat-headers=1:colorprim=bt2020:transfer=smpte2084:colormatrix=bt2020nc"
@@ -371,9 +372,11 @@ def seed_playstate(viewer: Api, uid: str) -> None:
 
 
 def write_config() -> None:
+    """The harness's settings for the demo: the example's volatile parts, and a search term this
+    library answers with films, the series and people."""
     if not CONFIG.exists():
         example = json.loads((ROOT / "harness" / "config.example.json").read_text())
-        CONFIG.write_text(json.dumps({k: example[k] for k in ("search_term", "volatile")}, indent=2) + "\n")
+        CONFIG.write_text(json.dumps({"search_term": SEARCH_TERM, "volatile": example["volatile"]}, indent=2) + "\n")
 
 
 def main(argv: list[str] | None = None) -> int:

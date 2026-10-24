@@ -185,3 +185,32 @@ def test_the_whole_block_shows_on_a_phone(picker):
         assert picker.evaluate("() => { const o = document.getElementById('output'); return o.scrollHeight <= o.clientHeight; }")
     finally:
         picker.set_viewport_size({"width": 1280, "height": 900})
+
+
+FOCUS_RING = "() => { const cs = getComputedStyle(document.activeElement); return [cs.outlineStyle, parseFloat(cs.outlineWidth)]; }"
+
+
+def tab_to(page, selector, limit=80):
+    """Press Tab from the top of the page until focus lands on selector."""
+    page.evaluate("() => document.activeElement && document.activeElement.blur()")
+    for _ in range(limit):
+        page.keyboard.press("Tab")
+        if page.evaluate("(s) => !!document.activeElement && document.activeElement.matches(s)", selector):
+            return True
+    return False
+
+
+def test_the_presets_are_reached_with_tab_and_show_a_ring(picker):
+    assert tab_to(picker, "[data-preset]")
+    style, width = picker.evaluate(FOCUS_RING)
+    assert style == "solid" and width >= 2, (style, width)
+
+
+def test_the_copy_button_keeps_its_ring_in_forced_colours(picker):
+    picker.emulate_media(forced_colors="active")
+    try:
+        assert tab_to(picker, "#copy")
+        style, width = picker.evaluate(FOCUS_RING)
+        assert style != "none" and width >= 1, (style, width)
+    finally:
+        picker.emulate_media(forced_colors="none")

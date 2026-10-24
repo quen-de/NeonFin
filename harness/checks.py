@@ -98,6 +98,24 @@ def glass_elements(page) -> list[str]:
     return page.evaluate(_js("glass.js"))
 
 
+def see_through(default: dict, reduced: dict) -> list[str]:
+    """Surfaces that are glass by default and still show the page through once the system asks
+    for less transparency: blurred, filled with anything less than opaque, or faded. Both are
+    collect.styles snapshots of the same route. A surface drawn at opacity 0 or hidden, such
+    as a closed menu MUI keeps mounted, shows nothing at all."""
+    out = []
+    for key, v in default.items():
+        if v["s"].get("backdrop-filter", "none") in ("none", "") or key not in reduced:
+            continue
+        s = reduced[key]["s"]
+        if s.get("visibility") == "hidden" or float(s.get("opacity") or 1) == 0:
+            continue
+        fill = colour_values(s.get("background-color", ""))
+        if s.get("backdrop-filter", "none") not in ("none", "") or not fill or fill[0][3] < 1 or float(s.get("opacity") or 1) < 1:
+            out.append(reduced[key]["label"])
+    return sorted(out)
+
+
 def blue_hits(page) -> dict[str, int]:
     at_rest(page)
     return page.evaluate(_js("blue.js"))
@@ -190,10 +208,17 @@ def brightest_decile(img: Image.Image, rect, dpr: float) -> tuple[int, int, int]
     return pixels[min(len(pixels) - 1, int(0.9 * len(pixels)))]
 
 
-def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
+def text_items(page, route_name: str) -> list[dict]:
+    """The text the contrast check samples on a route: the visible matches of its targets and
+    of the targets every route has."""
     at_rest(page)
     selectors = TEXT_TARGETS["*"] + TEXT_TARGETS.get(route_name, ())
-    items = page.evaluate(_js("contrast.js"), list(selectors))
+    return page.evaluate(_js("contrast.js"), list(selectors))
+
+
+def contrast_failures(page, route_name: str, shot_path) -> list[dict]:
+    items = text_items(page, route_name)
+    selectors = TEXT_TARGETS["*"] + TEXT_TARGETS.get(route_name, ())
     if not items:
         return []
     # Three ids outrank any skin rule that colours the text with !important.

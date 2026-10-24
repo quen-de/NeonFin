@@ -1,6 +1,7 @@
 """demo/setup.py's own logic; Task 8 runs it against a real server."""
 
 import importlib.util
+import json
 import pathlib
 import stat
 import sys
@@ -158,3 +159,12 @@ def test_sign_in_shows_the_splash_screen():
     on = Branding({"SplashscreenEnabled": True})
     setup.show_splash(on)
     assert on.posted is None
+
+
+def test_the_demo_searches_a_term_its_library_answers(tmp_path, monkeypatch):
+    # "in" finds films (Sintel, Spring, Wing It!), the series and people; the example's "the"
+    # finds only two people here.
+    monkeypatch.setattr(setup, "CONFIG", tmp_path / "config.json")
+    setup.write_config()
+    conf = json.loads((tmp_path / "config.json").read_text())
+    assert conf["search_term"] == "in" and conf["volatile"]

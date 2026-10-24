@@ -52,9 +52,11 @@ def test_header_reads_over_a_white_hero(open_page, tmp_path):
       return [getComputedStyle(b).backgroundColor, Math.round(b.getBoundingClientRect().top)]; }"""
     )
     assert reach == ["rgb(255, 255, 255)", 0]
-    assert page.locator(f"{NAV} > .MuiButton-root >> visible=true").count() > 0
-    fails = checks.contrast_failures(page, "home", tmp_path / "hero.png")
-    assert [f for f in fails if "MuiButton" in f["label"]] == []
+    # Only the capsules' own labels, every one of them measured: the hero's text has its own test.
+    labels = page.locator(f"{NAV} > .MuiButton-root >> visible=true").count()
+    sampled = checks.text_items(page, "header")
+    assert labels > 0 and len(sampled) >= labels, (labels, sampled)
+    assert checks.contrast_failures(page, "header", tmp_path / "hero.png") == []
 
 
 # The hero shows the plot from about 1100px wide; 1280 is the narrowest common desktop with it.
