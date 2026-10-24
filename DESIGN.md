@@ -140,7 +140,7 @@ Colour values above are the default (Crimson) palette as rendered. The source of
 `skin/00-tokens.css`: nine inputs set in hex, everything else mixed from them with
 `color-mix(in srgb, ...)`, so a preset or a user block that changes the inputs changes every
 derived value. `build.py` concatenates `skin/` (numbered core files, then `skin/plugins/*.css`,
-then `99-*`) into `dist/neonfin.css` and enforces the rules in `skinlint.py`.
+then `99-*`) into `build/neonfin.css` (`dist/neonfin.css` for a release) and enforces the rules in `skinlint.py`.
 
 ## Overview
 
@@ -208,7 +208,7 @@ Crimson is the default. Each preset sets only the inputs it changes, in hex, and
 | Violet | `#a855ff` | default | `#2ee6d6` | `#06050b` / `#0b0914` / `#161225` |
 | Acid green | `#b6ff2e` | `#000` | `#ff2bd6` | `#050704` / `#090c07` / `#131a10` |
 
-`palettes/picker.html` (built to `dist/palette.html`) previews any palette and checks it.
+`palettes/picker.html` (built to `build/palette.html`, and published with each release as `palette.html`) previews any palette and checks it.
 
 ### Named Rules
 

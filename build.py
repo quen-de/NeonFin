@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build NeonFin into one self-contained stylesheet, dist/neonfin.css.
+"""Build NeonFin into one self-contained stylesheet: build/neonfin.css, or dist/neonfin.css for a release.
 
 Concatenates skin/ in cascade order (numbered core files, then one file per
 plugin, then the files numbered 99), embeds the sign font as a data: URI,
 enforces the skin rules in skinlint.py, strips comments, and stamps the version,
-and for any build but a release the commit, into a header comment. It also writes dist/palette.html, the palette picker,
+and for any build but a release the commit, into a header comment. A dev build also writes build/palette.html, the palette picker,
 from palettes/. Stdlib only, so any deploy script can run it with a system
 python3.
 """
@@ -189,25 +189,51 @@ def build(root: pathlib.Path | None = None, release: bool = False) -> str:
     return header(build_id(version(root), sha, dirty)) + assemble(root)
 
 
+def changelog_section(text: str, version: str) -> str | None:
+    """The body of CHANGELOG.md's section for version, or None if it has none."""
+    m = re.search(rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|\Z)", text, re.M | re.S)
+    return m[1].strip() if m else None
+
+
+def release_notes(root: pathlib.Path, version: str) -> str:
+    path = root / "CHANGELOG.md"
+    body = changelog_section(path.read_text(encoding="utf-8"), version) if path.exists() else None
+    if not body:
+        raise BuildError(f"CHANGELOG.md has no ## [{version}] section with entries")
+    return body
+
+
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="Build dist/neonfin.css")
-    ap.add_argument("-o", "--out", default=str(ROOT / "dist" / "neonfin.css"))
+    ap = argparse.ArgumentParser(description="Build the skin: build/neonfin.css, or dist/neonfin.css for a release")
+    ap.add_argument("-o", "--out", help="where the stylesheet goes")
+    ap.add_argument("--release", action="store_true", help="version-only header, CHANGELOG checked, written to dist/")
+    ap.add_argument("--palette-out", help="with --release, also write the palette picker here")
+    ap.add_argument("--notes", metavar="VERSION", help="print CHANGELOG.md's section for VERSION")
     args = ap.parse_args(argv)
+    if args.palette_out and not args.release:
+        ap.error("--palette-out goes with --release; a dev build writes the picker next to the stylesheet")
     try:
-        css = build(ROOT)
+        if args.notes:
+            print(release_notes(ROOT, args.notes))
+            return 0
+        if args.release:
+            release_notes(ROOT, version(ROOT))
+        css = build(ROOT, release=args.release)
         font = len(font_face(ROOT).encode())
-        picker = palette_page(ROOT)
+        picker = palette_page(ROOT) if args.palette_out or not args.release else None
     except BuildError as e:
         print(f"build: {e}", file=sys.stderr)
         return 1
-    out = pathlib.Path(args.out)
+    out = pathlib.Path(args.out) if args.out else ROOT / ("dist" if args.release else "build") / "neonfin.css"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(css, encoding="utf-8")
     raw = css.encode("utf-8")
     print(f"wrote {out} ({len(raw):,} bytes, {len(raw) - font:,} without the font, {len(gzip.compress(raw)):,} gzip)")
-    page = out.parent / "palette.html"
-    page.write_text(picker, encoding="utf-8")
-    print(f"wrote {page} (the palette picker)")
+    if picker is not None:
+        page = pathlib.Path(args.palette_out) if args.palette_out else out.parent / "palette.html"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(picker, encoding="utf-8")
+        print(f"wrote {page} (the palette picker)")
     return 0
 
 

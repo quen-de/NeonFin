@@ -198,3 +198,52 @@ def test_a_preset_that_sets_more_than_the_palette_in_hex_fails(tmp_path, body, p
 def test_the_real_palette_page_builds():
     page = build.palette_page()
     assert all(name in page for name in ('"Cyan neon"', '"Amber"', '"Violet"', '"Acid green"'))
+
+
+CHANGELOG = "# Changelog\n\n## [Unreleased]\n\n## [9.9.9] - 2026-10-24\n\n### Added\n\n- First.\n\n## [9.9.8] - 2026-10-01\n\n- Old.\n"
+
+
+def test_dev_builds_go_to_build_with_the_picker(tmp_path, monkeypatch):
+    root = make_skin(tmp_path / "repo")
+    monkeypatch.setattr(build, "ROOT", root)
+    assert build.main([]) == 0
+    assert (root / "build" / "neonfin.css").read_text().startswith("/* neonfin 9.9.9+")
+    assert (root / "build" / "palette.html").exists() and not (root / "dist").exists()
+
+
+def test_a_release_build_goes_to_dist_alone(tmp_path, monkeypatch):
+    root = make_skin(tmp_path / "repo", {"CHANGELOG.md": CHANGELOG})
+    monkeypatch.setattr(build, "ROOT", root)
+    assert build.main(["--release"]) == 0
+    assert (root / "dist" / "neonfin.css").read_text().startswith("/* neonfin 9.9.9 */\n")
+    assert not (root / "dist" / "palette.html").exists() and not (root / "build").exists()
+
+
+def test_a_release_build_writes_the_picker_where_asked(tmp_path, monkeypatch):
+    root = make_skin(tmp_path / "repo", {"CHANGELOG.md": CHANGELOG})
+    monkeypatch.setattr(build, "ROOT", root)
+    out, page = tmp_path / "r" / "neonfin.css", tmp_path / "r" / "palette.html"
+    assert build.main(["--release", "-o", str(out), "--palette-out", str(page)]) == 0
+    assert out.read_text().startswith("/* neonfin 9.9.9 */\n") and page.read_text().startswith("<style>@font-face")
+
+
+def test_a_release_without_its_changelog_section_is_refused(tmp_path, monkeypatch, capsys):
+    root = make_skin(tmp_path / "repo", {"CHANGELOG.md": "# Changelog\n\n## [Unreleased]\n\n- Next.\n"})
+    monkeypatch.setattr(build, "ROOT", root)
+    assert build.main(["--release"]) == 1
+    assert "CHANGELOG.md has no ## [9.9.9] section with entries" in capsys.readouterr().err
+    assert not (root / "dist").exists()
+
+
+def test_an_empty_changelog_section_is_refused(tmp_path, monkeypatch, capsys):
+    root = make_skin(tmp_path / "repo", {"CHANGELOG.md": "# Changelog\n\n## [9.9.9] - 2026-10-24\n\n## [9.9.8]\n\n- Old.\n"})
+    monkeypatch.setattr(build, "ROOT", root)
+    assert build.main(["--release"]) == 1
+    assert "no ## [9.9.9] section with entries" in capsys.readouterr().err
+
+
+def test_notes_print_the_section_body(tmp_path, monkeypatch, capsys):
+    root = make_skin(tmp_path / "repo", {"CHANGELOG.md": CHANGELOG})
+    monkeypatch.setattr(build, "ROOT", root)
+    assert build.main(["--notes", "9.9.9"]) == 0
+    assert capsys.readouterr().out == "### Added\n\n- First.\n"

@@ -13,7 +13,7 @@ Status: early development, not ready for use.
 
 ## Install
 
-1. `python3 build.py` writes `dist/neonfin.css`.
+1. `python3 build.py` writes `build/neonfin.css`.
 2. Paste its contents into the Custom CSS field of your server's branding settings.
 
 Jellyfin 12, modern layout, desktop browsers and phones. The legacy layout is not styled for, and TV apps do not load custom CSS.
@@ -33,7 +33,7 @@ in Custom CSS and set only the ones you want to change.
 Four presets are ready in `palettes/`: Cyan neon, Amber, Violet and Acid green. Paste one
 after the skin.
 
-To make your own, open `dist/palette.html` (written by `python3 build.py` next to the
+To make your own, open `build/palette.html` (written by `python3 build.py` next to the
 stylesheet) in a browser. It previews the skin in your colours, checks that text stays
 readable, and gives you the block to paste.
 
