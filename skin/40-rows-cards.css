@@ -34,6 +34,12 @@
   margin-bottom: 2.2em;
 }
 
+/* A section Jellyfin left empty (no Live TV, nothing to continue reading) takes no room: a
+   plugin that lays the sections out as a flex column keeps its margin from collapsing. */
+.homeSectionsContainer > .verticalSection:empty {
+  display: none;
+}
+
 /* My Media is the row of library tiles: the tiles name themselves, so its title leaves the
    screen but stays for screen readers. */
 .homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) > .sectionTitleContainer,
@@ -74,6 +80,12 @@
 
 .layout-mobile .homeSectionsContainer .sectionTitleContainer-cards {
   padding-top: 10px;
+}
+
+/* The container's padding stands in for the title's own, which a bare title keeps: both kinds of
+   row title then sit the same distance under the row above. */
+.layout-mobile .homeSectionsContainer .sectionTitleContainer-cards .sectionTitle {
+  padding-top: 0;
 }
 
 .layout-mobile .verticalSection .emby-scroller {
@@ -278,6 +290,18 @@
 }
 
 .itemProgressBarForeground {
+  border-radius: inherit;
+  background-color: var(--nf-neon);
+}
+
+/* Library grids draw the same bar with MUI. */
+.itemLinearProgress.MuiLinearProgress-root {
+  height: 4px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--nf-light) 18%, transparent);
+}
+
+.itemLinearProgress > .MuiLinearProgress-bar {
   border-radius: inherit;
   background-color: var(--nf-neon);
 }

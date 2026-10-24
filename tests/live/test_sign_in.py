@@ -89,12 +89,13 @@ def test_forgot_password_and_the_disclaimer_step_back(open_page, style, color):
 
 
 def test_the_panel_ends_close_under_its_last_line(open_page):
-    # The disclaimer's paragraph margin and Jellyfin's spacing left a tall empty band.
+    # The disclaimer's paragraph margin and Jellyfin's spacing left a tall empty band, and an
+    # empty disclaimer kept its margin. The last line is a button's when there is no disclaimer.
     gap = open_page("login", "desktop", "none").evaluate(
         """(s) => { const panel = document.querySelector(s).getBoundingClientRect();
-      const last = [...document.querySelectorAll('#loginPage .readOnlyContent *')]
-        .filter((e) => e.getClientRects().length && e.innerText && e.innerText.trim()).pop().getBoundingClientRect();
-      return panel.bottom - last.bottom; }""",
+      const text = [...document.querySelectorAll('#loginPage .readOnlyContent *')]
+        .filter((e) => e.getClientRects().length && e.innerText && e.innerText.trim()).pop();
+      return panel.bottom - (text.closest('button') || text).getBoundingClientRect().bottom; }""",
         PANEL,
     )
     assert gap <= 32, gap

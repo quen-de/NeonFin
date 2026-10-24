@@ -1,4 +1,4 @@
-/* plugin: Media Bar Enhanced; roots: #slides-container */
+/* plugin: Media Bar Enhanced; roots: #slides-container, .media-bar-settings-button */
 /* The home hero. The plugin colours most of its parts itself at higher specificity, hence the
    !important flags. What its Jellyfin 12 build added sits under the version class it puts on
    the body. */
@@ -158,4 +158,14 @@
 /* Play is a tube: a light focus ring, not one lost in its glow. */
 #slides-container .play-button:focus-visible {
   outline-color: var(--nf-light) !important;
+}
+
+/* Reduced motion: the plugin's own transitions are !important, at more specificity than the
+   skin's global stop. Its settings button sits in the header. */
+@media (prefers-reduced-motion: reduce) {
+  #slides-container .media-bar-progress-fill,
+  :root .media-bar-settings-button.headerButton,
+  .media-bar-settings-button.headerButton img {
+    transition-duration: 0.01ms !important;
+  }
 }

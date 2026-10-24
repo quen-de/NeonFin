@@ -217,7 +217,9 @@ GAPS = """() => {
     const last = [...secs[i].querySelectorAll('.cardBox')].pop(), t = secs[i + 1].querySelector('.sectionTitle');
     const box = t && (t.closest('.sectionTitleContainer') || t);
     if (!box || box.getBoundingClientRect().width <= 1) continue;
-    out.push(Math.round(t.getBoundingClientRect().top - last.getBoundingClientRect().bottom));
+    // From the title's text, not its box: a title outside a container carries its own padding.
+    const top = t.getBoundingClientRect().top + parseFloat(getComputedStyle(t).paddingTop);
+    out.push(Math.round(top - last.getBoundingClientRect().bottom));
   }
   return out;
 }"""
@@ -227,6 +229,8 @@ GAPS = """() => {
 def test_rows_sit_closer_on_phones(open_page, plugin_state):
     gaps = open_page("home", "phone", plugin_state).evaluate(GAPS)
     assert gaps and all(36 <= g <= 62 for g in gaps), gaps
+    # Evenly: a title in a container (a link) sits no lower than a bare one.
+    assert max(gaps) - min(gaps) <= 4, gaps
 
 
 def test_rows_keep_their_generous_separation_on_desktop(open_page):
