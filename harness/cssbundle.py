@@ -21,5 +21,5 @@ def probe_branding(base: str) -> dict:
         wire_bytes = len(r.read())
         encoding = r.headers.get("Content-Encoding", "identity")
     with urllib.request.urlopen(url, timeout=30) as r:
-        custom_css = json.loads(r.read())["CustomCss"] or ""
+        custom_css = json.loads(r.read()).get("CustomCss") or ""
     return {"wire_bytes": wire_bytes, "encoding": encoding, "custom_css": custom_css}
