@@ -11,16 +11,22 @@ from collections import Counter
 from PIL import Image, ImageChops
 
 
+def shows_inside(key: str, *snaps: dict) -> bool:
+    """Whether anything under key is visible in either run: a visible child shows inside a hidden parent."""
+    prefix = key + ">"
+    return any(k.startswith(prefix) and v["s"].get("visibility") != "hidden" for s in snaps for k, v in s.items())
+
+
 def diff_styles(a: dict, b: dict) -> dict:
     changed = {}
     for k in a.keys() & b.keys():
         sa, sb = a[k]["s"], b[k]["s"]
         d = {p: (sa.get(p), sb.get(p)) for p in sa.keys() | sb.keys() if sa.get(p) != sb.get(p)}
-        # A transform on an element hidden in both runs moves nothing anyone
-        # sees. Closed MUI drawers sit there, parked by an offset measured at
-        # mount that races the custom CSS.
-        if sa.get("visibility") == sb.get("visibility") == "hidden":
-            d.pop("transform", None)
+        # A transform on an element hidden in both runs moves nothing anyone sees, unless a
+        # visible child shows inside it. Closed MUI drawers sit there, parked by an offset
+        # measured at mount that races the custom CSS.
+        if "transform" in d and sa.get("visibility") == sb.get("visibility") == "hidden" and not shows_inside(k, a, b):
+            d.pop("transform")
         if d:
             changed[k] = d
     return {"only_a": sorted(a.keys() - b.keys()), "only_b": sorted(b.keys() - a.keys()), "changed": changed}

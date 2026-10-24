@@ -72,3 +72,12 @@ def test_diff_styles_ignores_transforms_of_elements_hidden_in_both_runs():
         "shown": el("div.card", visibility="visible", transform="scale(1.1)"),
     }
     assert compare.diff_styles(a, b)["changed"] == {"shown": {"transform": ("none", "scale(1.1)")}}
+
+
+def test_a_visible_child_keeps_its_hidden_parents_movement():
+    # visibility: visible on a child shows it inside a hidden parent, so the parent's transform
+    # moves something a user sees.
+    child = el("div.item", visibility="visible", transform="none")
+    a = {"p": el("div.panel", visibility="hidden", transform="none"), "p>div.item:1": child}
+    b = {"p": el("div.panel", visibility="hidden", transform="matrix(1, 0, 0, 1, 40, 0)"), "p>div.item:1": child}
+    assert compare.diff_styles(a, b)["changed"] == {"p": {"transform": ("none", "matrix(1, 0, 0, 1, 40, 0)")}}

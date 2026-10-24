@@ -66,3 +66,29 @@ def test_css_selectors_keep_focus_within_and_focus_visible_whole(page):
     page.set_content("<div class=card><a class=x></a></div>")
     _, sels = collect.css_selectors(page, ".card:focus-within .x{a:1}.x:focus-visible{b:2}")
     assert sels == [".card .x", ".x"]
+
+
+ROW = (
+    "<div class='verticalSection {cls}'><div class=sectionTitleContainer><h2 class=sectionTitle>{title}</h2></div>"
+    "<div class=card>x</div></div>"
+)
+ROWS = "<style>.a .card{{color:rgb(1, 0, 0)}} .b .card{{color:rgb(0, 0, 1)}}</style><div class=homeSectionsContainer>{rows}</div>"
+
+
+def home(*rows):
+    return ROWS.format(rows="".join(ROW.format(cls=c, title=t) for c, t in rows))
+
+
+def test_home_rows_are_keyed_by_their_titles_not_their_order(page):
+    # A server can reorder its home rows between two runs; each row must still meet itself.
+    page.set_content(home(("a", "Continue Watching"), ("b", "Next Up")))
+    first = collect.styles(page, [])
+    page.set_content(home(("b", "Next Up"), ("a", "Continue Watching")))
+    assert collect.styles(page, []) == first
+
+
+def test_a_renamed_home_row_is_a_different_row(page):
+    page.set_content(home(("a", "Continue Watching"), ("b", "Next Up")))
+    first = set(collect.styles(page, []))
+    page.set_content(home(("a", "Continue Watching"), ("b", "Recently Added")))
+    assert set(collect.styles(page, [])) != first

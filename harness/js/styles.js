@@ -1,9 +1,10 @@
 // Computed-style snapshot of every element that has a layout box, plus
 // ::before/::after when they generate content. Keys are paths that start at
-// the nearest ancestor with a stable id (else <body>); each step counts only
-// siblings of the same tag and first class, so lazily mounted portals and
-// plugin nodes do not renumber their neighbours. The full class list goes in
-// the label only, because trailing classes change with state.
+// the nearest ancestor with a stable id (else <body>); home rows go by their
+// titles, and each other step counts only siblings of the same tag and first
+// class, so lazily mounted portals and plugin nodes do not renumber their
+// neighbours. The full class list goes in the label only, because trailing
+// classes change with state.
 ({ props, volatile }) => {
   const skip = new Set();
   for (const sel of volatile) for (const el of document.querySelectorAll(sel)) skip.add(el);
@@ -15,11 +16,19 @@
     const first = typeof e.className === 'string' ? e.className.trim().split(/\s+/)[0] : '';
     return e.tagName.toLowerCase() + (first ? '.' + first : '');
   };
+  // Home rows are keyed by their titles: a server can reorder them between runs.
+  const rowTitle = (e) => {
+    if (!e.parentElement || !e.parentElement.classList.contains('homeSectionsContainer')) return '';
+    const t = e.querySelector(':scope > .sectionTitleContainer .sectionTitle, :scope > .sectionTitle');
+    return t ? t.textContent.trim().replace(/[\[\]>]/g, ' ').slice(0, 60) : '';
+  };
   const keyOf = (el) => {
     const parts = [];
     for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
       if (stableId(e)) { parts.push('#' + e.id); break; }
       const k = kind(e);
+      const title = rowTitle(e);
+      if (title) { parts.push(`${k}[${title}]`); continue; }
       let i = 1;
       for (let s = e.previousElementSibling; s; s = s.previousElementSibling) if (kind(s) === k) i++;
       parts.push(`${k}:${i}`);
