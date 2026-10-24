@@ -6,3 +6,6 @@ __pycache__/
 build/
 harness/runs/
 harness/config.local.json
+demo/.data/
+demo/.env
+demo/config.json

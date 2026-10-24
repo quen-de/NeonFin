@@ -1,0 +1,54 @@
+{
+  "repositories": [
+    {
+      "name": "IAmParadox",
+      "url": "https://www.iamparadox.dev/jellyfin/plugins/manifest.json"
+    },
+    {
+      "name": "Media Bar Enhanced",
+      "url": "https://raw.githubusercontent.com/CodeDevMLH/jellyfin-plugin-manifest/refs/heads/main/manifest.json"
+    },
+    {
+      "name": "Jellyfin Enhanced",
+      "url": "https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/manifest.json"
+    }
+  ],
+  "plugins": [
+    {
+      "name": "File Transformation",
+      "version": "3.0.2.0",
+      "repository": "IAmParadox",
+      "styled": "Required by the IAmParadox plugins"
+    },
+    {
+      "name": "Plugin Pages",
+      "version": "3.0.2.0",
+      "repository": "IAmParadox",
+      "styled": "Hosts Jellyfin Enhanced's calendar"
+    },
+    {
+      "name": "Home Screen Sections",
+      "version": "3.0.3.0",
+      "repository": "IAmParadox",
+      "styled": "Its rows and Discover cards"
+    },
+    {
+      "name": "Custom Tabs",
+      "version": "0.3.2.0",
+      "repository": "IAmParadox",
+      "styled": "Works alongside; nothing of its own to style"
+    },
+    {
+      "name": "Media Bar Enhanced",
+      "version": "3.10.0.0",
+      "repository": "Media Bar Enhanced",
+      "styled": "The hero: slides, dots or counter, buttons"
+    },
+    {
+      "name": "Jellyfin Enhanced",
+      "version": "12.13.0.0",
+      "repository": "Jellyfin Enhanced",
+      "styled": "Its panel, calendar, flags, random pick and Seerr search"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "movies": [
+    {
+      "title": "Big Buck Bunny",
+      "year": 2008,
+      "runtime_s": 596,
+      "licence": "CC-BY 3.0",
+      "source": "https://studio.blender.org/projects/big-buck-bunny/"
+    },
+    {
+      "title": "Coffee Run",
+      "year": 2020,
+      "runtime_s": 184,
+      "licence": "CC-BY 4.0",
+      "source": "https://studio.blender.org/projects/coffee-run/"
+    },
+    {
+      "title": "Cosmos Laundromat",
+      "year": 2015,
+      "runtime_s": 730,
+      "licence": "CC-BY 3.0",
+      "source": "https://studio.blender.org/projects/cosmos-laundromat/",
+      "hdr": true
+    },
+    {
+      "title": "Elephants Dream",
+      "year": 2006,
+      "runtime_s": 654,
+      "licence": "CC-BY 2.5",
+      "source": "https://studio.blender.org/projects/elephants-dream/"
+    },
+    {
+      "title": "Glass Half",
+      "year": 2015,
+      "runtime_s": 193,
+      "licence": "CC-BY 3.0",
+      "source": "https://studio.blender.org/projects/glass-half/"
+    },
+    {
+      "title": "Sintel",
+      "year": 2010,
+      "runtime_s": 888,
+      "licence": "CC-BY 3.0",
+      "source": "https://studio.blender.org/projects/sintel/"
+    },
+    {
+      "title": "Spring",
+      "year": 2019,
+      "runtime_s": 464,
+      "licence": "CC-BY 4.0",
+      "source": "https://studio.blender.org/projects/spring/"
+    },
+    {
+      "title": "Sprite Fright",
+      "year": 2021,
+      "runtime_s": 630,
+      "licence": "CC-BY 1.0",
+      "source": "https://studio.blender.org/projects/sprite-fright/"
+    },
+    {
+      "title": "Tears of Steel",
+      "year": 2012,
+      "runtime_s": 734,
+      "licence": "CC-BY 3.0",
+      "source": "https://studio.blender.org/projects/tears-of-steel/"
+    },
+    {
+      "title": "Wing It!",
+      "year": 2023,
+      "runtime_s": 238,
+      "licence": "CC-BY 4.0",
+      "source": "https://studio.blender.org/projects/wing-it/"
+    }
+  ],
+  "series": {
+    "title": "Caminandes",
+    "year": 2013,
+    "licence": "CC-BY 3.0",
+    "source": "https://studio.blender.org/projects/caminandes-3/",
+    "episodes": [
+      {
+        "season": 1,
+        "episode": 1,
+        "title": "Llama Drama",
+        "year": 2013,
+        "runtime_s": 90
+      },
+      {
+        "season": 1,
+        "episode": 2,
+        "title": "Gran Dillama",
+        "year": 2013,
+        "runtime_s": 146
+      },
+      {
+        "season": 1,
+        "episode": 3,
+        "title": "Llamigos",
+        "year": 2016,
+        "runtime_s": 150
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+# The demo server: run demo/setup.py rather than this file directly. Reachable from this
+# machine only.
+name: neonfin-demo
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:12.3.20261023-013714
+    ports:
+      - "127.0.0.1:${DEMO_PORT:-8096}:8096"
+    volumes:
+      - ./.data/config:/config
+      - ./.data/cache:/cache
+      - ./.data/media:/media:ro
+    cpus: 4
+    mem_limit: 4g
+    restart: "no"
