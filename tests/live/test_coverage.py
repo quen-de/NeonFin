@@ -1,4 +1,4 @@
-"""The harness reaches every page milestone 2 styles, and the contrast check reads their text."""
+"""The harness reaches every page the skin styles, and the contrast check reads their text."""
 
 import pytest
 

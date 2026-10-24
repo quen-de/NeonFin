@@ -263,7 +263,7 @@ def test_title_pages_are_benched_too(tmp_path, capsys):
 
 
 def test_benched_states_are_captured_and_all_on_and_off_are_benched(tmp_path, capsys):
-    # Speed is gated with every plugin on and every plugin off (spec 7.2); a state with one
+    # Speed is gated with every plugin on and every plugin off; a state with one
     # plugin removed needs captures only.
     both = bench(full_cells("all", CLEAR) | full_cells("none", CLEAR))
     code, out = judge(tmp_path, [both], [capture("all"), capture("without:custom-tabs")], capsys)

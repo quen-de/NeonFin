@@ -53,7 +53,7 @@ def test_no_results_is_one_quiet_centred_line(open_page, style, color):
 
 
 def test_results_are_rows_under_lit_signs(open_page, style):
-    # Guard: milestone 1's row titles already apply here.
+    # Guard: the home rows' lit titles already apply here.
     s = style(open_page("search", "desktop", "none"), "#searchPage .sectionTitle", "font-family")
     assert s["font-family"].startswith('"NeonFin Sign"')
 

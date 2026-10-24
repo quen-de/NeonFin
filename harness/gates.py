@@ -1,10 +1,10 @@
-"""Whether the skin meets the spec's gates against vanilla Jellyfin (spec section 5).
+"""Whether the skin meets its gates against vanilla Jellyfin (DEVELOPMENT.md, "Gates").
 
 usage: python -m harness.gates VANILLA_RUN SKIN_RUN [--scope home,movies]
        python -m harness.gates --bench BENCH_RUN [--bench BENCH_RUN ...] [SKIN_CAPTURE_RUN ...] [--scope home,movies]
 
 Performance and glass apply to every route captured; Jellyfin blue and text
-contrast apply only to the routes in scope (the pages the milestone styles);
+contrast apply only to the routes in scope;
 --scope all checks every route.
 A bench run (harness.bench) carries paired vanilla and skin trials; capture
 runs next to it carry the glass, blue and contrast checks. Every benched state needs its
@@ -26,7 +26,7 @@ from harness import plugins
 from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
 
 GLASS_BUDGET = {"desktop": 3, "phone": 0}
-# Speed is gated with every plugin on and every plugin off (spec 7.2); a state with one
+# Speed is gated with every plugin on and every plugin off; a state with one
 # plugin removed is checked by captures alone.
 SPEED_STATES = {"all", "none"}
 MENU_STATES = {"usermenu", "select", "actionsheet"}
@@ -61,8 +61,8 @@ ANCHOR_FLOOR_MS = 50.0
 # 2026-10-10, owner-approved: title pages restyle about 1.35x vanilla and run about 1.2x its
 # main-thread work while scrolling (pooled medians over four benches: 1.36x and 1.21x with
 # plugins on desktop, 1.34x and 1.17x on phones), with frames unchanged (p95 16.7 ms) and
-# page-ready unaffected. The milestone 1 skin alone measured about 1.1x here; benching the
-# milestone 2 commits one by one found no single cause (the blurred backdrop copy costs
+# page-ready unaffected. The skin before the title pages were styled measured about 1.1x here;
+# benching those commits one by one found no single cause (the blurred backdrop copy costs
 # nothing measurable, the palette about 1 ms a scroll). One ceiling for every title page cell.
 TITLE_PAGE = {"recalc_style_ms": 1.4, "task_ms": 1.25}
 EXCEPTIONS = {

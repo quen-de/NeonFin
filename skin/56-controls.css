@@ -1,4 +1,4 @@
-/* Legacy form controls and MUI's contained buttons. Jellyfin paints them in its blue from global rules (spec 6.10), so
+/* Legacy form controls and MUI's contained buttons. Jellyfin paints them in its blue from global rules, so
    the fix is global too: the primary button is the neon tube, every other raised button a
    tinted pill, and focus keeps the fill and shows the crimson ring. */
 .raised.button-submit,

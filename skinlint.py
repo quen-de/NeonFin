@@ -1,4 +1,4 @@
-"""The skin's build-time rules (spec section 7.1). Stdlib only."""
+"""The skin's build-time rules (DEVELOPMENT.md, "Skin rules"). Stdlib only."""
 
 from __future__ import annotations
 
@@ -7,17 +7,17 @@ import re
 from cssscan import code_mask, declarations, leaf_rules, line_of, selectors
 
 # The only selectors that may carry live glass (a backdrop-filter other than
-# none). Each addition is a decision against the glass budget (spec 5.2).
+# none). Each addition is a decision against the glass budget (DESIGN.md, "Elevation & Depth").
 GLASS_ALLOWLIST = frozenset(
     {
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root",
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child)",
-        # Library pages: the header's second row (spec 5.2).
+        # Library pages: the header's second row.
         ".MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root",
         # Menus, desktop pages only: phones and the player turn it off.
         ".actionSheet",
         ".MuiPopover-paper",
-        # The sign-in panel, desktop only: phones turn it off (spec 5.2).
+        # The sign-in panel, desktop only: phones turn it off.
         "#loginPage > .margin-auto-y",
     }
 )

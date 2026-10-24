@@ -321,6 +321,7 @@ RTL).
 - **Rows**: titles are row signs; the see-all chevron in `--nf-text-2`. The home "My Media" row hides its own title, and hides the name under each library tile that has artwork (the artwork carries the name), visually only: screen readers keep both. A tile without artwork keeps its name.
 
 ### Title pages
+- On desktop the backdrop stays sharp at the top and blurs toward the bottom (Elevation & Depth).
 - Backdrop under the whole page, ink ramping in under the text (120px soft ramp above the ribbon, ribbon 64% to 72%, page panel 72% to 82% by 480px). The in-page backdrop fades out from 55% down.
 - Name as the title sign; the details line in `--nf-text-2`; the age rating keeps its outline at 6px.
 - Tags, external links and credit labels in `--nf-text-2`, links lighting `--nf-neon-text` on hover.
@@ -345,7 +346,7 @@ One capsule holding Play All (tube pill), shuffle, filter, sort, view and paging
 No glass over video. Top and bottom bars sit on ink gradients Jellyfin fades by opacity. Icons white with a soft dark shadow. Sliders: crimson played part, white handle with a small drop. The scrub bubble is `chrome-deep` at 8px. The now-playing bar is `chrome-solid` with a top rim. The Up Next countdown is `--nf-neon-text`.
 
 ### Settings
-Working pages: lists on `chrome-tint` at 12px, list icons on oxblood, headings semibold, the subtitle preview on an oxblood-to-ink gradient. Fields, checkboxes and buttons as above.
+Working pages: lists on `chrome-tint` at 12px, list icons on oxblood, headings semibold, the subtitle preview on an oxblood-to-ink gradient. Fields, checkboxes and buttons as above. None of Jellyfin's blue is left.
 
 ### Sign-in and user picker
 One panel (menu glass desktop, solid phone, 14px) holds the form, other ways in and the disclaimer; the heading is a sign. A server splash stays sharp behind it at `brightness(0.4)`. Forgot password and the disclaimer step back to `--nf-text-2`; disclaimer links `--nf-neon-text`, underlined. The focused field label is `--nf-neon-text`. The user picker shows round oxblood tiles; focus is the ring, not the outline.
