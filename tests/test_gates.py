@@ -89,10 +89,25 @@ def test_trials_must_be_recorded_equal_and_at_least_seven():
     ]
 
 
+def test_a_small_excess_of_task_time_passes_whatever_its_ratio():
+    # A library of ten films does little work: 20 ms more is twice vanilla's 20 and still nothing.
+    vanilla = summary("vanilla", perf(20, 20, 1000, route="movies"), plugins="none")
+    assert gates.evaluate(vanilla, summary(perf=perf(20, 45, 1000, route="movies"), plugins="none"), set()) == []
+    fails = gates.evaluate(vanilla, summary(perf=perf(20, 46, 1000, route="movies"), plugins="none"), set())
+    assert len(fails) == 1 and "task_ms" in fails[0]
+
+
+def test_page_ready_may_run_a_little_past_vanillas_slowest():
+    vanilla = summary("vanilla", perf(20, 400, 1000, 1200))
+    assert gates.evaluate(vanilla, summary(perf=perf(20, 400, 1250)), set()) == []
+    fails = gates.evaluate(vanilla, summary(perf=perf(20, 400, 1251)), set())
+    assert len(fails) == 1 and "anchor_ms" in fails[0]
+
+
 def test_plugin_built_desktop_home_runs_under_its_accepted_exception():
     vanilla = summary("vanilla", perf(16, 420, 1000))
     assert gates.evaluate(vanilla, summary(perf=perf(28, 500, 1000)), set()) == []
-    fails = gates.evaluate(vanilla, summary(perf=perf(33, 530, 1000)), set())
+    fails = gates.evaluate(vanilla, summary(perf=perf(33, 690, 1000)), set())
     assert len(fails) == 2 and all("desktop/home" in f for f in fails)
 
 
@@ -140,6 +155,16 @@ def test_a_pair_across_the_line_leaves_the_cell_undecided():
 def test_page_ready_slower_than_every_vanilla_load_decides_a_fail():
     pairs = [pair(10, 10, v_anchor=1000 + i, s_anchor=1500) for i in range(4)]
     assert gates.decide(pairs, LIMITS) == "fail"
+
+
+def test_pairs_over_a_ratio_by_less_than_its_floor_decide_a_pass():
+    assert gates.decide([pair(10, 10, v_task=20, s_task=44)] * 4, LIMITS) == "pass"
+    assert gates.decide([pair(10, 10, v_task=20, s_task=60)] * 4, LIMITS) == "fail"
+
+
+def test_page_ready_a_little_past_every_vanilla_load_decides_a_pass():
+    pairs = [pair(10, 10, v_anchor=1000 + i, s_anchor=1040) for i in range(4)]
+    assert gates.decide(pairs, LIMITS) == "pass"
 
 
 def bench(cells, **extra):
@@ -294,7 +319,7 @@ def test_paired_runs_against_different_plugin_versions_fail():
 
 
 def test_the_exception_ceilings_sit_just_above_what_was_measured():
-    assert gates.limits("all", "desktop", "home") == {"recalc_style_ms": 1.9, "task_ms": 1.24}
+    assert gates.limits("all", "desktop", "home") == {"recalc_style_ms": 1.9, "task_ms": 1.62}
 
 
 def test_title_pages_run_under_their_accepted_exception():

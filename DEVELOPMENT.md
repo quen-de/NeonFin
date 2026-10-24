@@ -80,7 +80,10 @@ cost, bench just that cell: `--profiles desktop --routes home`. `--bench` repeat
 further without losing the pairs it has. The gate passes only on complete evidence from one
 committed build: every speed cell for all plugins on and off, a capture of every route for
 each benched state, nothing built from uncommitted CSS. Accepted exceptions to the speed
-ratios live in `harness/gates.py`, each with its own ceiling.
+ratios live in `harness/gates.py`, each with its own ceiling. A ratio fails only when the
+skin's excess is also over a floor (25 ms of main-thread work over the scroll), and page ready
+may run up to 50 ms past vanilla's slowest load: a page that does little work, like the demo's
+ten-film grids, is not judged on a few milliseconds.
 
 Captures are not timed, so `harness.captures` runs them side by side (`--jobs`, default 4).
 Timed work runs alone, across every checkout on the machine: a timed run waits for captures to

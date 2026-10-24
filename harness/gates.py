@@ -33,6 +33,14 @@ MENU_STATES = {"usermenu", "select", "actionsheet"}
 RECALC_RATIO = 1.3
 TASK_RATIO = 1.15
 MIN_TRIALS = 7
+# Floors, 2026-10-24, owner-approved: a ratio fails only when the skin's excess over vanilla is
+# also above its floor, and page ready may run a little past vanilla's slowest load. On a page
+# that does little work a fixed few milliseconds read as a large ratio: the demo server's ten-film
+# grids scroll in about 20 ms, and the skin's 13 to 22 ms more measured 1.7x with frames
+# unchanged, where large libraries measure 0.9x. Its phone pages, served from the same machine,
+# vary so little that page ready landed 9 to 30 ms past vanilla's slowest.
+FLOORS = {"task_ms": 25.0}
+ANCHOR_FLOOR_MS = 50.0
 # Accepted exceptions, keyed by (plugin state, profile, route), with their own ceilings so
 # they cannot drift further unnoticed.
 # 2026-10-09: a plugin-built desktop home restyles 1.6x to 1.8x vanilla while scrolling (the
@@ -40,6 +48,10 @@ MIN_TRIALS = 7
 # unchanged: 0 dropped, p95 16.7 ms. Cutting the card treatment only reaches 1.29x.
 # The ceilings sit about 7% above the worst medians measured (1.77x, 1.18x): close enough to
 # catch a real step up, far enough that run-to-run spread (1.61x to 1.77x) does not trip it.
+# 2026-10-24, owner-approved: on the demo server's short home (ten films under Media Bar
+# Enhanced's hero) the task ratio measured 1.52x and 1.10x in two benches, 1.35x pooled over 20
+# pairs, frames unchanged: p95 16.7 ms, at most 2 dropped on either side. The task ceiling sits
+# about 7% above the worst median, 1.52x.
 # 2026-10-10: with plugins off, desktop home is short, and hiding the My Media title (55px)
 # moves where the bench's mid-screen cursor stops: it now ends the scroll over a card, whose
 # hover animations (Jellyfin's overlay buttons, the skin's ring) restyle every frame. Moving
@@ -54,7 +66,7 @@ MIN_TRIALS = 7
 # nothing measurable, the palette about 1 ms a scroll). One ceiling for every title page cell.
 TITLE_PAGE = {"recalc_style_ms": 1.4, "task_ms": 1.25}
 EXCEPTIONS = {
-    ("all", "desktop", "home"): {"recalc_style_ms": 1.9, "task_ms": 1.24},
+    ("all", "desktop", "home"): {"recalc_style_ms": 1.9, "task_ms": 1.62},
     ("none", "desktop", "home"): {"recalc_style_ms": 1.62, "task_ms": 1.37},
 } | {(plugins, profile, "movie"): TITLE_PAGE for plugins in ("all", "none") for profile in ("desktop", "phone")}
 # Early decisions in paired benches, after MIN_DECIDED pairs: a cell fails once every pair is
@@ -74,12 +86,19 @@ def _ratio(skin: float, vanilla: float) -> float:
     return skin / vanilla if vanilla else (1.0 if not skin else float("inf"))
 
 
+def _judged(metric: str, skin: float, vanilla: float) -> float:
+    """The skin's ratio to vanilla, counted as even when the excess is within the metric's floor."""
+    if metric in FLOORS and skin - vanilla <= FLOORS[metric]:
+        return 1.0
+    return _ratio(skin, vanilla)
+
+
 def decide(pairs: list[dict], lim: dict[str, float]) -> str | None:
     """'fail' or 'pass' once the pairs agree clearly enough, None while undecided."""
     if len(pairs) < MIN_DECIDED:
         return None
-    ratios = {m: [_ratio(p["skin"][m], p["vanilla"][m]) for p in pairs] for m in lim}
-    v_slowest = max(p["vanilla"]["anchor_ms"] for p in pairs)
+    ratios = {m: [_judged(m, p["skin"][m], p["vanilla"][m]) for p in pairs] for m in lim}
+    v_slowest = max(p["vanilla"]["anchor_ms"] for p in pairs) + ANCHOR_FLOOR_MS
     s_anchor = [p["skin"]["anchor_ms"] for p in pairs]
     if any(min(r) > lim[m] and statistics.median(r) > lim[m] * MARGIN for m, r in ratios.items()) or min(s_anchor) > v_slowest:
         return "fail"
@@ -91,10 +110,11 @@ def decide(pairs: list[dict], lim: dict[str, float]) -> str | None:
 def _speed_failures(where: str, m: dict, v: dict, lim: dict[str, float]) -> list[str]:
     fails = []
     for metric, ratio in lim.items():
-        if m[metric]["median"] > ratio * v[metric]["median"]:
+        if _judged(metric, m[metric]["median"], v[metric]["median"]) > ratio:
             fails.append(f"{where}: {metric} {m[metric]['median']} > {ratio}x vanilla {v[metric]['median']}")
-    if m["anchor_ms"]["median"] > v["anchor_ms"]["max"]:
-        fails.append(f"{where}: anchor_ms {m['anchor_ms']['median']} beyond vanilla's slowest {v['anchor_ms']['max']}")
+    if m["anchor_ms"]["median"] > v["anchor_ms"]["max"] + ANCHOR_FLOOR_MS:
+        late = f"more than {ANCHOR_FLOOR_MS:g} ms beyond vanilla's slowest {v['anchor_ms']['max']}"
+        fails.append(f"{where}: anchor_ms {m['anchor_ms']['median']} {late}")
     return fails
 
 
