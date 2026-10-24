@@ -8,13 +8,12 @@ web
 
 ## Users
 
-People who watch a personal Jellyfin 12 server, in three typical groups:
+People who watch a Jellyfin 12 server, in three typical groups:
 
 - The person running the server, on desktop browsers (Safari, Chrome, Firefox), who also
   curates the library.
-- A household on phones: Chrome Android and the Jellyfin Android app (a WebView).
-- Friends and family signing in remotely from their own devices. They know Jellyfin less
-  well than the household does.
+- Its regular viewers on phones: Chrome Android and the Jellyfin Android app (a WebView).
+- Guests signing in from their own devices, who know Jellyfin less well.
 
 Their jobs, in no fixed order: browse and discover (the home rows and the libraries),
 continue watching, and search for a known title. Some playback happens in the web player.
@@ -25,26 +24,26 @@ NeonFin, a web skin for Jellyfin 12: one stylesheet that re-dresses jellyfin-web
 fresh over vanilla Jellyfin.
 
 Success means an interface that feels as finished as a commercial streaming service, with
-glass that reads as glass, and that is never slower than vanilla Jellyfin to render,
-navigate or scroll.
+glass that reads as glass, at a render, navigation and scrolling cost close to vanilla
+Jellyfin's, measured on every change.
 
 ## Positioning
 
-For personal libraries rather than a commercial service's licensed shelf: the server
-owner's own collection, often in more than one language. It works on any Jellyfin 12
-server, carries no server's brand, and may be published one day.
+For personal libraries rather than a commercial service's licensed shelf: a server owner's
+own collection, often in more than one language. It works on any Jellyfin 12 server and
+carries no server's brand.
 
 ## Operating Context
 
 - Delivered as Jellyfin's branding Custom CSS. It reaches desktop browsers, Chrome Android
   and the Jellyfin Android app. Native TV clients never load it, and Jellyfin 12 does not
   load it on the admin dashboard.
-- Popular plugins compose much of a typical home page: Media Bar (a hero slideshow), Home
-  Screen Sections (configurable rows), Jellyfin Enhanced (language flags, a random-pick
-  button and other additions) and Jellyseerr (requests in search). Any of them may be
+- Popular plugins compose much of a typical home page: Media Bar Enhanced (a hero
+  slideshow), Home Screen Sections (configurable rows), Jellyfin Enhanced (language flags, a
+  random pick, Seerr search and more), Custom Tabs and Plugin Pages. Any of them may be
   missing.
-- Development renders real pages from a real server with the local build (`harness/`), so
-  a change is seen on real content before it ships.
+- Development renders real pages of a Jellyfin server with the local build (`harness/`),
+  the demo server or any other, so a change is seen on real content before it ships.
 
 ## Capabilities and Constraints
 
@@ -56,8 +55,8 @@ server, carries no server's brand, and may be published one day.
   vanilla Jellyfin with the harness.
 - Targets: Safari, Chrome and Firefox on desktop; Chrome Android and the Android app's
   WebView on phones. TV is out of scope.
-- No network fetches from the stylesheet: system fonts for the interface, one embedded
-  display face, no `@import`.
+- No network fetches from the stylesheet itself: system fonts for the interface, one
+  embedded display face, no `@import` inside the skin.
 
 ## Brand Commitments
 
@@ -71,12 +70,11 @@ server, carries no server's brand, and may be published one day.
 
 ## Evidence on Hand
 
-- A real library on the development server: posters, backdrops, clear logos, language
-  flags, several plugins installed.
-- Harness captures of every key page on desktop and phone (`harness/runs/`, gitignored),
-  and performance runs of vanilla Jellyfin against the skin.
-- No user research beyond the developer's own judgement and household use, and no
-  analytics.
+- A demo server anyone can run (`demo/`): open movies with TMDB posters and backdrops, the
+  supported plugins installed.
+- Harness captures of every key page on desktop and phone, and paired performance runs of
+  vanilla Jellyfin against the skin.
+- No user research beyond the developer's own judgement, and no analytics.
 
 ## Product Principles
 

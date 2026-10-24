@@ -1,0 +1,41 @@
+name: Bug
+description: Something looks wrong or stopped working with NeonFin.
+labels: [bug]
+body:
+  - type: input
+    id: jellyfin
+    attributes: { label: Jellyfin version, placeholder: "12.2.1" }
+    validations: { required: true }
+  - type: input
+    id: neonfin
+    attributes:
+      label: NeonFin version
+      description: The version in your @import URL, or the first line of the pasted CSS.
+    validations: { required: true }
+  - type: input
+    id: browser
+    attributes: { label: Browser and version, placeholder: "Firefox 140" }
+    validations: { required: true }
+  - type: dropdown
+    id: device
+    attributes: { label: Desktop or phone, options: [Desktop, Phone, Both] }
+    validations: { required: true }
+  - type: textarea
+    id: plugins
+    attributes: { label: Plugins and their versions, description: 'From Dashboard, Plugins. Write "none" if none.' }
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes: { label: What is wrong, description: "The page, what you see, what you expected." }
+    validations: { required: true }
+  - type: textarea
+    id: screenshot
+    attributes: { label: Screenshot }
+    validations: { required: true }
+  - type: checkboxes
+    id: vanilla
+    attributes:
+      label: Checked without NeonFin
+      options:
+        - label: It does not happen with NeonFin removed from Custom CSS.
+          required: true

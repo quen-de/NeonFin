@@ -1,41 +1,63 @@
 # NeonFin
 
-A fast glass-and-neon web skin for Jellyfin 12.
+A glass-and-neon web skin for Jellyfin 12, in one stylesheet.
 
-Status: early development, not ready for use.
+[![CI](https://github.com/quen-de/NeonFin/actions/workflows/ci.yml/badge.svg)](https://github.com/quen-de/NeonFin/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/quen-de/NeonFin)](https://github.com/quen-de/NeonFin/releases/latest)
 
-## Principles
+![NeonFin's home page: a lit hero over the rows](docs/screenshots/home.webp)
 
-- Never slower than plain Jellyfin. Every effect is measured against it.
-- Glass only where it reads as glass: the header and menus, never on cards or over video.
-- Works with or without popular plugins: Media Bar Enhanced, Home Screen Sections, Jellyfin Enhanced, Custom Tabs.
-- One stylesheet, no external requests: system fonts for the interface, one embedded display face.
+## What it is
+
+- CSS only: no scripts, nothing for the server to install. One file in Jellyfin's Custom CSS.
+- Glass where it reads as glass: the header and its menus. Cards, title pages and the player
+  stay solid.
+- Works with or without the popular plugins (see Compatibility).
+- Page load and style cost stay within set limits of plain Jellyfin, measured on every change
+  ([how](DEVELOPMENT.md#gates)).
+- Every colour comes from nine tokens; four presets are ready.
+- Turns solid and still when the system asks for less transparency, more contrast, forced
+  colours or less motion.
+
+| | |
+|---|---|
+| ![Plain Jellyfin and NeonFin, the same home page](docs/screenshots/before-after.webp) | ![A film's page](docs/screenshots/title.webp) |
+| ![The Movies library](docs/screenshots/library.webp) | ![Home and a title page on a phone](docs/screenshots/phone.webp) |
+| ![The sign-in user picker](docs/screenshots/sign-in.webp) | ![The four palette presets](docs/screenshots/palettes.webp) |
+| ![The player's controls](docs/screenshots/player.webp) | |
 
 ## Install
 
-1. `python3 build.py` writes `build/neonfin.css`.
-2. Paste its contents into the Custom CSS field of your server's branding settings.
+In Jellyfin: **Dashboard, Branding, Custom CSS**. Paste one of the two below, save, and reload
+the page.
 
-Jellyfin 12, modern layout, desktop browsers and phones. The legacy layout is not styled for, and TV apps do not load custom CSS.
+**From jsDelivr**, the simplest. Each viewer's browser then fetches the file from jsDelivr.
+The `@import` line must come first in the field, before any other rule, or browsers ignore it.
 
-## Plugin notes
+```css
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@v1.0.0/dist/neonfin.css");
+```
 
-Media Bar Enhanced gives each slide its own dot, and above its maximum number of dots shows a
-counter instead. Its stylesheet imports a web font from Google; the skin sets the hero in its
-own face, so the font itself is never downloaded, but the import still is. The original Media
-Bar plugin is not supported.
+**Pasted in**, the private one: no third party is contacted. Download
+[`neonfin.css`](https://github.com/quen-de/NeonFin/releases/latest/download/neonfin.css) from
+the latest release and paste its contents into the field.
 
-## Change the palette
+## Palettes
 
-Every colour in the skin comes from nine tokens. To restyle it, add a block after the skin
-in Custom CSS and set only the ones you want to change.
+Every colour comes from nine tokens. Four presets are ready: Cyan neon, Amber, Violet and Acid
+green. Add one after the skin, as a second `@import` right after the first:
 
-Four presets are ready in `palettes/`: Cyan neon, Amber, Violet and Acid green. Paste one
-after the skin.
+```css
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@v1.0.0/dist/neonfin.css");
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@v1.0.0/palettes/cyan.css");
+```
 
-To make your own, open `build/palette.html` (written by `python3 build.py` next to the
-stylesheet) in a browser. It previews the skin in your colours, checks that text stays
-readable, and gives you the block to paste.
+or paste the preset's block after the pasted skin.
+
+To make your own, open
+[`palette.html`](https://github.com/quen-de/NeonFin/releases/latest/download/palette.html)
+from the latest release in a browser. It previews the skin in your colours, checks that text
+stays readable, and gives you the block to paste after the skin.
 
 The nine, with their defaults:
 
@@ -55,10 +77,51 @@ A light accent needs dark labels: the cyan, amber and acid green presets set
 `--nf-on-neon: #000`. The defaults keep every label readable over the brightest artwork. A
 lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 
-A block made before `--nf-on-neon` existed, with a light accent, now shows white labels on
-that accent: add `--nf-on-neon: #000;` to it, or rebuild it in the picker.
+## Compatibility
 
-## Licence
+- Jellyfin 12, tested on `jellyfin/jellyfin:12.2.20261005-225228`, in the modern layout.
+- Chrome is tested on every change (Edge shares its engine); Firefox and Safari are checked
+  at each release. Phones: Chrome on Android and the Jellyfin Android app.
+- Plugins, each optional:
+
+| Plugin | Tested version | Styled |
+|---|---|---|
+| File Transformation | 3.0.2.0 | Required by the IAmParadox plugins |
+| Plugin Pages | 3.0.2.0 | Hosts Jellyfin Enhanced's calendar |
+| Home Screen Sections | 3.0.3.0 | Its rows and Discover cards |
+| Custom Tabs | 0.3.2.0 | Works alongside; nothing of its own to style |
+| Media Bar Enhanced | 3.10.0.0 | The hero: slides, dots or counter, buttons |
+| Jellyfin Enhanced | 12.13.0.0 | Its panel, calendar, flags, random pick and Seerr search |
+
+## Known limitations
+
+- The legacy layout is not styled; use the modern one (the default).
+- TV apps and the native apps do not load custom CSS.
+- Media Bar Enhanced's stylesheet imports a web font from Google. The skin sets the hero in
+  its own face, so the font is never downloaded, but the import still is. The original Media
+  Bar plugin is not supported.
+- Seerr's surfaces in Jellyfin Enhanced are styled but not on the demo server, so they are
+  checked less often.
+
+## Update
+
+Change the version in the `@import` URL, or paste the new file. A new major version can rename
+palette tokens: read the [changelog](CHANGELOG.md) before moving to one.
+
+## Uninstall
+
+Remove the NeonFin lines from Custom CSS, save, and hard-reload (Ctrl+Shift+R, or Cmd+Shift+R
+on a Mac): clients keep the old stylesheet until they reload.
+
+## Contributing
+
+Bug reports and fixes are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). The
+[demo server](DEVELOPMENT.md#demo-server) runs Jellyfin with the plugins and a library of open
+movies on your own machine, so you can test against the same pages the screenshots show.
+
+## Credits and licence
 
 MIT. The embedded sign font is a subset of Big Shoulders Display, under the SIL Open Font
-License 1.1 (`skin/fonts/OFL.txt`).
+License 1.1 (`skin/fonts/OFL.txt`). The films and artwork in the screenshots are open movies
+by the Blender Foundation, under Creative Commons Attribution licences, with metadata from TMDB
+([demo/CREDITS.md](demo/CREDITS.md)). NeonFin is not affiliated with the Jellyfin project.

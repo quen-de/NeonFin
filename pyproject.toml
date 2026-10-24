@@ -1,7 +1,7 @@
 [project]
 name = "neonfin"
 version = "0.1.0"
-description = "A fast glass-and-neon web skin for Jellyfin 12"
+description = "A glass-and-neon web skin for Jellyfin 12, in one stylesheet."
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = ["playwright>=1.48", "pillow>=10"]

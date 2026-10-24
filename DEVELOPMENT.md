@@ -12,11 +12,12 @@
 
 ## Hooks
 
-`git config core.hooksPath .githooks` turns them on.
+`git config core.hooksPath .githooks` turns them on. They are the maintainer's checks; turn
+them on if you want the same.
 
-- `pre-commit` runs the offline tests.
-- `commit-msg` rejects AI attribution trailers and any term from `neutrality_terms` in
-  `harness/config.local.json`.
+- `pre-commit` runs what CI runs: lint, format and the offline tests.
+- `commit-msg` rejects AI attribution trailers, the maintainer's policy for this
+  repository's history, and any term from `neutrality_terms` in `harness/config.local.json`.
 
 `harness/config.local.json` is gitignored. Its `neutrality_terms` list names what must never
 appear in the repository: your server's name, host names, people, addresses. The neutrality
@@ -49,7 +50,8 @@ The harness renders real pages of a Jellyfin 12 server with your local build inj
 nothing is ever written to the server.
 
 1. Create a dedicated Jellyfin user for it, then export:
-   `JELLYFIN_URL`, `JELLYFIN_THEME_USER`, `JELLYFIN_THEME_PASSWORD`.
+   `JELLYFIN_URL`, `JELLYFIN_THEME_USER`, `JELLYFIN_THEME_PASSWORD`; or use the demo server
+   below, which does all of this.
 2. `uv run python -m harness.discover` writes `harness/config.local.json` with the items the
    routes need. It keeps any other keys you add (such as `neutrality_terms`).
 3. `uv run python -m harness.run --label NAME --css dist` captures every route on desktop and
@@ -117,6 +119,23 @@ trial.
 injected (same env vars and local config as the harness). They are skipped without them,
 and never run in CI or the pre-commit hook. Run them in their own pytest process: their
 session-wide browser blocks the browsers the offline tests start for themselves.
+
+## Demo server
+
+`uv run python demo/setup.py` brings up Jellyfin 12 in Docker on `127.0.0.1:8096`, with the
+supported plugins and a library of Blender open movies (stand-in clips, TMDB metadata). It
+writes the accounts' random passwords and an API key to `demo/.env` and the harness's items to
+`demo/config.json`, both gitignored. Run anything against it in a subshell:
+
+    ( set -a; . demo/.env; set +a; uv run pytest -m live )
+
+`NEONFIN_CONFIG` in `demo/.env` points the harness at `demo/config.json`, so a config for
+another server in `harness/config.local.json` is left alone; `neutrality_terms` are always
+read from `harness/config.local.json`. Setup can be rerun at any time. `--port` picks another
+port. To start over: `docker compose -f demo/compose.yml down`, then delete `demo/.data/`.
+
+`uv run python -m harness.shots` retakes the README's screenshots on the demo server and
+refuses any other.
 
 ## Releasing
 

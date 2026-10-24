@@ -1,0 +1,15 @@
+name: Styling request
+description: A page or plugin NeonFin does not style yet, or styles badly.
+labels: [styling]
+body:
+  - type: input
+    id: where
+    attributes: { label: Page or plugin }
+    validations: { required: true }
+  - type: textarea
+    id: screenshot
+    attributes: { label: Screenshot }
+    validations: { required: true }
+  - type: textarea
+    id: wanted
+    attributes: { label: What it should look like }
