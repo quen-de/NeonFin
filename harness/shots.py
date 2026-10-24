@@ -3,15 +3,18 @@
     uv run python -m harness.shots                            # docs/screenshots/ and docs/social-preview.png
     uv run python -m harness.shots --engine firefox --out DIR # the release check in another engine
 
-Refuses any server but this machine's, so no other library ever reaches a public image.
+Refuses any server but the demo (on this machine, named Demo by demo/setup.py), so no other
+library ever reaches a public image.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import pathlib
 import sys
 import tempfile
+import urllib.request
 from urllib.parse import urlsplit
 
 from PIL import Image
@@ -25,6 +28,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SHOTS = ROOT / "docs" / "screenshots"
 PREVIEW = ROOT / "docs" / "social-preview.png"
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
+DEMO_NAME = "Demo"  # the name demo/setup.py gives the server
 ROUTE = {r.name: r for r in ROUTES}
 CHECK_ROUTES = ("home", "movie", "movies", "login", "osd")
 PRESETS = ("cyan", "amber", "violet", "acid")
@@ -40,9 +44,26 @@ class ShotError(RuntimeError):
     pass
 
 
+DEMO_ONLY = "screenshots come from the demo server only (DEVELOPMENT.md, Demo server)"
+
+
 def require_local(url: str) -> None:
     if urlsplit(url).hostname not in LOCAL_HOSTS:
-        raise ShotError("screenshots come from the demo server only (DEVELOPMENT.md, Demo server)")
+        raise ShotError(DEMO_ONLY)
+
+
+def require_demo_server(info: dict) -> None:
+    """Another Jellyfin on this machine is local too; only the demo carries the demo's name."""
+    if info.get("ServerName") != DEMO_NAME:
+        raise ShotError(f"{DEMO_ONLY}; this server is not named {DEMO_NAME}")
+
+
+def public_info(url: str) -> dict:
+    try:
+        with urllib.request.urlopen(url.rstrip("/") + "/System/Info/Public", timeout=10) as r:
+            return json.loads(r.read())
+    except (OSError, ValueError) as e:
+        raise ShotError(f"cannot read the server's public info: {e}") from None
 
 
 def side_by_side(images: list[Image.Image], gap: int = 24) -> Image.Image:
@@ -138,6 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     cfg = config.load()
     try:
         require_local(cfg.url)
+        require_demo_server(public_info(cfg.url))
     except ShotError as e:
         print(f"shots: {e}", file=sys.stderr)
         return 2

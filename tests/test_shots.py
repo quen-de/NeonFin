@@ -14,6 +14,17 @@ def test_screenshots_never_come_from_another_server():
         shots.require_local("http://192.0.2.10:8096")
 
 
+def test_screenshots_come_from_the_demo_server_by_name():
+    shots.require_demo_server({"ServerName": "Demo"})
+
+
+@pytest.mark.parametrize("info", [{"ServerName": "My Jellyfin"}, {}])
+def test_screenshots_never_come_from_another_local_server(info):
+    # Another Jellyfin on this machine is local too: its name tells it from the demo.
+    with pytest.raises(shots.ShotError, match="demo server only"):
+        shots.require_demo_server(info)
+
+
 def test_side_by_side_keeps_each_image_and_the_gap():
     a, b = Image.new("RGB", (10, 20), "red"), Image.new("RGB", (30, 10), "blue")
     out = shots.side_by_side([a, b], gap=4)

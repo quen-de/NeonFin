@@ -364,7 +364,7 @@ One panel (menu glass desktop, solid phone, 14px) holds the form, other ways in 
 - **Do** keep the focus ring visible everywhere: `outline: 2px solid var(--nf-neon) !important; outline-offset: 2px`, white on neon tubes, the card ring replacing it only where box shadows render (`forced-colors: none`).
 - **Do** use `--nf-fast` (180ms) with `--nf-ease` (`cubic-bezier(0.2, 0.8, 0.2, 1)`) for hover and focus transitions, on colour, background, box-shadow or opacity only. The hero slideshow is the page's one moving element.
 - **Do** honour `prefers-reduced-motion` (transitions and animations to 0.01ms, no card lift, the loading spinner left running) and `prefers-reduced-transparency`, `prefers-contrast: more` and `forced-colors: active` (every glass and phone-chrome surface turns solid `ink-2`).
-- **Do** keep the built sheet at 60,000 bytes or less without the embedded font (`tests/test_build.py`), and judge every change against plain Jellyfin with the harness: never slower to render, navigate or scroll.
+- **Do** keep the built sheet at 60,000 bytes or less without the embedded font (`tests/test_build.py`), and judge every change against plain Jellyfin with the harness: render, navigation and scrolling stay within the gates' limits (DEVELOPMENT.md, "Gates").
 - **Do** scope plugin files: start with `/* plugin: <Name>; roots: <selector>, ... */` and select only under those roots; the only exception is a `:root` block handing the plugin's own variables the palette.
 - **Do** write `-webkit-backdrop-filter` before `backdrop-filter`, both literal, on an allowlisted selector.
 

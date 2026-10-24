@@ -80,8 +80,10 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 ## Compatibility
 
 - Jellyfin 12, tested on `jellyfin/jellyfin:12.2.20261005-225228`, in the modern layout.
-- Chrome is tested on every change (Edge shares its engine); Firefox and Safari are checked
-  at each release. Phones: Chrome on Android and the Jellyfin Android app.
+- Chrome is tested on every change (Edge shares its engine), at desktop and phone sizes;
+  Firefox and Safari are checked at each release. On phones the targets are Chrome on
+  Android and the Jellyfin Android app, which runs the web client; neither is tested on a
+  device.
 - Plugins, each optional:
 
 | Plugin | Tested version | Styled |
@@ -96,12 +98,14 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 ## Known limitations
 
 - The legacy layout is not styled; use the modern one (the default).
-- TV apps and the native apps do not load custom CSS.
+- TV apps, and phone apps that do not run the web client, do not load custom CSS.
 - Media Bar Enhanced's stylesheet imports a web font from Google. The skin sets the hero in
   its own face, so the font is never downloaded, but the import still is. The original Media
   Bar plugin is not supported.
 - Seerr's surfaces in Jellyfin Enhanced are styled but not on the demo server, so they are
   checked less often.
+- Media Bar Enhanced has no Jellyfin 12 build yet: its 3.10.0.0 build targets Jellyfin 10.11.
+  It loads on Jellyfin 12.2, and NeonFin was tested with it there.
 
 ## Update
 

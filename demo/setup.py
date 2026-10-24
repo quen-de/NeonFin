@@ -392,7 +392,13 @@ def main(argv: list[str] | None = None) -> int:
         for d in ("config", "cache", "media"):
             (DATA / d).mkdir(parents=True, exist_ok=True)
         compose = ["docker", "compose", "-f", str(COMPOSE)]
-        subprocess.run([*compose, "up", "-d"], check=True, env={**os.environ, "DEMO_PORT": str(args.port)})
+        try:
+            subprocess.run([*compose, "up", "-d"], check=True, env={**os.environ, "DEMO_PORT": str(args.port)})
+        except subprocess.CalledProcessError:
+            raise SetupError(
+                f"docker compose could not start the demo; is Docker running and port {args.port} free? "
+                "Docker's own message is above; --port picks another port"
+            ) from None
         print(f"made {make_media(library, image(COMPOSE.read_text()))} stand-in clips", flush=True)
         wait_healthy(base)
         wizard(Api(base), creds)

@@ -117,6 +117,19 @@ def test_main_reports_a_missing_docker(tmp_path, monkeypatch, capsys):
     assert capsys.readouterr().err.startswith("setup: docker not found")
 
 
+def test_main_names_the_likely_cause_when_compose_cannot_start(tmp_path, monkeypatch, capsys):
+    # Docker stopped or the port taken: compose itself fails, before any health check.
+    monkeypatch.setattr(setup, "ENV_FILE", tmp_path / ".env")
+    monkeypatch.setattr(setup, "DATA", tmp_path / ".data")
+    docker = tmp_path / "docker"
+    docker.write_text("#!/bin/sh\nexit 1\n")
+    docker.chmod(0o755)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert setup.main(["--port", "8123"]) == 1
+    last = capsys.readouterr().err.strip().splitlines()[-1]
+    assert last.startswith("setup: docker compose could not start the demo") and "port 8123" in last and "--port" in last, last
+
+
 def test_the_series_gets_drawn_art_since_tmdb_has_none():
     art = setup.series_art(LIBRARY)
     assert {k: v.size for k, v in art.items()} == {

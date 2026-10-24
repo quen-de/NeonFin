@@ -44,3 +44,11 @@ def test_the_readme_installs_the_committed_release():
         pytest.skip("no release committed yet: dist/neonfin.css is not tracked")
     ident, _ = build.parse_header(DIST.read_text(encoding="utf-8"))
     assert f"cdn.jsdelivr.net/gh/quen-de/NeonFin@v{ident}/dist/neonfin.css" in (ROOT / "README.md").read_text()
+
+
+def test_the_release_steps_include_the_browser_check_the_readme_promises():
+    # The README says Firefox and Safari are checked at each release.
+    steps = (ROOT / "DEVELOPMENT.md").read_text().split("## Releasing", 1)[1]
+    assert "playwright install firefox webkit" in steps
+    for engine in ("firefox", "webkit"):
+        assert f"harness.shots --engine {engine} --out" in steps, engine

@@ -30,6 +30,23 @@ def test_compatibility_names_the_tested_jellyfin_and_plugin_versions():
         assert f"| {p['name']} | {p['version']} |" in text, p["name"]
 
 
+def test_phones_are_claimed_only_as_far_as_they_are_tested():
+    # The harness emulates a phone in desktop Chrome; no phone or app is tested on a device.
+    text = " ".join(section("Compatibility").split())  # as read, whatever the line wrapping
+    assert "phone sizes" in text and "neither is tested on a device" in text
+    # The Android app runs the web client, so it does load custom CSS.
+    assert "native apps" not in section("Known limitations")
+
+
+def test_known_limitations_name_every_plugin_built_for_an_older_jellyfin():
+    text = section("Known limitations")
+    plugins = json.loads((ROOT / "demo" / "plugins.json").read_text())["plugins"]
+    assert all(re.fullmatch(r"\d+\.\d+\.\d+\.\d+", p["target_abi"]) for p in plugins)
+    for p in plugins:
+        if not p["target_abi"].startswith("12."):
+            assert f"{p['name']} has no Jellyfin 12 build" in text, p["name"]
+
+
 def test_install_snippets_put_every_import_first():
     # Every CSS snippet in the README, the preset's two-line one included.
     blocks = re.findall(r"```css\n(.*?)```", README, re.S)
@@ -50,7 +67,10 @@ def test_readme_links_point_at_files_that_ship():
 
 
 def test_the_readme_claims_only_what_is_measured():
-    assert "never slower" not in README.lower()
+    # The gates allow a measured margin over plain Jellyfin (DEVELOPMENT.md, Gates), so no public
+    # document may promise more.
+    for name in ("README.md", "DESIGN.md", "PRODUCT.md", "DEVELOPMENT.md", "CONTRIBUTING.md"):
+        assert "never slower" not in (ROOT / name).read_text().lower(), name
     assert "dist/palette.html" not in README
 
 

@@ -147,7 +147,12 @@ commits; everything else builds into `build/`.
    README's `@import` URL.
 2. `uv run python build.py --release` writes `dist/neonfin.css`. It refuses a version with no
    CHANGELOG entries.
-3. Commit "Release X.Y.Z" with those four files, tag it with
+3. Check the other engines on the demo server, since the README says Firefox and Safari are
+   checked at each release. Once: `uv run playwright install firefox webkit`. Then, in the
+   demo's subshell, `uv run python -m harness.shots --engine firefox --out DIR` and
+   `uv run python -m harness.shots --engine webkit --out DIR`, with `DIR` outside the
+   repository, and look at every image for broken layout.
+4. Commit "Release X.Y.Z" with those four files, tag it with
    `git tag -a vX.Y.Z -m "NeonFin X.Y.Z"`, and push the commit and the tag.
 
 The tag runs `.github/workflows/release.yml`: the checks CI runs, the tag against the
