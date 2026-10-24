@@ -12,7 +12,7 @@ import sys
 import urllib.parse
 import urllib.request
 
-from harness.config import LOCAL
+from harness.config import config_path
 
 CLIENT = 'MediaBrowser Client="neonfin-harness", Device="harness", DeviceId="neonfin-harness", Version="0.1"'
 
@@ -58,6 +58,7 @@ def pick_player_titles(films: list[dict]) -> dict[str, str]:
 
 
 def main() -> int:
+    local = config_path(os.environ)
     base = os.environ["JELLYFIN_URL"].rstrip("/")
 
     def call(path, body=None, token=None):
@@ -108,9 +109,9 @@ def main() -> int:
         }
     )
     data["items"] |= pick_player_titles(call(f"/Items?{q}", token=tok)["Items"])
-    data = merge_local(json.loads(LOCAL.read_text()) if LOCAL.exists() else {}, data)
-    LOCAL.write_text(json.dumps(data, indent=2) + "\n")
-    print(f"login ok; wrote {LOCAL.name} with {len(data['items'])} items")
+    data = merge_local(json.loads(local.read_text()) if local.exists() else {}, data)
+    local.write_text(json.dumps(data, indent=2) + "\n")
+    print(f"login ok; wrote {local.name} with {len(data['items'])} items")
     return 0
 
 

@@ -40,3 +40,17 @@ def test_prepare_outdir_refuses_existing(tmp_path):
     run.prepare_outdir(tmp_path, "baseline")
     with pytest.raises(FileExistsError):
         run.prepare_outdir(tmp_path, "baseline")
+
+
+def test_the_config_file_can_be_chosen_per_server(tmp_path):
+    other = tmp_path / "demo.json"
+    other.write_text(json.dumps({"items": ITEMS, "search_term": "x"}))
+    assert config.load({**ENV, "NEONFIN_CONFIG": str(other)}).search_term == "x"
+
+
+def test_a_relative_config_path_is_read_from_the_repo_root():
+    assert config.config_path({"NEONFIN_CONFIG": "demo/config.json"}) == config.ROOT / "demo" / "config.json"
+
+
+def test_without_a_choice_the_config_is_the_local_file():
+    assert config.config_path({}) == config.LOCAL
