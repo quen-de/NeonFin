@@ -114,3 +114,21 @@ trial.
 injected (same env vars and local config as the harness). They are skipped without them,
 and never run in CI or the pre-commit hook. Run them in their own pytest process: their
 session-wide browser blocks the browsers the offline tests start for themselves.
+
+## Releasing
+
+`dist/neonfin.css` is the stylesheet of the latest release and changes only in release
+commits; everything else builds into `build/`.
+
+1. Set `version` in `pyproject.toml`. Move the entries under `## [Unreleased]` in
+   `CHANGELOG.md` to a new `## [X.Y.Z] - YYYY-MM-DD` section, and put the version in the
+   README's `@import` URL.
+2. `uv run python build.py --release` writes `dist/neonfin.css`. It refuses a version with no
+   CHANGELOG entries.
+3. Commit "Release X.Y.Z" with those four files, tag it with
+   `git tag -a vX.Y.Z -m "NeonFin X.Y.Z"`, and push the commit and the tag.
+
+The tag runs `.github/workflows/release.yml`: the checks CI runs, the tag against the
+version, the committed stylesheet against a fresh release build, then a GitHub Release with
+`neonfin.css`, `palette.html` and the four presets. Asset names carry no version, so
+`releases/latest/download/neonfin.css` always serves the latest release.

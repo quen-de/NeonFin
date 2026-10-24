@@ -1,0 +1,33 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
+      - name: The tag names the version in pyproject.toml
+        run: |
+          version=$(uv run python -c 'import build; print(build.version())')
+          test "$GITHUB_REF_NAME" = "v$version" || { echo "tag $GITHUB_REF_NAME, pyproject.toml $version"; exit 1; }
+      - name: The committed stylesheet is the release build
+        run: |
+          uv run python build.py --release -o "$RUNNER_TEMP/neonfin.css" --palette-out "$RUNNER_TEMP/palette.html"
+          cmp "$RUNNER_TEMP/neonfin.css" dist/neonfin.css
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          uv run python build.py --notes "$version" > "$RUNNER_TEMP/notes.md"
+          gh release create "$GITHUB_REF_NAME" --title "NeonFin $version" --notes-file "$RUNNER_TEMP/notes.md" \
+            "$RUNNER_TEMP/neonfin.css" "$RUNNER_TEMP/palette.html" \
+            palettes/acid.css palettes/amber.css palettes/cyan.css palettes/violet.css
