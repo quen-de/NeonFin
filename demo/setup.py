@@ -84,12 +84,23 @@ def clips(library: dict) -> list[Clip]:
 def nfo_files(library: dict) -> dict[str, str]:
     """NFO files for the series, so its names and order hold whether or not TMDB knows it."""
     s = library["series"]
-    out = {f"{show_dir(s)}/tvshow.nfo": f"<tvshow><title>{s['title']}</title><year>{s['year']}</year></tvshow>\n"}
+    crew = f"<director>{s['director']}</director>" if s.get("director") else ""
+    out = {f"{show_dir(s)}/tvshow.nfo": f"<tvshow><title>{s['title']}</title><year>{s['year']}</year>{crew}</tvshow>\n"}
     for e in s["episodes"]:
         out[episode_stem(s, e) + ".nfo"] = (
             f"<episodedetails><title>{e['title']}</title><season>{e['season']}</season>"
             f"<episode>{e['episode']}</episode><year>{e['year']}</year></episodedetails>\n"
         )
+    return out
+
+
+def subtitle_files(library: dict) -> dict[str, str]:
+    """English and French subtitles beside every clip, so the title page's track selects and the
+    player's subtitle menu have choices to show."""
+    out = {}
+    for clip in clips(library):
+        for lang in ("en", "fr"):
+            out[f"{clip.path.removesuffix('.mp4')}.{lang}.srt"] = f"1\n00:00:01,000 --> 00:00:06,000\n{clip.title}\n"
     return out
 
 
@@ -101,6 +112,16 @@ def title_card(title: str, size: tuple[int, int] = (1920, 1080)) -> Image.Image:
     left, top, right, bottom = draw.textbbox((0, 0), title, font=font)
     draw.text(((size[0] - (right - left)) / 2, (size[1] - (bottom - top)) / 2), title, font=font, fill=(246, 243, 240))
     return im
+
+
+def series_art(library: dict) -> dict[str, Image.Image]:
+    """Poster, backdrop and season poster for the series, drawn like the title cards: TMDB lists
+    no Caminandes series, and a library of blank tiles shows nothing of the skin."""
+    s = library["series"]
+    poster, backdrop = title_card(s["title"], (1000, 1500)), title_card(s["title"])
+    seasons = sorted({e["season"] for e in s["episodes"]})
+    out = {f"{show_dir(s)}/poster.jpg": poster, f"{show_dir(s)}/backdrop.jpg": backdrop}
+    return out | {f"{show_dir(s)}/season{n:02d}-poster.jpg": title_card(f"Season {n}", (1000, 1500)) for n in seasons}
 
 
 def ffmpeg_args(clip: Clip, card: str, out: str) -> list[str]:
@@ -203,9 +224,12 @@ def in_container(path: pathlib.Path) -> str:
 def make_media(library: dict, tag: str) -> int:
     media, cards = DATA / "media", DATA / "cards"
     cards.mkdir(parents=True, exist_ok=True)
-    for rel, text in nfo_files(library).items():
+    for rel, text in (nfo_files(library) | subtitle_files(library)).items():
         (media / rel).parent.mkdir(parents=True, exist_ok=True)
         (media / rel).write_text(text)
+    for rel, picture in series_art(library).items():
+        if not (media / rel).exists():
+            picture.save(media / rel, quality=90)
     made = 0
     for clip in clips(library):
         out = media / clip.path
@@ -241,6 +265,13 @@ def name_server(admin: Api) -> None:
     conf = admin.call("GET", "/System/Configuration")
     if conf.get("ServerName") != "Demo":
         admin.call("POST", "/System/Configuration", {**conf, "ServerName": "Demo"})
+
+
+def show_splash(admin: Api) -> None:
+    """Sign-in over the splash screen Jellyfin draws from the library's artwork."""
+    branding = admin.call("GET", "/System/Configuration/branding")
+    if not branding.get("SplashscreenEnabled"):
+        admin.call("POST", "/System/Configuration/branding", {**branding, "SplashscreenEnabled": True})
 
 
 def ensure_viewer(admin: Api, password: str) -> None:
@@ -359,18 +390,19 @@ def main(argv: list[str] | None = None) -> int:
             (DATA / d).mkdir(parents=True, exist_ok=True)
         compose = ["docker", "compose", "-f", str(COMPOSE)]
         subprocess.run([*compose, "up", "-d"], check=True, env={**os.environ, "DEMO_PORT": str(args.port)})
-        print(f"made {make_media(library, image(COMPOSE.read_text()))} stand-in clips")
+        print(f"made {make_media(library, image(COMPOSE.read_text()))} stand-in clips", flush=True)
         wait_healthy(base)
         wizard(Api(base), creds)
         admin, _ = sign_in(base, ADMIN, creds["DEMO_ADMIN_PASSWORD"])
         name_server(admin)
+        show_splash(admin)
         ensure_viewer(admin, creds["JELLYFIN_THEME_PASSWORD"])
         creds["JELLYFIN_API_KEY"] = ensure_key(admin)
         write_env(creds, ENV_FILE)
         server = admin.call("GET", "/System/Info")["Version"]
         done, skipped = ensure_plugins(admin, plan, server)
         if done:
-            print("installed " + ", ".join(done) + "; restarting")
+            print("installed " + ", ".join(done) + "; restarting", flush=True)
             admin.call("POST", "/System/Restart")
             time.sleep(5)
             wait_healthy(base)

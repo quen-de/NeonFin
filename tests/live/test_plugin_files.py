@@ -223,8 +223,10 @@ def test_hero_text_is_primary_white(open_page, style, color, profile):
 
 def seerr_card(page):
     cards = page.locator(".jellyseerr-card >> visible=true")
+    if not page.locator("#jellyseerr-search-icon").count():
+        pytest.skip("no Seerr on this server")
     if not cards.count():
-        pytest.skip("no Seerr results on this server for the search term")
+        pytest.skip("no Seerr results for the search term")
     return cards.first
 
 

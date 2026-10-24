@@ -33,7 +33,7 @@ def test_on_a_phone_the_field_runs_edge_to_edge_inside_the_gutter(open_page):
 def test_typed_text_stops_before_the_seerr_icon(open_page, profile):
     geo = open_page("search", profile, "all").evaluate(GEOM)
     if geo["seerr"] is None:
-        pytest.skip("Jellyfin Enhanced's Seerr search is not active on this server")
+        pytest.skip("no Seerr on this server")
     assert geo["text_end"] <= geo["seerr"], geo
 
 

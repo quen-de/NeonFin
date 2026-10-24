@@ -3,7 +3,7 @@
 name: neonfin-demo
 services:
   jellyfin:
-    image: jellyfin/jellyfin:12.3.20261023-013714
+    image: jellyfin/jellyfin:12.2.20261005-225228
     ports:
       - "127.0.0.1:${DEMO_PORT:-8096}:8096"
     volumes:

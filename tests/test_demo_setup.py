@@ -114,3 +114,47 @@ def test_main_reports_a_missing_docker(tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("PATH", str(tmp_path))  # no docker on it
     assert setup.main([]) == 1
     assert capsys.readouterr().err.startswith("setup: docker not found")
+
+
+def test_the_series_gets_drawn_art_since_tmdb_has_none():
+    art = setup.series_art(LIBRARY)
+    assert {k: v.size for k, v in art.items()} == {
+        "Shows/Caminandes (2013)/poster.jpg": (1000, 1500),
+        "Shows/Caminandes (2013)/backdrop.jpg": (1920, 1080),
+        "Shows/Caminandes (2013)/season01-poster.jpg": (1000, 1500),
+    }
+
+
+def test_every_clip_gets_english_and_french_subtitles_so_track_menus_have_choices():
+    files = setup.subtitle_files(LIBRARY)
+    stems = [c.path.removesuffix(".mp4") for c in setup.clips(LIBRARY)]
+    assert sorted(files) == sorted(f"{s}.{lang}.srt" for s in stems for lang in ("en", "fr"))
+    srt = files["Movies/Cosmos Laundromat (2015)/Cosmos Laundromat (2015).en.srt"]
+    assert srt.startswith("1\n00:00:01,000 --> 00:00:06,000\n") and "Cosmos Laundromat" in srt
+
+
+def test_the_series_names_its_director_so_its_page_has_a_crew():
+    series = {**LIBRARY["series"], "director": "Pablo Vazquez"}
+    show = setup.nfo_files({**LIBRARY, "series": series})["Shows/Caminandes (2013)/tvshow.nfo"]
+    assert "<director>Pablo Vazquez</director>" in show
+    assert "<director>" not in setup.nfo_files(LIBRARY)["Shows/Caminandes (2013)/tvshow.nfo"]
+
+
+class Branding:
+    def __init__(self, conf):
+        self.conf, self.posted = conf, None
+
+    def call(self, method, path, body=None):
+        assert path == "/System/Configuration/branding"
+        if method == "POST":
+            self.posted = body
+        return self.conf
+
+
+def test_sign_in_shows_the_splash_screen():
+    api = Branding({"LoginDisclaimer": "", "SplashscreenEnabled": False})
+    setup.show_splash(api)
+    assert api.posted == {"LoginDisclaimer": "", "SplashscreenEnabled": True}
+    on = Branding({"SplashscreenEnabled": True})
+    setup.show_splash(on)
+    assert on.posted is None
