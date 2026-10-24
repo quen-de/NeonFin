@@ -196,9 +196,9 @@ def evaluate_evidence(benches: list[dict], captures: dict[str, dict], scope: set
         for b in benches
         if b.get("css_mode") == "dist" and not b.get("intercept_hits")
     ]
-    shas = sorted({b.get("skin_sha") for b in benches}, key=str)
-    if len(shas) > 1:
-        fails.append(f"benches measured different builds: {', '.join(map(str, shas))}")
+    builds = sorted({b.get("skin_build") for b in benches}, key=str)
+    if len(builds) > 1:
+        fails.append(f"benches measured different builds: {', '.join(map(str, builds))}")
     for b in benches[1:]:
         for key in ("server_version", "browser_version"):
             if b.get(key) != benches[0].get(key):
@@ -220,8 +220,8 @@ def evaluate_evidence(benches: list[dict], captures: dict[str, dict], scope: set
             continue
         fails += [f"{run}: {f}" for f in _provenance("capture", capture)]
         notes += [f"{run}: signed in again before {key}" for key in capture.get("relogins", [])]
-        if capture.get("skin_sha") != shas[0]:
-            fails.append(f"{run}: captured build {capture.get('skin_sha')}, benched {shas[0]}")
+        if capture.get("skin_build") != builds[0]:
+            fails.append(f"{run}: captured build {capture.get('skin_build')}, benched {builds[0]}")
         for key in ("server_version", "browser_version"):
             if capture.get(key) != bench.get(key):
                 fails.append(f"{run}: {key} differs from the bench: {capture.get(key)} vs {bench.get(key)}")

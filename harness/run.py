@@ -152,19 +152,19 @@ def main(argv: list[str] | None = None) -> int:
     branding = cssbundle.probe_branding(cfg.url)
     if args.css == "dist":
         served = build.build()
-        sha, dirty = build.parse_header(served)
+        ident, dirty = build.parse_header(served)
         override = session.Override(served)
     elif args.css == "vanilla":
-        served, sha, dirty, override = "", None, None, session.Override("")
+        served, ident, dirty, override = "", None, None, session.Override("")
     else:
-        served, sha, dirty, override = branding["custom_css"], None, None, None
+        served, ident, dirty, override = branding["custom_css"], None, None, None
     effective = cssbundle.strip_imports(served)
     summary = {
         "label": args.label,
         "plugins": args.plugins,
         "css_mode": args.css,
         "date": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-        "skin_sha": sha,
+        "skin_build": ident,
         "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
         "branding_response": {k: branding[k] for k in ("wire_bytes", "encoding")},

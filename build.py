@@ -3,8 +3,8 @@
 
 Concatenates skin/ in cascade order (numbered core files, then one file per
 plugin, then the files numbered 99), embeds the sign font as a data: URI,
-enforces the skin rules in skinlint.py, strips comments, and stamps the commit
-into a header comment. It also writes dist/palette.html, the palette picker,
+enforces the skin rules in skinlint.py, strips comments, and stamps the version,
+and for any build but a release the commit, into a header comment. It also writes dist/palette.html, the palette picker,
 from palettes/. Stdlib only, so any deploy script can run it with a system
 python3.
 """
@@ -19,6 +19,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tomllib
 
 import skinlint
 from cssscan import BuildError, brace_scan, declarations, leaf_rules, line_of, strip_comments
@@ -30,7 +31,7 @@ FONT_FILE = "skin/fonts/neonfin-sign-800.woff2"
 FONT_FAMILY = "NeonFin Sign"
 FONT_WEIGHT = 800
 PICKER = "palettes/picker.html"
-HEADER_RE = re.compile(r"^/\* neonfin ([0-9a-f]{40}|unknown)(-dirty)?")
+HEADER_RE = re.compile(r"^/\* neonfin (\d+\.\d+\.\d+(?:\+(?:[0-9a-f]{40}|unknown)(?:\.dirty)?)?) \*/")
 # The palette's inputs, in the order a picker shows them; each is a --nf- token.
 PALETTE = ("neon", "teal", "ink", "ink-2", "chrome", "paper", "light", "shade", "on-neon")
 PRESET_HEADER = re.compile(r"/\* NeonFin palette: ([^.]+)\. Paste after the skin in Custom CSS\. \*/\n")
@@ -157,19 +158,35 @@ def repo_state(root: pathlib.Path) -> tuple[str, bool]:
     return sha, bool(dirty)
 
 
-def header(sha: str, dirty: bool) -> str:
-    return f"/* neonfin {sha}{'-dirty' if dirty else ''} */\n"
+def version(root: pathlib.Path | None = None) -> str:
+    """The version in pyproject.toml: the one place it is written."""
+    path = (root or ROOT) / "pyproject.toml"
+    if not path.exists():
+        raise BuildError("missing pyproject.toml")
+    return tomllib.loads(path.read_text(encoding="utf-8"))["project"]["version"]
+
+
+def build_id(version: str, sha: str | None, dirty: bool) -> str:
+    """1.0.0 for a release; 1.0.0+<commit> for any other build, .dirty when uncommitted."""
+    if sha is None:
+        return version
+    return f"{version}+{sha}{'.dirty' if dirty else ''}"
+
+
+def header(ident: str) -> str:
+    return f"/* neonfin {ident} */\n"
 
 
 def parse_header(css: str) -> tuple[str, bool] | None:
+    """(build id, built from uncommitted files) from a built sheet's first line."""
     m = HEADER_RE.match(css)
-    return (m.group(1), bool(m.group(2))) if m else None
+    return (m[1], m[1].endswith(".dirty")) if m else None
 
 
-def build(root: pathlib.Path | None = None) -> str:
+def build(root: pathlib.Path | None = None, release: bool = False) -> str:
     root = root or ROOT
-    sha, dirty = repo_state(root)
-    return header(sha, dirty) + assemble(root)
+    sha, dirty = (None, False) if release else repo_state(root)
+    return header(build_id(version(root), sha, dirty)) + assemble(root)
 
 
 def main(argv: list[str] | None = None) -> int:

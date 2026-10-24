@@ -338,12 +338,12 @@ def main(argv: list[str] | None = None) -> int:
 
     outdir = prepare_outdir(RUNS, args.label)
     served = build.build()
-    sha, dirty = build.parse_header(served)
+    ident, dirty = build.parse_header(served)
     sides = {"vanilla": session.Override(""), "skin": session.Override(served)}
     out = {
         "label": args.label,
         "date": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-        "skin_sha": sha,
+        "skin_build": ident,
         "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
         "plugins": args.plugins,

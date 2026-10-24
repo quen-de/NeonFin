@@ -90,16 +90,16 @@ def main(argv: list[str] | None = None) -> int:
     by_name = {r.name: r for r in ROUTES}
     if args.css == "dist":
         served = build.build()
-        sha, dirty = build.parse_header(served)
+        ident, dirty = build.parse_header(served)
         skin = session.Override(served)
     else:
-        skin, sha, dirty = None, None, None
+        skin, ident, dirty = None, None, None
     vanilla = session.Override("")
     out = {
         "label": args.label,
         "css_mode": args.css,
         "date": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-        "skin_sha": sha,
+        "skin_build": ident,
         "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
         "max_pairs": args.trials,

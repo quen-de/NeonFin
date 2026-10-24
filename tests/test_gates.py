@@ -145,7 +145,7 @@ def test_page_ready_slower_than_every_vanilla_load_decides_a_fail():
 def bench(cells, **extra):
     return {
         "css_mode": "dist",
-        "skin_sha": "abc",
+        "skin_build": "abc",
         "skin_dirty": False,
         "intercept_hits": 9,
         "server_version": "12.0",
@@ -190,7 +190,7 @@ def capture(state, **extra):
     from harness.profiles import ROUTES
 
     routes = {f"{p}/{r.name}": {"glass": 0, "blue": {}, "contrast_failures": []} for p in ("desktop", "phone") for r in ROUTES}
-    return summary(**{"plugins": state, "routes": routes, "perf": {}, "trials": None, "skin_sha": "abc", "skin_dirty": False, **extra})
+    return summary(**{"plugins": state, "routes": routes, "perf": {}, "trials": None, "skin_build": "abc", "skin_dirty": False, **extra})
 
 
 def judge(tmp_path, benches, captures, capsys):
@@ -270,10 +270,10 @@ def test_benches_of_one_build_pool_their_pairs(tmp_path, capsys):
 def test_benches_and_captures_come_from_one_clean_build(tmp_path, capsys):
     cells = full_cells("all", CLEAR)
     cases = [
-        ([bench(cells), bench({}, skin_sha="def")], [capture("all")], "benches measured different builds: abc, def"),
+        ([bench(cells), bench({}, skin_build="def")], [capture("all")], "benches measured different builds: abc, def"),
         ([bench(cells, skin_dirty=True)], [capture("all")], "a bench of uncommitted CSS"),
         ([bench(cells, css_mode="live")], [capture("all")], "a bench of live CSS, not the build"),
-        ([bench(cells)], [capture("all", skin_sha="def")], "captured build def, benched abc"),
+        ([bench(cells)], [capture("all", skin_build="def")], "captured build def, benched abc"),
         ([bench(cells)], [capture("all", skin_dirty=True)], "a capture of uncommitted CSS"),
     ]
     for i, (benches, captures, message) in enumerate(cases):

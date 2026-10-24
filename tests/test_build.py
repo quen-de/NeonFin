@@ -11,6 +11,7 @@ FONT = b"wOF2-test-bytes"
 
 def make_skin(root, files=None):
     tree = {
+        "pyproject.toml": '[project]\nname = "t"\nversion = "9.9.9"\n',
         "skin/00-tokens.css": (
             ":root { --nf-neon: #f00; --nf-teal: #0f0; --nf-ink: #000; --nf-ink-2: #111; --nf-chrome: #222;"
             " --nf-paper: #eee; --nf-light: #fff; --nf-shade: #000; --nf-on-neon: var(--nf-light); }\n"
@@ -79,18 +80,42 @@ def test_unbalanced_file_fails_with_its_name(tmp_path):
         build.assemble(make_skin(tmp_path, {"skin/30-header.css": ".h { color: inherit;\n"}))
 
 
-def test_header_round_trip():
-    h = build.header("a" * 40, True)
-    assert h.startswith("/* neonfin ")
-    assert build.parse_header(h + ".x{}") == ("a" * 40, True)
+def test_a_dev_header_carries_the_version_and_the_commit():
+    h = build.header(build.build_id("1.2.3", "a" * 40, True))
+    assert h == f"/* neonfin 1.2.3+{'a' * 40}.dirty */\n"
+    assert build.parse_header(h + ".x{}") == (f"1.2.3+{'a' * 40}.dirty", True)
+    assert build.parse_header(build.header(build.build_id("1.2.3", "b" * 40, False))) == (f"1.2.3+{'b' * 40}", False)
+
+
+def test_a_release_header_carries_the_version_alone():
+    h = build.header(build.build_id("1.2.3", None, False))
+    assert h == "/* neonfin 1.2.3 */\n"
+    assert build.parse_header(h) == ("1.2.3", False)
+
+
+def test_old_headers_and_plain_css_do_not_parse():
+    assert build.parse_header(f"/* neonfin {'a' * 40} */\n") is None
     assert build.parse_header(".x{}") is None
+
+
+def test_the_version_comes_from_pyproject(tmp_path):
+    assert build.version(make_skin(tmp_path)) == "9.9.9"
+
+
+def test_a_tree_without_pyproject_fails(tmp_path):
+    with pytest.raises(BuildError, match="missing pyproject.toml"):
+        build.build(make_skin(tmp_path, {"pyproject.toml": None}))
+
+
+def test_a_release_build_names_no_commit(tmp_path):
+    assert build.build(make_skin(tmp_path), release=True).startswith("/* neonfin 9.9.9 */\n@font-face")
 
 
 def test_main_writes_the_stylesheet(tmp_path, monkeypatch):
     monkeypatch.setattr(build, "ROOT", make_skin(tmp_path / "repo"))
     out = tmp_path / "out.css"
     assert build.main(["-o", str(out)]) == 0
-    assert out.read_text().startswith("/* neonfin unknown-dirty */\n@font-face")
+    assert out.read_text().startswith("/* neonfin 9.9.9+unknown.dirty */\n@font-face")
     assert (tmp_path / "palette.html").read_text().startswith("<style>@font-face")
 
 
