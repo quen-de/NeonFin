@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import os
 import statistics
 import sys
 import time
@@ -22,7 +23,7 @@ from playwright.sync_api import sync_playwright
 import build
 from harness import config, gates, lock, perf, plugins, session
 from harness.profiles import PERF_ROUTES, PROFILES, ROUTES
-from harness.run import RUNS, prepare_outdir, server_version
+from harness.run import RUNS, plugin_versions, prepare_outdir, server_version
 
 
 def cells(states: list[str], profiles: list[str], routes: list[str]) -> list[tuple[str, str, str]]:
@@ -102,6 +103,7 @@ def main(argv: list[str] | None = None) -> int:
         "skin_build": ident,
         "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
+        "plugin_versions": plugin_versions(cfg.url, os.environ.get("JELLYFIN_API_KEY")),
         "max_pairs": args.trials,
         "cells": {},
     }

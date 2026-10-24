@@ -275,11 +275,22 @@ def test_benches_and_captures_come_from_one_clean_build(tmp_path, capsys):
         ([bench(cells, css_mode="live")], [capture("all")], "a bench of live CSS, not the build"),
         ([bench(cells)], [capture("all", skin_build="def")], "captured build def, benched abc"),
         ([bench(cells)], [capture("all", skin_dirty=True)], "a capture of uncommitted CSS"),
+        (
+            [bench(cells, plugin_versions={"A": "1"}), bench({}, plugin_versions={"A": "2"})],
+            [capture("all")],
+            "benches differ in plugin_versions",
+        ),
+        ([bench(cells)], [capture("all", plugin_versions={"A": "2"})], "plugin_versions differs from the bench"),
     ]
     for i, (benches, captures, message) in enumerate(cases):
         (tmp_path / str(i)).mkdir()
         code, out = judge(tmp_path / str(i), benches, captures, capsys)
         assert code == 1 and message in out, (message, out)
+
+
+def test_paired_runs_against_different_plugin_versions_fail():
+    fails = gates.evaluate(summary("vanilla", plugin_versions={"A": "1"}), summary("dist", plugin_versions={"A": "2"}), set())
+    assert any(f.startswith("plugin_versions differs") for f in fails), fails
 
 
 def test_the_exception_ceilings_sit_just_above_what_was_measured():

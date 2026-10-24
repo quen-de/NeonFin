@@ -6,6 +6,7 @@ import argparse
 import datetime
 import gzip
 import json
+import os
 import pathlib
 import sys
 import urllib.request
@@ -28,6 +29,21 @@ def prepare_outdir(root: pathlib.Path, label: str) -> pathlib.Path:
 def server_version(base: str) -> str:
     with urllib.request.urlopen(f"{base}/System/Info/Public", timeout=30) as r:
         return json.loads(r.read()).get("Version", "unknown")
+
+
+def plugin_versions(base: str, api_key: str | None) -> dict[str, str] | str:
+    """Installed plugins and their versions, read with the server's admin API key
+    (JELLYFIN_API_KEY); "unknown" without one or when the server does not answer."""
+    if not api_key:
+        return "unknown"
+    req = urllib.request.Request(f"{base}/Plugins", headers={"Authorization": f'MediaBrowser Token="{api_key}"'})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            items = json.loads(r.read())
+    except (OSError, ValueError) as e:
+        print(f"plugin versions unknown: {type(e).__name__}", file=sys.stderr)
+        return "unknown"
+    return {p["Name"]: p["Version"] for p in sorted(items, key=lambda p: p["Name"])}
 
 
 def write_gz(path: pathlib.Path, data) -> None:
@@ -167,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
         "skin_build": ident,
         "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
+        "plugin_versions": plugin_versions(cfg.url, os.environ.get("JELLYFIN_API_KEY")),
         "branding_response": {k: branding[k] for k in ("wire_bytes", "encoding")},
         "css": {
             "custom_css_bytes": len(served.encode()),

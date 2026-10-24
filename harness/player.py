@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import os
 import statistics
 import sys
 import time
@@ -27,7 +28,7 @@ from playwright.sync_api import sync_playwright
 import build
 from harness import bench, config, gates, lock, perf, plugins, session
 from harness.profiles import PROFILES
-from harness.run import RUNS, prepare_outdir, server_version
+from harness.run import RUNS, plugin_versions, prepare_outdir, server_version
 
 # Title name: (config item, hide HEVC from the page).
 TITLES = {"direct": ("play_direct", False), "hdr": ("play_hdr", False), "convert": ("play_hdr", True)}
@@ -346,6 +347,7 @@ def main(argv: list[str] | None = None) -> int:
         "skin_build": ident,
         "skin_dirty": dirty,
         "server_version": server_version(cfg.url),
+        "plugin_versions": plugin_versions(cfg.url, os.environ.get("JELLYFIN_API_KEY")),
         "plugins": args.plugins,
         "pairs": args.pairs,
         "cells": {},
