@@ -1,0 +1,1493 @@
+/* neonfin 1.0.0 */
+@font-face { font-family: "NeonFin Sign"; src: url(data:font/woff2;base64,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) format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+:root {
+  --nf-neon: #ff2448;
+  --nf-teal: #19d3c5;
+  --nf-ink: #05060a;
+  --nf-ink-2: #090b12;
+  --nf-chrome: #121420;
+  --nf-paper: #f6f3f0;
+  --nf-light: #fff;
+  --nf-shade: #000;
+  --nf-on-neon: var(--nf-light);
+  --nf-neon-deep: color-mix(in srgb, var(--nf-neon) 70%, var(--nf-shade));
+  --nf-oxblood: color-mix(in srgb, var(--nf-neon) 29%, var(--nf-shade));
+  --nf-sign: color-mix(in srgb, var(--nf-neon) 12%, var(--nf-light));
+  --nf-text: color-mix(in srgb, var(--nf-paper) 94%, transparent);
+  --nf-text-2: color-mix(in srgb, var(--nf-paper) 62%, transparent);
+  --nf-rim: color-mix(in srgb, var(--nf-light) 16%, transparent);
+  --nf-error: var(--jf-palette-error-main, #f44336);
+  --nf-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --nf-sign-font: "NeonFin Sign", "Arial Narrow", sans-serif;
+  --nf-radius-card: 12px;
+  --nf-radius-menu: 14px;
+  --nf-radius-thumb: 8px;
+  --nf-fast: 180ms;
+  --nf-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --nf-chrome-deep: color-mix(in srgb, var(--nf-chrome) 70%, var(--nf-ink));
+  --nf-chrome-tint: color-mix(in srgb, var(--nf-chrome) 40%, transparent);
+  --nf-chrome-solid: color-mix(in srgb, var(--nf-chrome-deep) 92%, transparent);
+  --nf-chrome-edge: inset 0 1px 0 color-mix(in srgb, var(--nf-light) 22%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 7%, transparent),
+    0 10px 26px -12px color-mix(in srgb, var(--nf-shade) 70%, transparent);
+  --nf-sign-glow: 0 0 2px color-mix(in srgb, var(--nf-light) 60%, transparent),
+    0 0 10px color-mix(in srgb, var(--nf-neon) 90%, transparent),
+    0 0 26px color-mix(in srgb, var(--nf-neon) 55%, transparent);
+  --nf-tube: inset 0 0 0 2px var(--nf-neon), 0 0 18px color-mix(in srgb, var(--nf-neon) 80%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--nf-neon) 60%, transparent);
+  --nf-ring: inset 0 0 0 2px var(--nf-neon), 0 0 22px 2px color-mix(in srgb, var(--nf-neon) 55%, transparent);
+  --nf-selected: color-mix(in srgb, var(--nf-neon) 20%, transparent);
+  --nf-selected-edge: inset 0 0 0 1px color-mix(in srgb, var(--nf-neon) 75%, transparent);
+  --nf-neon-text: color-mix(in srgb, var(--nf-neon) 60%, var(--nf-light));
+}
+html,
+body,
+button,
+input,
+select,
+textarea,
+.MuiTypography-root,
+.MuiButtonBase-root,
+.MuiInputBase-root,
+.MuiMenuItem-root {
+  font-family: var(--nf-ui);
+}
+html {
+  background-color: var(--nf-ink);
+  color: var(--nf-text);
+  color-scheme: dark;
+  caret-color: var(--nf-neon);
+  accent-color: var(--nf-neon);
+  scrollbar-color: color-mix(in srgb, var(--nf-light) 18%, transparent) transparent;
+  scrollbar-width: thin;
+}
+::selection {
+  background-color: var(--nf-neon-deep);
+  color: var(--nf-on-neon);
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--nf-light) 18%, transparent) padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+:focus-visible {
+  outline: 2px solid var(--nf-neon) !important;
+  outline-offset: 2px;
+}
+.mdl-spinner__layer {
+  border-color: var(--nf-neon);
+}
+:is(button, a).paper-icon-button-light:hover:not(:disabled),
+:is(button, a).paper-icon-button-light:active:not(:disabled) {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 12%, transparent);
+}
+:is(button, a).paper-icon-button-light.show-focus:focus {
+  color: var(--nf-neon-text);
+}
+:root:root {
+  --jf-palette-primary-main: var(--nf-neon);
+  --jf-palette-primary-light: var(--nf-neon-text);
+  --jf-palette-primary-dark: var(--nf-neon-deep);
+  --jf-palette-primary-contrastText: var(--nf-on-neon);
+  --jf-palette-primary-mainChannel: 255 255 255;
+  --jf-palette-primary-lightChannel: 255 255 255;
+  --jf-palette-primary-darkChannel: 255 255 255;
+  --jf-palette-primary-contrastTextChannel: 255 255 255;
+  --jf-palette-secondary-main: var(--nf-neon);
+  --jf-palette-secondary-light: var(--nf-neon-text);
+  --jf-palette-secondary-dark: var(--nf-neon-deep);
+  --jf-palette-secondary-contrastText: var(--nf-on-neon);
+  --jf-palette-secondary-mainChannel: 255 255 255;
+  --jf-palette-secondary-lightChannel: 255 255 255;
+  --jf-palette-secondary-darkChannel: 255 255 255;
+  --jf-palette-secondary-contrastTextChannel: 255 255 255;
+}
+.MuiTypography-root.MuiLink-root {
+  color: var(--nf-neon-text);
+  text-decoration-color: color-mix(in srgb, var(--nf-neon-text) 50%, transparent);
+}
+:is(
+    .raised.button-submit,
+    .cardOverlayContainer > .cardOverlayFab-primary,
+    .mainDetailButtons > .detailButton.btnPlay,
+    .MuiButton-root.MuiButton-contained
+  ):focus-visible {
+  outline-color: var(--nf-light) !important;
+}
+.backgroundContainer {
+  background:
+    radial-gradient(36vmax 28vmax at 90% 4%, color-mix(in srgb, var(--nf-neon) 34%, transparent), transparent 70%),
+    radial-gradient(30vmax 24vmax at 6% 60%, color-mix(in srgb, var(--nf-teal) 16%, transparent), transparent 70%),
+    radial-gradient(26vmax 20vmax at 70% 100%, color-mix(in srgb, var(--nf-neon) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--nf-ink-2), var(--nf-ink) 60%);
+}
+.backgroundContainer.withBackdrop {
+  opacity: 1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--nf-ink) 72%, transparent) 0,
+    color-mix(in srgb, var(--nf-ink) 60%, transparent) 56px,
+    color-mix(in srgb, var(--nf-ink) 10%, transparent) 160px,
+    color-mix(in srgb, var(--nf-ink) 50%, transparent) 80%
+  );
+}
+.backdropImage {
+  filter: blur(36px) saturate(1.7) brightness(0.95);
+  transform: scale(1.18);
+}
+.layout-desktop .backdropImage {
+  filter: none;
+  transform: none;
+}
+.layout-desktop .backdropImage::after {
+  content: "";
+  position: absolute;
+  inset: 0 -72px -72px;
+  padding: 0 72px 72px;
+  background: inherit;
+  background-origin: content-box;
+  background-clip: border-box;
+  filter: blur(36px) saturate(1.7) brightness(0.95);
+  -webkit-mask-image: linear-gradient(180deg, transparent 22%, #000 62%);
+  mask-image: linear-gradient(180deg, transparent 22%, #000 62%);
+}
+.MuiAppBar-root {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child {
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root::-webkit-scrollbar {
+  display: none;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  margin-left: auto;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  height: 42px;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: var(--nf-chrome-tint);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--nf-chrome-edge);
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > :is(.MuiStack-root, .MuiBox-root:not(:last-child)) > .MuiButtonBase-root {
+  height: 34px;
+  min-height: 0;
+  margin: 0;
+  border-radius: 999px;
+  color: var(--nf-text-2);
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: none;
+  transition:
+    background-color var(--nf-fast) var(--nf-ease),
+    color var(--nf-fast) var(--nf-ease);
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButton-root {
+  flex: 0 0 auto;
+  padding: 0 12px;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) > .MuiIconButton-root {
+  width: 34px;
+  padding: 0;
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > :is(.MuiStack-root, .MuiBox-root:not(:last-child)) > .MuiButtonBase-root:hover {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButtonBase-root.MuiButton-textPrimary,
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButtonBase-root.MuiButton-textPrimary:hover {
+  color: var(--nf-light);
+  background-color: var(--nf-selected);
+  box-shadow: var(--nf-selected-edge);
+}
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:last-child .MuiIconButton-root {
+  padding: 4px;
+}
+.MuiAppBar-root .MuiAvatar-root {
+  color: var(--nf-text);
+  background-color: var(--nf-oxblood);
+  box-shadow: 0 0 0 1px var(--nf-rim);
+}
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child) {
+  background-color: var(--nf-chrome-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root:first-child {
+  width: 42px;
+  height: 42px;
+  background-color: var(--nf-chrome-solid);
+  box-shadow: var(--nf-chrome-edge);
+}
+.MuiDrawer-paper {
+  background-color: var(--nf-ink-2) !important;
+  background-image: none !important;
+  box-shadow: inset -1px 0 0 var(--nf-rim);
+}
+.MuiDrawer-paper .MuiListItemButton-root {
+  margin: 2px 8px;
+  border-radius: 999px;
+}
+.MuiDrawer-paper .MuiListItemButton-root.Mui-selected {
+  background-color: var(--nf-selected);
+  box-shadow: var(--nf-selected-edge);
+}
+.sectionTitleContainer .sectionTitle,
+.verticalSection > .sectionTitle-cards {
+  font-family: var(--nf-sign-font);
+  font-weight: 800;
+  font-size: 2.1rem;
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: normal;
+  color: var(--nf-sign);
+  text-shadow: var(--nf-sign-glow);
+}
+.sectionTitleContainer .sectionTitle {
+  margin: 0;
+}
+.layout-mobile .sectionTitleContainer .sectionTitle,
+.layout-mobile .verticalSection > .sectionTitle-cards {
+  font-size: 1.5rem;
+}
+.sectionTitleTextButton {
+  max-width: 100%;
+  white-space: normal;
+}
+.sectionTitleContainer .material-icons {
+  color: var(--nf-text-2);
+}
+.homeSectionsContainer > .verticalSection {
+  margin-bottom: 2.2em;
+}
+.homeSectionsContainer > .verticalSection:empty {
+  display: none;
+}
+.homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) > .sectionTitleContainer,
+.homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) > .sectionTitle {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.homeSectionsContainer > .verticalSection:has(.card[data-type="CollectionFolder"]) .card:not(:has(.defaultCardBackground)) .cardText {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.verticalSection .emby-scroller {
+  padding-top: 12px;
+  padding-bottom: 16px;
+}
+.layout-mobile .homeSectionsContainer > .verticalSection {
+  margin-bottom: 1.1em;
+}
+.layout-mobile .homeSectionsContainer .sectionTitleContainer-cards {
+  padding-top: 10px;
+}
+.layout-mobile .homeSectionsContainer .sectionTitleContainer-cards .sectionTitle {
+  padding-top: 0;
+}
+.layout-mobile .verticalSection .emby-scroller {
+  padding-bottom: 10px;
+}
+.emby-scrollbuttons-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  box-shadow: inset 0 1px 0 var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.emby-scrollbuttons-button:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+.card .cardScalable {
+  border-radius: var(--nf-radius-card);
+  box-shadow: 0 14px 28px -18px color-mix(in srgb, var(--nf-shade) 90%, transparent);
+}
+.card .cardImageContainer,
+.card .cardPadder,
+.cardBox:not(.visualCardBox) .cardPadder,
+.card .blurhash-canvas,
+.card .cardOverlayContainer {
+  border-radius: var(--nf-radius-card);
+}
+.card .cardPadder,
+.cardBox:not(.visualCardBox) .cardPadder {
+  background-color: var(--nf-ink-2);
+}
+.card .cardPadder .cardImageIcon {
+  color: color-mix(in srgb, var(--nf-light) 22%, transparent);
+}
+.card .cardImageContainer {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--nf-light) 18%, transparent);
+}
+.card .cardScalable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: var(--nf-ring);
+  opacity: 0;
+}
+@media (hover: hover) {
+  .card:hover {
+    contain: layout style;
+  }
+  .card:hover .cardScalable {
+    transform: translateY(-4px);
+  }
+  .card:hover .cardScalable::after {
+    opacity: 1;
+    transition: opacity var(--nf-fast) var(--nf-ease);
+  }
+}
+.card:focus-within:is(:focus-visible, :has(:focus-visible)) {
+  contain: layout style;
+}
+.card:focus-within:is(:focus-visible, :has(:focus-visible)) .cardScalable {
+  transform: translateY(-4px);
+  transition: transform var(--nf-fast) var(--nf-ease);
+}
+.card:focus-within:is(:focus-visible, :has(:focus-visible)) .cardScalable::after {
+  opacity: 1;
+  transition: opacity var(--nf-fast) var(--nf-ease);
+}
+@media (forced-colors: none) {
+  .card .cardImageContainer:focus-visible {
+    outline: none !important;
+  }
+}
+.cardText {
+  color: var(--nf-text-2);
+}
+.cardText-first {
+  color: var(--nf-text);
+  font-weight: 600;
+}
+.cardOverlayContainer {
+  background: linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--nf-ink) 60%, transparent));
+}
+.cardOverlayContainer > .cardOverlayFab-primary {
+  color: var(--nf-light);
+  background-color: color-mix(in srgb, var(--nf-neon) 16%, color-mix(in srgb, var(--nf-ink) 70%, transparent));
+  box-shadow: var(--nf-tube);
+}
+.cardOverlayContainer > .cardOverlayFab-primary:hover:not(:disabled) {
+  color: var(--nf-light);
+  background-color: color-mix(in srgb, var(--nf-neon) 30%, color-mix(in srgb, var(--nf-ink) 70%, transparent));
+}
+.cardOverlayContainer .cardOverlayButton:not(.cardOverlayFab-primary):hover:not(:disabled) {
+  color: var(--nf-light);
+  background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
+}
+:is(.material-icons, svg).playstatebutton-icon-played,
+:is(.material-icons, svg).ratingbutton-icon-withrating {
+  color: var(--nf-neon);
+}
+.countIndicator,
+.playedIndicator {
+  color: var(--nf-on-neon);
+  background-color: var(--nf-neon);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--nf-shade) 50%, transparent);
+}
+.card .cardScalable .cardIndicators {
+  top: 0;
+  right: 0;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 0 var(--nf-radius-card) 0 10px;
+}
+[dir="rtl"] .card .cardScalable .cardIndicators {
+  right: auto;
+  left: 0;
+  border-radius: var(--nf-radius-card) 0 10px 0;
+}
+.cardIndicators .indicator {
+  width: auto;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 0;
+  color: var(--nf-light);
+  font-size: 12px;
+  font-weight: 700;
+  background-color: color-mix(in srgb, var(--nf-neon) 52%, color-mix(in srgb, var(--nf-ink-2) 42%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--nf-light) 24%, transparent),
+    inset 1px -1px 0 color-mix(in srgb, var(--nf-neon) 60%, transparent);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--nf-shade) 55%, transparent);
+}
+.cardIndicators .indicator .material-icons,
+.cardIndicators .indicator svg {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+.itemProgressBar {
+  height: 4px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--nf-light) 18%, transparent);
+}
+.itemProgressBarForeground {
+  border-radius: inherit;
+  background-color: var(--nf-neon);
+}
+.itemLinearProgress.MuiLinearProgress-root {
+  height: 4px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--nf-light) 18%, transparent);
+}
+.itemLinearProgress > .MuiLinearProgress-bar {
+  border-radius: inherit;
+  background-color: var(--nf-neon);
+}
+.detailRibbon {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--nf-ink) 64%, transparent), color-mix(in srgb, var(--nf-ink) 72%, transparent));
+}
+.detailRibbon::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--nf-ink) 64%, transparent));
+  pointer-events: none;
+}
+.detailPageWrapperContainer,
+.noBackdropTransparency .detailPageWrapperContainer {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--nf-ink) 72%, transparent), color-mix(in srgb, var(--nf-ink) 82%, transparent) 480px);
+}
+.itemBackdrop {
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
+  mask-image: linear-gradient(180deg, #000 55%, transparent);
+}
+.detailRibbon .nameContainer > h1 {
+  font-family: var(--nf-sign-font);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nf-sign);
+  text-shadow: var(--nf-sign-glow);
+}
+.layout-desktop .detailRibbon .nameContainer > h1 {
+  margin: -0.6em;
+  padding: 0.6em;
+  font-size: 2.6rem;
+  line-height: 1.05;
+}
+.detailRibbon .itemMiscInfo-primary > .mediaInfoItem {
+  color: var(--nf-text-2);
+}
+.detailRibbon .mediaInfoOfficialRating {
+  border-radius: 6px;
+}
+.detailPagePrimaryContainer .overview {
+  max-width: 54ch;
+  margin-top: 2em;
+}
+.detailPagePrimaryContainer .overview p:first-child {
+  margin-top: 0;
+}
+.detailPagePrimaryContainer .overview p:last-child {
+  margin-bottom: 0;
+}
+.detailPagePrimaryContainer .overview.detail-clamp-text p {
+  display: inline;
+}
+.detailPagePrimaryContainer .overview.detail-clamp-text p + p {
+  margin-inline-start: 0.3em;
+}
+.detailPagePrimaryContainer .overview-controls {
+  max-width: 54ch;
+}
+.detailPagePrimaryContainer .overview-controls:has(.overview-expand:not(.hide)) {
+  margin-top: -1em;
+}
+.detailPagePrimaryContainer .overview-expand {
+  margin: 0 -1em 0 0;
+}
+.itemTags,
+.itemTags a,
+.itemExternalLinks,
+.itemExternalLinks a,
+.detailsGroupItem .label {
+  color: var(--nf-text-2);
+}
+.itemTags a:hover,
+.itemExternalLinks a:hover {
+  color: var(--nf-neon-text);
+}
+.detailsGroupItem a:hover {
+  color: var(--nf-neon-text) !important;
+}
+.mainDetailButtons {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mainDetailButtons > .detailButton {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.mainDetailButtons > .detailButton:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+.mainDetailButtons > .detailButton.btnPlay {
+  width: 52px;
+  height: 52px;
+  color: var(--nf-light);
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  box-shadow: var(--nf-tube);
+}
+.mainDetailButtons > .detailButton.btnPlay:hover {
+  background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent);
+}
+.mainDetailButtons > .detailButton > .detailButton-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+.listItemImage.listItemImage-large {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--nf-radius-thumb);
+  overflow: hidden;
+}
+.listItem.listItem-largeImage {
+  border-radius: var(--nf-radius-card);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.listItem.listItem-largeImage:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 4%, transparent);
+}
+.defaultCardBackground.defaultCardBackground1 {
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, var(--nf-ink-2));
+}
+.defaultCardBackground.defaultCardBackground2 {
+  background-color: color-mix(in srgb, var(--nf-neon) 18%, var(--nf-ink-2));
+}
+.defaultCardBackground.defaultCardBackground3 {
+  background-color: color-mix(in srgb, var(--nf-neon) 24%, var(--nf-ink-2));
+}
+.defaultCardBackground.defaultCardBackground4 {
+  background-color: color-mix(in srgb, var(--nf-neon) 30%, var(--nf-ink-2));
+}
+.defaultCardBackground.defaultCardBackground5 {
+  background-color: color-mix(in srgb, var(--nf-neon) 36%, var(--nf-ink-2));
+}
+#castCollapsible .personCard .cardPadder {
+  padding-bottom: 100%;
+}
+#castCollapsible .personCard :is(.cardScalable, .cardPadder, .cardImageContainer, .blurhash-canvas, .cardOverlayContainer) {
+  border-radius: 50%;
+}
+#castCollapsible .personCard .cardImageContainer {
+  background-position: 50% 25%;
+}
+#castCollapsible .personCard .cardOverlayButton-br {
+  right: 8%;
+  bottom: 8%;
+}
+select.emby-select-withcolor:not([disabled]) {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--nf-light) 14%, transparent);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--nf-light) 6%, transparent);
+  transition:
+    background-color var(--nf-fast) var(--nf-ease),
+    border-color var(--nf-fast) var(--nf-ease);
+}
+select.emby-select-withcolor:not([disabled]):hover {
+  background-color: color-mix(in srgb, var(--nf-light) 10%, transparent);
+  border-color: color-mix(in srgb, var(--nf-light) 22%, transparent);
+}
+select.emby-select-withcolor:not([disabled]):focus,
+.emby-input:focus {
+  border-color: color-mix(in srgb, var(--nf-neon) 80%, transparent) !important;
+}
+.selectLabelFocused,
+.inputLabelFocused,
+.MuiFormLabel-root.MuiInputLabel-root.Mui-focused:not(.Mui-error) {
+  color: var(--nf-neon);
+}
+.emby-select-withcolor > option {
+  color: var(--nf-text);
+  background-color: var(--nf-ink-2);
+}
+.selectArrowContainer .selectArrow {
+  color: var(--nf-text-2);
+}
+.MuiFilledInput-root {
+  border-radius: 10px !important;
+  background-color: color-mix(in srgb, var(--nf-light) 6%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 14%, transparent);
+  transition: box-shadow var(--nf-fast) var(--nf-ease);
+}
+.MuiFilledInput-root:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 10%, transparent) !important;
+}
+.MuiFilledInput-root.Mui-focused {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-neon) 80%, transparent);
+}
+.MuiFilledInput-root::before,
+.MuiFilledInput-root::after {
+  display: none;
+}
+.MuiFilledInput-root.Mui-disabled,
+.MuiFilledInput-root.Mui-disabled:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 3%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 7%, transparent);
+}
+.MuiFilledInput-root.Mui-error,
+.MuiFilledInput-root.Mui-error.Mui-focused {
+  box-shadow: inset 0 0 0 1px var(--nf-error);
+}
+.raised.button-submit,
+.MuiButton-root.MuiButton-contained {
+  color: var(--nf-light);
+  font-weight: 600;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+  background: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  border-radius: 999px;
+  box-shadow: var(--nf-tube);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.raised.button-submit:hover,
+.raised.button-submit:focus,
+.MuiButton-root.MuiButton-contained:hover,
+.MuiButton-root.MuiButton-contained:focus-visible {
+  color: var(--nf-light);
+  background: color-mix(in srgb, var(--nf-neon) 22%, transparent);
+}
+.raised.button-submit:disabled,
+.MuiButton-root.MuiButton-contained:is(.Mui-disabled, :disabled) {
+  color: var(--nf-text-2);
+  text-shadow: none;
+  background: color-mix(in srgb, var(--nf-light) 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+.MuiButton-root.MuiButton-containedError,
+.MuiButton-root.MuiButton-containedError:is(:hover, :focus-visible) {
+  color: var(--nf-light);
+  text-shadow: none;
+  background: color-mix(in srgb, var(--nf-error) 70%, var(--nf-shade));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 18%, transparent);
+}
+.raised:not(.button-submit) {
+  color: var(--nf-text);
+  background: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.raised:not(.button-submit):hover,
+.raised:not(.button-submit):focus {
+  color: var(--nf-text);
+  background: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+input.emby-checkbox:checked + span + .checkboxOutline {
+  background-color: var(--nf-neon);
+  border-color: var(--nf-neon);
+}
+input.emby-checkbox:checked + span + .checkboxOutline > .checkboxIcon-checked {
+  color: var(--nf-on-neon);
+}
+input.emby-checkbox:focus-visible + span + .checkboxOutline {
+  box-shadow: 0 0 0 2px var(--nf-ink-2), 0 0 0 4px var(--nf-neon);
+}
+input.emby-checkbox:focus:not(:checked) + span + .checkboxOutline {
+  border-color: var(--nf-neon);
+}
+.userPreferencesPage .paperList {
+  background-color: var(--nf-chrome-tint);
+  border-radius: var(--nf-radius-card);
+}
+.listItemIcon:not(.listItemIcon-transparent) {
+  color: var(--nf-light);
+  background-color: var(--nf-oxblood);
+}
+.userPreferencesPage :is(.sectionTitle, .MuiTypography-h2) {
+  font-weight: 600;
+}
+.userPreferencesPage .subtitleappearance-preview {
+  background: linear-gradient(135deg, var(--nf-oxblood), var(--nf-ink-2)) !important;
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+  height: 42px;
+  min-height: 42px;
+  margin: 3px 3.3%;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: var(--nf-chrome-tint);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--nf-chrome-edge);
+}
+.layout-mobile .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+  height: auto;
+  min-height: 0;
+  margin: 0 3.3%;
+  padding: 0 8px;
+  border-radius: 22px;
+  background-color: var(--nf-chrome-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.layout-desktop .MuiAppBar-root:has(> .MuiToolbar-root + .MuiToolbar-root)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -48px;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--nf-ink) 72%, transparent) 0,
+    color-mix(in srgb, var(--nf-ink) 60%, transparent) 96px,
+    transparent
+  );
+  pointer-events: none;
+}
+.MuiToolbar-root .MuiButtonGroup-contained {
+  gap: 8px;
+  box-shadow: none;
+}
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained {
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:has(svg[data-testid="PlayArrowIcon"]) {
+  padding: 0 16px;
+  color: var(--nf-light);
+  font-weight: 600;
+  text-transform: none;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+  box-shadow: var(--nf-tube);
+}
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:has(svg[data-testid="PlayArrowIcon"]):hover {
+  background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent);
+}
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:not(:has(svg[data-testid="PlayArrowIcon"])) {
+  width: 34px;
+  min-width: 34px;
+  padding: 0;
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+.MuiToolbar-root .MuiButtonGroup-contained > .MuiButton-contained:not(:has(svg[data-testid="PlayArrowIcon"])):hover {
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButtonGroup-text {
+  gap: 6px;
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButtonGroup-text > .MuiButton-root {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButtonGroup-text > .MuiButton-root:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButtonGroup-text > .MuiButton-root.Mui-disabled {
+  opacity: 0.4;
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-sizeLarge {
+  height: 34px;
+  padding-block: 0;
+  border-radius: 999px;
+}
+.MuiToolbar-root .MuiChip-filled {
+  color: var(--nf-text-2);
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 12%, transparent);
+}
+.MuiToolbar-root .MuiBadge-dot {
+  background-color: var(--nf-neon);
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-textPrimary {
+  color: var(--nf-neon-text);
+}
+.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-textPrimary:hover {
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent);
+}
+.alphaPicker-fixed-right .MuiPaper-root {
+  padding: 6px 0;
+  border-radius: 999px;
+  background-color: var(--nf-chrome-solid);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+.alphaPicker-fixed-right .MuiToggleButton-root {
+  color: var(--nf-text-2);
+  border: 0;
+  border-radius: 999px;
+}
+.alphaPicker-fixed-right .MuiToggleButton-root:hover {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+.alphaPicker-fixed-right .MuiToggleButton-root.Mui-selected,
+.alphaPicker-fixed-right .MuiToggleButton-root.Mui-selected:hover {
+  color: var(--nf-neon-text);
+  font-weight: 700;
+  background-color: transparent;
+}
+.searchFieldsInner {
+  position: relative;
+}
+.searchFieldsInner > .searchfields-icon {
+  position: absolute;
+  bottom: 22px;
+  left: 16px;
+  z-index: 1;
+  font-size: 22px;
+  color: var(--nf-text-2);
+  transform: translateY(50%);
+  pointer-events: none;
+}
+#searchPage .searchfields-txtSearch {
+  height: 48px;
+  padding: 0 48px 0 50px;
+  font-size: 1.1rem;
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--nf-light) 14%, transparent);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--nf-light) 6%, transparent);
+  transition:
+    border-color var(--nf-fast) var(--nf-ease),
+    box-shadow var(--nf-fast) var(--nf-ease);
+}
+#searchPage .searchfields-txtSearch:focus {
+  border-color: color-mix(in srgb, var(--nf-neon) 80%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nf-neon) 30%, transparent);
+}
+.layout-mobile .searchFields {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+#searchPage .noItemsMessage {
+  color: var(--nf-text-2);
+}
+#searchPage .searchSuggestionsList .button-link {
+  color: var(--nf-text);
+  transition: color var(--nf-fast) var(--nf-ease);
+}
+#searchPage .searchSuggestionsList .button-link:is(:hover, :focus-visible) {
+  color: var(--nf-neon-text);
+}
+.actionSheet,
+.MuiPopover-paper {
+  border-radius: var(--nf-radius-menu) !important;
+  background-color: color-mix(in srgb, var(--nf-chrome) 55%, transparent) !important;
+  background-image: none !important;
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  box-shadow:
+    var(--nf-chrome-edge),
+    0 18px 48px color-mix(in srgb, var(--nf-shade) 50%, transparent) !important;
+}
+.MuiPopover-paper {
+  background-color: color-mix(in srgb, var(--nf-chrome) 72%, transparent) !important;
+}
+.layout-mobile .actionSheet,
+.layout-mobile .MuiPopover-paper,
+.transparentDocument .actionSheet,
+.transparentDocument .MuiPopover-paper {
+  background-color: color-mix(in srgb, var(--nf-chrome-deep) 96%, transparent) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.actionSheetMenuItem {
+  border-radius: 8px;
+}
+.actionSheetMenuItem:hover,
+.actionSheetMenuItem:focus-visible,
+.MuiPopover-paper .MuiMenuItem-root:hover {
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+.actionSheetMenuItem .actionsheetMenuItemIcon {
+  color: var(--nf-text-2);
+}
+.actionSheetMenuItem .actionsheetMenuItemIcon.check {
+  color: var(--nf-neon);
+}
+.actionSheetItemAsideText {
+  color: var(--nf-text-2);
+}
+.MuiPopover-paper .MuiMenuItem-root.Mui-selected,
+.MuiPopover-paper .MuiMenuItem-root.Mui-selected:hover,
+.MuiPopover-paper .MuiMenuItem-root.Mui-selected.Mui-focusVisible {
+  background-color: var(--nf-selected);
+  box-shadow: var(--nf-selected-edge);
+}
+html:not(.layout-mobile) .MuiPopover-paper .MuiMenuItem-root {
+  min-height: 40px;
+}
+.layout-mobile .actionSheet.actionsheet-not-fullscreen {
+  top: auto !important;
+  right: 0;
+  bottom: 0;
+  left: 0 !important;
+  width: auto;
+  max-width: none;
+  max-height: 84%;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-radius: var(--nf-radius-menu) var(--nf-radius-menu) 0 0 !important;
+  transform-origin: 50% 100%;
+}
+.dialog.formDialog {
+  background-color: var(--nf-ink-2);
+  border-radius: var(--nf-radius-menu);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--nf-shade) 60%, transparent);
+}
+.dialog.formDialog::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 var(--nf-rim),
+    inset 0 0 0 1px color-mix(in srgb, var(--nf-light) 7%, transparent);
+}
+.formDialog .formDialogHeader:not(.formDialogHeader-clear) {
+  background-color: transparent;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+.formDialog .formDialogFooter:not(.formDialogFooter-clear) {
+  background-color: var(--nf-ink-2);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+.dialog.formDialog.dialog-fullscreen {
+  border-radius: 0;
+}
+.dialog.formDialog.dialog-fullscreen::after {
+  display: none;
+}
+@media (max-width: 80em), (max-height: 45em) {
+  .dialog.formDialog.dialog-fixedSize,
+  .dialog.formDialog.dialog-fullscreen-lowres {
+    border-radius: 0;
+  }
+  .dialog.formDialog.dialog-fixedSize::after,
+  .dialog.formDialog.dialog-fullscreen-lowres::after {
+    display: none;
+  }
+}
+.dialogBackdrop {
+  background-color: var(--nf-ink);
+}
+.MuiTooltip-popper .MuiTooltip-tooltip,
+.toastContainer .toast {
+  color: var(--nf-text);
+  background: var(--nf-chrome-deep);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 var(--nf-rim),
+    0 10px 26px -12px color-mix(in srgb, var(--nf-shade) 70%, transparent);
+}
+.MuiTooltip-popper .MuiTooltip-tooltip {
+  padding: 5px 12px;
+  font-size: 0.75rem;
+}
+.toastContainer .toast {
+  min-width: 0;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+}
+#loginPage > .margin-auto-y {
+  box-sizing: border-box;
+  width: min(440px, 100% - 32px);
+  margin-right: auto;
+  margin-left: auto;
+  padding: 28px 28px 24px !important;
+  border-radius: var(--nf-radius-menu);
+  background-color: color-mix(in srgb, var(--nf-chrome) 55%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  box-shadow: var(--nf-chrome-edge);
+}
+.layout-mobile #loginPage > .margin-auto-y {
+  padding: 22px 18px 18px !important;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+  background-color: color-mix(in srgb, var(--nf-chrome-deep) 96%, transparent);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+#loginPage .inputLabelFocused {
+  color: var(--nf-neon-text);
+}
+.backdropImage[style*="Branding/Splashscreen"] {
+  filter: brightness(0.4);
+  transform: none;
+}
+.layout-desktop .backdropImage[style*="Branding/Splashscreen"]::after {
+  display: none;
+}
+#loginPage h1 {
+  margin: 0 0 0.6em;
+  font-family: var(--nf-sign-font);
+  font-weight: 800;
+  font-size: 1.9rem;
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nf-sign);
+  text-shadow: var(--nf-sign-glow);
+}
+.layout-mobile #loginPage h1 {
+  font-size: 1.5rem;
+}
+#loginPage .btnForgotPassword,
+#loginPage .btnForgotPassword:hover,
+#loginPage .btnForgotPassword:focus {
+  color: var(--nf-text-2);
+  background: transparent;
+  box-shadow: none;
+}
+#loginPage .btnForgotPassword:hover {
+  color: var(--nf-text);
+}
+#loginPage .loginDisclaimer {
+  color: var(--nf-text-2);
+}
+#loginPage .loginDisclaimer a {
+  color: var(--nf-neon-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+#loginPage .loginDisclaimerContainer {
+  margin-top: 1.25em;
+}
+#loginPage .loginDisclaimerContainer:not(:has(.loginDisclaimer:not(:empty))) {
+  margin-top: 0;
+}
+#loginPage .loginDisclaimer > :first-child {
+  margin-top: 0;
+}
+#loginPage .loginDisclaimer > :last-child {
+  margin-bottom: 0;
+}
+#loginPage .readOnlyContent {
+  margin-bottom: 0 !important;
+}
+#divUsers .card .cardScalable,
+#divUsers .card .cardPadder,
+#divUsers .card .cardContent,
+#divUsers .card .cardImage,
+#divUsers .card .cardImageContainer {
+  border-radius: 50%;
+}
+html:not(.layout-mobile) #divUsers .card.squareCard {
+  width: calc(100% / 3);
+}
+#divUsers .card .defaultCardBackground {
+  background-color: var(--nf-oxblood);
+}
+#divUsers .cardText {
+  color: var(--nf-text);
+}
+@media (forced-colors: none) {
+  #divUsers .card:focus-visible {
+    outline: none !important;
+  }
+}
+.mdl-slider {
+  color: var(--nf-neon);
+}
+.mdl-slider-background-lower,
+.sliderMarker.watched {
+  background-color: var(--nf-neon);
+}
+.mdl-slider::-webkit-slider-thumb {
+  background: var(--nf-light);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 50%, transparent);
+}
+.mdl-slider::-moz-range-thumb {
+  background: var(--nf-light);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 50%, transparent);
+}
+.skinHeader.skinHeader-withBackground.osdHeader {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--nf-ink) 80%, transparent),
+    color-mix(in srgb, var(--nf-ink) 55%, transparent) 55%,
+    transparent
+  );
+}
+.videoOsdBottom.videoOsdBottom-maincontrols {
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--nf-ink) 86%, transparent),
+    color-mix(in srgb, var(--nf-ink) 72%, transparent) 50%,
+    transparent
+  );
+}
+.videoOsdBottom .material-icons,
+.osdHeader .material-icons {
+  text-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 60%, transparent);
+}
+.osdHeader svg {
+  filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--nf-shade) 60%, transparent));
+}
+.sliderBubble {
+  overflow: hidden;
+  color: var(--nf-text);
+  background: var(--nf-chrome-deep);
+  border-radius: var(--nf-radius-thumb);
+  box-shadow: inset 0 1px 0 var(--nf-rim);
+}
+.upNextDialog-countdownText {
+  color: var(--nf-neon-text);
+}
+.appfooter {
+  background-color: var(--nf-chrome-solid);
+  box-shadow: inset 0 1px 0 var(--nf-rim);
+}
+.cardScalable:is(.discoverCard-movie, .discoverCard-tv)::before {
+  color: var(--nf-text) !important;
+  background-color: color-mix(in srgb, var(--nf-ink-2) 78%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+:root {
+  --theme-updated-on: 1;
+  --primary-accent-color: var(--nf-neon);
+  --primary-background-transparent: var(--nf-ink-2);
+  --secondary-background-transparent: var(--nf-chrome-deep);
+  --text-color: var(--nf-text);
+  --alt-accent-color: color-mix(in srgb, var(--nf-light) 12%, transparent);
+  --blur: 0px;
+}
+#jellyfin-enhanced-panel :is([style*="color: #00a4dc" i], [style*="color:#00a4dc" i]) {
+  color: var(--primary-accent-color) !important;
+  accent-color: var(--primary-accent-color) !important;
+}
+#jellyfin-enhanced-panel :is([style*="background: #00a4dc" i], [style*="background: rgb(0, 164, 220)"]) {
+  background-color: var(--primary-accent-color) !important;
+}
+#jellyfin-enhanced-panel :is([style*="left: 3px solid #00a4dc" i], [style*="left:3px solid #00a4dc" i]) {
+  border-left-color: var(--primary-accent-color) !important;
+}
+.je-header-actions-host {
+  flex: 0 0 auto !important;
+}
+.je-header-buttons-tray {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.MuiToolbar-root .je-header-buttons-tray .headerButton.paper-icon-button-light {
+  width: 34px !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  color: var(--nf-text-2);
+  transition:
+    background-color var(--nf-fast) var(--nf-ease),
+    color var(--nf-fast) var(--nf-ease);
+}
+.MuiToolbar-root .je-header-buttons-tray .headerButton.paper-icon-button-light:hover {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+}
+.je-tag-host .language-flag {
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--nf-shade) 45%, transparent);
+}
+.jellyseerr-card .jellyseerr-media-badge {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-ink-2) 78%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+.jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request {
+  color: var(--nf-light) !important;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent) !important;
+  box-shadow: var(--nf-tube);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+}
+.jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--nf-neon) 22%, transparent) !important;
+  box-shadow: var(--nf-tube);
+}
+#jellyfin-enhanced-panel {
+  background: var(--nf-ink-2) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--nf-rim),
+    0 24px 60px -20px color-mix(in srgb, var(--nf-shade) 80%, transparent) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+#jellyfin-enhanced-panel :is(#releaseNotesBtn, #clearTranslationCacheButton) {
+  color: var(--nf-text) !important;
+  background: color-mix(in srgb, var(--nf-light) 8%, transparent) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim) !important;
+}
+.je-calendar-nav .je-calendar-view-btn.active {
+  color: var(--nf-light) !important;
+  background-color: var(--nf-selected) !important;
+  border-color: transparent !important;
+  box-shadow: var(--nf-selected-edge);
+}
+.jellyseerr-card .jellyseerr-status-badge {
+  border-color: transparent !important;
+}
+.jellyseerr-card .jellyseerr-status-badge:is(.status-available, .status-partially-available) {
+  color: var(--nf-light) !important;
+  background-color: color-mix(in srgb, var(--nf-teal) 45%, var(--nf-shade)) !important;
+}
+.jellyseerr-card .jellyseerr-status-badge:is(.status-requested, .status-pending, .status-processing) {
+  color: var(--nf-on-neon) !important;
+  background-color: var(--nf-neon-deep) !important;
+}
+.jellyseerr-card .jellyseerr-status-badge:is(.status-blocklisted, .status-deleted) {
+  color: var(--nf-text) !important;
+  background-color: color-mix(in srgb, var(--nf-ink-2) 85%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+}
+.cardText .jellyseerr-rating,
+.cardText .jellyseerr-rating > span {
+  color: var(--nf-text-2) !important;
+}
+.jellyseerr-card .jellyseerr-request-button.jellyseerr-button-request:focus-visible {
+  outline-color: var(--nf-light) !important;
+}
+#slides-container .gradient-overlay {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--nf-ink) 85%, transparent) 0%, color-mix(in srgb, var(--nf-ink) 35%, transparent) 45%, transparent 70%),
+    linear-gradient(0deg, var(--nf-ink) 0%, color-mix(in srgb, var(--nf-ink) 40%, transparent) 30%, transparent 55%) !important;
+}
+.layout-desktop #slides-container .gradient-overlay {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--nf-ink) 72%, transparent) 0, color-mix(in srgb, var(--nf-ink) 60%, transparent) 56px, transparent 160px),
+    linear-gradient(90deg, color-mix(in srgb, var(--nf-ink) 66%, transparent) 0%, color-mix(in srgb, var(--nf-ink) 62%, transparent) 38%, color-mix(in srgb, var(--nf-ink) 14%, transparent) 54%, transparent 66%),
+    linear-gradient(0deg, var(--nf-ink) 0%, color-mix(in srgb, var(--nf-ink) 25%, transparent) 20%, transparent 40%) !important;
+}
+#slides-container .plot {
+  color: var(--nf-text) !important;
+}
+.layout-desktop #slides-container .plot {
+  max-width: 34vw;
+  -webkit-line-clamp: 3;
+}
+#slides-container .dots-container .dot {
+  background-color: color-mix(in srgb, var(--nf-light) 28%, transparent) !important;
+}
+#slides-container .dots-container .dot.active {
+  background-color: var(--nf-neon) !important;
+}
+#slides-container .play-button {
+  color: var(--nf-light) !important;
+  background-color: color-mix(in srgb, var(--nf-neon) 12%, transparent) !important;
+  box-shadow: var(--nf-tube) !important;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--nf-neon) 90%, transparent);
+}
+#slides-container .detail-button,
+#slides-container .favorite-button,
+#slides-container .arrow {
+  color: var(--nf-text) !important;
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--nf-rim) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.jellyfin-v12 #slides-container :is(.misc-info, .date, .runTime, .genre, .plot, .play-button, .trailer-button, .slide-counter) {
+  font-family: var(--nf-ui);
+}
+.jellyfin-v12 #slides-container .separator-icon {
+  color: var(--nf-text-2);
+}
+.jellyfin-v12 #slides-container .age-rating {
+  color: var(--nf-text);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--nf-text-2);
+}
+.jellyfin-v12 #slides-container .button-container :is(.play-button, .trailer-button) {
+  border-radius: 999px;
+}
+.jellyfin-v12 #slides-container .trailer-button {
+  color: var(--nf-text);
+  background-color: color-mix(in srgb, var(--nf-light) 8%, transparent);
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  transition: background-color var(--nf-fast) var(--nf-ease);
+}
+.jellyfin-v12 #slides-container .trailer-button:hover {
+  opacity: 1;
+  background-color: color-mix(in srgb, var(--nf-light) 14%, transparent);
+}
+.jellyfin-v12 #slides-container .slide-counter {
+  color: var(--nf-text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+  background-color: color-mix(in srgb, var(--nf-ink-2) 64%, transparent);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--nf-rim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media not all and (max-width: 767px) and (orientation: portrait) {
+  #slides-container .dots-container {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+.jellyfin-v12 #slides-container .media-bar-progress-bar {
+  background-color: color-mix(in srgb, var(--nf-light) 16%, transparent);
+}
+.jellyfin-v12 #slides-container .media-bar-progress-fill {
+  background-color: var(--nf-neon);
+}
+.jellyfin-v12 #slides-container :is(.pause-button, .mute-button) {
+  color: var(--nf-text);
+}
+.jellyfin-v12 #slides-container .misc-info {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+.jellyfin-v12 #slides-container .misc-info > * {
+  white-space: nowrap;
+}
+.layout-mobile .jellyfin-v12 #slides-container .misc-info {
+  justify-content: center;
+}
+.layout-desktop .jellyfin-v12 #slides-container :is(.info-container, .genre) {
+  max-width: 34vw;
+  justify-content: flex-start;
+}
+.layout-mobile .jellyfin-v12 #slides-container .gradient-overlay {
+  background: linear-gradient(
+    0deg,
+    var(--nf-ink) 0%,
+    color-mix(in srgb, var(--nf-ink) 70%, transparent) 16%,
+    color-mix(in srgb, var(--nf-ink) 66%, transparent) 50%,
+    transparent 70%
+  ) !important;
+}
+#slides-container .play-button:focus-visible {
+  outline-color: var(--nf-light) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #slides-container .media-bar-progress-fill,
+  :root .media-bar-settings-button.headerButton,
+  .media-bar-settings-button.headerButton img {
+    transition-duration: 0.01ms !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+  .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child),
+  .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root,
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root,
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:not(:last-child),
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root:first-child,
+  .layout-mobile .MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root,
+  #loginPage > .margin-auto-y,
+  .layout-mobile #loginPage > .margin-auto-y {
+    background-color: var(--nf-ink-2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .actionSheet,
+  .MuiPopover-paper,
+  .layout-mobile .actionSheet,
+  .layout-mobile .MuiPopover-paper,
+  .transparentDocument .actionSheet,
+  .transparentDocument .MuiPopover-paper {
+    background-color: var(--nf-ink-2) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *:not(.mdl-spinner, .mdl-spinner *),
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .card .cardScalable,
+  .card:hover .cardScalable::after,
+  .card:focus-within:is(:focus-visible, :has(:focus-visible)) .cardScalable::after {
+    transition: none;
+  }
+  .card:hover .cardScalable,
+  .card:focus-within:is(:focus-visible, :has(:focus-visible)) .cardScalable {
+    transform: none;
+    transition: none;
+  }
+}

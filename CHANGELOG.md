@@ -6,6 +6,8 @@ or plugins. A patch fixes what is already styled.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-25
+
 ### Added
 
 - The skin for Jellyfin 12's modern layout: the header's glass capsules and menus, home rows
