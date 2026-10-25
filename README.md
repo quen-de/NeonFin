@@ -112,6 +112,14 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 Change the version in the `@import` URL, or paste the new file. A new major version can rename
 palette tokens: read the [changelog](CHANGELOG.md) before moving to one.
 
+To take every 1.x release without editing anything, import the major version instead (the
+same works for the palette URLs). jsDelivr can keep serving the previous release for a while
+after a new one.
+
+```css
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@1/dist/neonfin.css");
+```
+
 ## Uninstall
 
 Remove the NeonFin lines from Custom CSS, save, and hard-reload (Ctrl+Shift+R, or Cmd+Shift+R

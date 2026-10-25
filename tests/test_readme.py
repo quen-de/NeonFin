@@ -3,6 +3,7 @@
 import json
 import pathlib
 import re
+import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 README = (ROOT / "README.md").read_text()
@@ -56,6 +57,12 @@ def test_install_snippets_put_every_import_first():
         imports = [i for i, line in enumerate(lines) if line.startswith("@import")]
         assert imports == list(range(len(imports))), block
     assert "first" in section("Install").lower()
+
+
+def test_update_offers_the_major_version_that_follows_every_compatible_release():
+    # jsDelivr resolves @1 to the newest v1.x tag; semver keeps the palette tokens within a major.
+    major = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"].split(".")[0]
+    assert f"cdn.jsdelivr.net/gh/quen-de/NeonFin@{major}/dist/neonfin.css" in section("Update")
 
 
 def test_readme_links_point_at_files_that_ship():
