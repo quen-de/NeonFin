@@ -132,7 +132,6 @@ def readme_shots(cam: Camera, css: str, tmp: pathlib.Path) -> None:
     webp(shot("movie"), SHOTS / "title.webp", 1440)
     webp(shot("movies"), SHOTS / "library.webp", 1440)
     webp(side_by_side([fit(shot("home", "phone"), 540), fit(shot("movie", "phone"), 540)]), SHOTS / "phone.webp", 1104)
-    webp(shot("picker"), SHOTS / "sign-in.webp", 1440)
     presets = [fit(shot("home", sheet=css + (ROOT / "palettes" / f"{p}.css").read_text()), 720) for p in PRESETS]
     webp(grid(presets), SHOTS / "palettes.webp", 1456)
     webp(shot("osd"), SHOTS / "player.webp", 1440)

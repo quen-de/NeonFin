@@ -17,10 +17,40 @@ def section(title: str) -> str:
 
 def test_every_image_the_readme_shows_ships_and_stays_small():
     images = re.findall(r"\((docs/screenshots/[\w-]+\.webp)\)", README)
-    assert len(images) >= 8, images
+    assert len(images) >= 7, images
     for rel in images:
         assert (ROOT / rel).exists() and (ROOT / rel).stat().st_size <= 400_000, rel
     assert sum(p.stat().st_size for p in (ROOT / "docs" / "screenshots").iterdir()) <= 2_500_000
+
+
+def test_every_screenshot_that_ships_is_shown():
+    shown = set(re.findall(r"\(docs/screenshots/([\w-]+\.webp)\)", README))
+    assert {p.name for p in (ROOT / "docs" / "screenshots").glob("*.webp")} == shown
+
+
+def test_the_gallery_has_no_empty_cell():
+    rows = [line for line in README.splitlines() if line.startswith("| ![")]
+    assert rows
+    for row in rows:
+        assert row.count("![") == 2, row
+
+
+def test_the_opening_says_why_it_exists_and_how_it_was_built():
+    opening = README.split("\n## ", 1)[0]
+    assert "Claude Code" in opening and "I built NeonFin to" in opening
+
+
+def test_features_link_every_plugin_they_name():
+    # File Transformation only carries the others, so it stays in Compatibility.
+    text = section("Features")
+    for p in json.loads((ROOT / "demo" / "plugins.json").read_text())["plugins"]:
+        if p["name"] != "File Transformation":
+            assert re.search(rf"\[{re.escape(p['name'])}\]\(https://github\.com/[\w-]+/[\w-]+\)", text), p["name"]
+
+
+def test_contributing_says_why_the_tooling_is_python():
+    text = section("Contributing")
+    assert "Python" in text and "Playwright" in text and "DEVELOPMENT.md" in text
 
 
 def test_compatibility_names_the_tested_jellyfin_and_plugin_versions():
@@ -56,6 +86,8 @@ def test_install_snippets_put_every_import_first():
         lines = [line for line in block.splitlines() if line.strip()]
         imports = [i for i, line in enumerate(lines) if line.startswith("@import")]
         assert imports == list(range(len(imports))), block
+    # An indented snippet would hide its @import from the check above.
+    assert not re.search(r"^[ \t]+@import", "\n".join(blocks), re.M)
     assert "first" in section("Install").lower()
 
 
