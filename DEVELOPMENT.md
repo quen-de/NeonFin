@@ -144,7 +144,8 @@ commits; everything else builds into `build/`.
 
 1. Set `version` in `pyproject.toml`. Move the entries under `## [Unreleased]` in
    `CHANGELOG.md` to a new `## [X.Y.Z] - YYYY-MM-DD` section, and put the version in the
-   README's `@import` URL.
+   README's pinned example (`@vX.Y.Z`). A new major version also changes the README's `@1`
+   imports to its own number.
 2. `uv run python build.py --release` writes `dist/neonfin.css`. It refuses a version with no
    CHANGELOG entries.
 3. Check the other engines on the demo server, since the README says Firefox and Safari are

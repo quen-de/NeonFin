@@ -44,16 +44,29 @@ I wouldn't have had the time to do it without Claude Code. I'm not a UI/UX desig
 
 ## Install
 
-You need a Jellyfin 12 server and an administrator account.
-
-1. In Jellyfin, open **Dashboard**, then **Branding**.
-2. Paste the line below into **Custom CSS**, first in the field: browsers ignore an `@import`
-   that comes after any other rule. Remove any other theme's lines.
-3. Save, and reload the page.
+NeonFin works on Jellyfin 12. It is one line of CSS, which you can add for everyone on the
+server or just for yourself.
 
 ```css
-@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@v1.0.0/dist/neonfin.css");
+/* Stays up to date with every 1.x release */
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@1/dist/neonfin.css");
 ```
+
+To stay on this exact version instead, use `@v1.0.0` in place of `@1`.
+
+**For everyone**, with an administrator account:
+
+1. In Jellyfin, open **Dashboard**, then **Branding**.
+2. Paste the line into **Custom CSS**, first in the field: browsers ignore an `@import` that
+   comes after any other rule. Remove any other theme's lines.
+3. Save, and reload the page.
+
+**Just for you**, with any account. This applies to the one browser or app you set it in:
+
+1. In Jellyfin, open **Settings** from your user menu, then **Display**.
+2. Paste the line into **Custom CSS code**, first in the field. If the server already has a
+   theme, also tick **Disable server-provided custom CSS code**.
+3. Save, and reload the page.
 
 Viewers' browsers then fetch the skin from jsDelivr, a free public CDN. To keep everything on
 your own server instead, download
@@ -65,8 +78,8 @@ the latest release and paste its contents into the field in place of the line.
 Add a palette's line right after the skin's:
 
 ```css
-@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@v1.0.0/dist/neonfin.css");
-@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@v1.0.0/palettes/cyan.css");
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@1/dist/neonfin.css");
+@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@1/palettes/cyan.css");
 ```
 
 The palettes are `cyan`, `amber`, `violet` and `acid`. If you pasted the skin in, paste the
@@ -131,20 +144,17 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 
 ## Update
 
-Change the version in the `@import` URL, or paste the new file. A new major version can rename
-palette tokens: read the [changelog](CHANGELOG.md) before moving to one.
+- With `@1`, there is nothing to do: each 1.x release reaches you on its own, though jsDelivr
+  can keep serving the previous one for a while after a release.
+- With a pinned version such as `@v1.0.0`, change the version in each line, or paste the new
+  file.
 
-To take every 1.x release without editing anything, import the major version instead (the
-same works for the palette URLs). jsDelivr can keep serving the previous release for a while
-after a new one.
-
-```css
-@import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@1/dist/neonfin.css");
-```
+A new major version can rename palette tokens, so `@1` never moves to 2.x: read the
+[changelog](CHANGELOG.md) before changing to `@2`.
 
 ## Uninstall
 
-Remove the NeonFin lines from Custom CSS, save, and hard-reload (Ctrl+Shift+R, or Cmd+Shift+R
+Remove the NeonFin lines from the Custom CSS field you used, save, and hard-reload (Ctrl+Shift+R, or Cmd+Shift+R
 on a Mac): clients keep the old stylesheet until they reload.
 
 ## Contributing
