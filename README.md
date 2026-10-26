@@ -133,14 +133,9 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 ## Known limitations
 
 - The legacy layout is not styled; use the modern one (the default).
-- TV apps, and phone apps that do not run the web client, do not load custom CSS.
-- Media Bar Enhanced's stylesheet imports a web font from Google. The skin sets the hero in
-  its own face, so the font is never downloaded, but the import still is. The original Media
-  Bar plugin is not supported.
-- Seerr's surfaces in Jellyfin Enhanced are styled but not on the demo server, so they are
-  checked less often.
-- Media Bar Enhanced has no Jellyfin 12 build yet: its 3.10.0.0 build targets Jellyfin 10.11.
-  It loads on Jellyfin 12.2, and NeonFin was tested with it there.
+- Media Bar Enhanced's stylesheet imports a web font from Google. The skin sets the hero in its own face, so the font is never downloaded, but the import still is. The original Media Bar plugin is not supported for now (its slider was broken, haven't taken the time to propose an upstream PR to fix).
+- Seerr's surfaces in Jellyfin Enhanced are styled (verified on my personal server) but not on the demo server, so they are checked less often.
+- Media Bar Enhanced has no Jellyfin 12 build yet: its 3.10.0.0 build targets Jellyfin 10.11. It loads on Jellyfin 12.2, and NeonFin was tested with it there.
 
 ## Update
 
@@ -149,37 +144,25 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 - With a pinned version such as `@v1.0.0`, change the version in each line, or paste the new
   file.
 
-A new major version can rename palette tokens, so `@1` never moves to 2.x: read the
-[changelog](CHANGELOG.md) before changing to `@2`.
-
 ## Uninstall
 
-Remove the NeonFin lines from the Custom CSS field you used, save, and hard-reload (Ctrl+Shift+R, or Cmd+Shift+R
-on a Mac): clients keep the old stylesheet until they reload.
+Remove the NeonFin lines from the Custom CSS field you used, save, and hard-reload (Ctrl+Shift+R, or Cmd+Shift+R on a Mac): clients keep the old stylesheet until they reload.
 
 ## Contributing
 
 Bug reports and fixes are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### Why a Python harness for a stylesheet
+### Why a Python harness for a stylesheet?!
 
-A stylesheet has no compiler to catch its mistakes, and Jellyfin's web client offers it no
-stable API: class names move between releases, and a rule that looks right on one page can
-slow another down or break a plugin's layout. Screenshots alone do not show that, so every
-change is checked on real pages. A harness built on pytest and Playwright opens a Jellyfin
-server in Chrome with the local build injected, and compares each page with plain Jellyfin:
-the work it takes to render and scroll, whether text keeps its contrast, whether any of
-Jellyfin's default blue is left, and whether glass stays where it belongs.
+A stylesheet has no compiler to catch its mistakes, and Jellyfin's web client offers it no stable API: class names move between releases, and a rule that looks right on one page can
+slow another down or break a plugin's layout. Screenshots alone do not show that, so every change is checked on real pages. A harness built on pytest and Playwright opens a Jellyfin
+server in Chrome with the local build injected, and compares each page with plain Jellyfin: the work it takes to render and scroll, whether text keeps its contrast, whether any of Jellyfin's default blue is left, and whether glass stays where it belongs.
 
-It is Python because that is what I work in, and because the build then needs nothing beyond
-Python's standard library: no Node toolchain to produce one CSS file. The
-[demo server](DEVELOPMENT.md#demo-server) runs Jellyfin with the plugins and a library of open
-movies on your own machine, so you can test against the same pages the screenshots show.
+It is Python because that is what I work with, and because the build then needs nothing beyond Python's standard library: no Node toolchain to produce one CSS file. The
+[demo server](DEVELOPMENT.md#demo-server) runs Jellyfin with the plugins and a library of open movies on your own machine, so you can test against the same pages the screenshots show.
 [DEVELOPMENT.md](DEVELOPMENT.md) has the rest.
 
 ## Credits and licence
 
-MIT. The embedded sign font is a subset of Big Shoulders Display, under the SIL Open Font
-License 1.1 (`skin/fonts/OFL.txt`). The films and artwork in the screenshots are open movies
-by the Blender Foundation, under Creative Commons Attribution licences, with metadata from TMDB
+MIT. The embedded sign font is a subset of Big Shoulders Display, under the SIL Open Font License 1.1 (`skin/fonts/OFL.txt`). The films and artwork in the screenshots are open movies by the Blender Foundation, under Creative Commons Attribution licences, with metadata from TMDB
 ([demo/CREDITS.md](demo/CREDITS.md)). NeonFin is not affiliated with the Jellyfin project.
