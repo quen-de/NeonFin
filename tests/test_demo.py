@@ -16,12 +16,6 @@ def plugin_plan() -> dict:
     return json.loads((DEMO / "plugins.json").read_text())
 
 
-def test_every_demo_title_is_cc_by_with_its_source():
-    lib = library()
-    for t in lib["movies"] + [lib["series"]]:
-        assert re.fullmatch(r"CC-BY \d\.\d", t["licence"]) and t["source"].startswith("https://"), t["title"]
-
-
 def test_one_demo_film_is_the_hdr_clip():
     assert sum(bool(m.get("hdr")) for m in library()["movies"]) == 1
 

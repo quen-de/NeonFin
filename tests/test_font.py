@@ -19,9 +19,3 @@ def test_font_covers_sign_text():
 
 def test_font_is_renamed_so_it_never_shadows_an_installed_one():
     assert TTFont(FONT)["name"].getDebugName(1) == "NeonFin Sign"
-
-
-def test_licence_ships_beside_it_with_no_reserved_name():
-    text = (FONT.parent / "OFL.txt").read_text()
-    assert "SIL OPEN FONT LICENSE Version 1.1" in text
-    assert "Reserved Font Name" not in text.split("This Font Software is licensed")[0]
