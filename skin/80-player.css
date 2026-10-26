@@ -19,7 +19,7 @@
   box-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 50%, transparent);
 }
 
-/* Controls over video: no glass (DESIGN.md, "Player"). The top and bottom bars sit on ink that holds
+/* Controls over video: no glass. The top and bottom bars sit on ink that holds
    dark behind the text, then fades out; Jellyfin fades the bars themselves by opacity. */
 .skinHeader.skinHeader-withBackground.osdHeader {
   background: linear-gradient(

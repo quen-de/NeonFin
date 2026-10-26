@@ -102,7 +102,7 @@ TEXT_GROUP = """(bar) => [...document.querySelectorAll(bar + ' .MuiButtonGroup-t
 @pytest.mark.parametrize("profile", ["desktop", "phone"])
 @pytest.mark.parametrize("route", ["movies", "series"])
 def test_filter_sort_view_and_paging_are_round_tinted_buttons(open_page, color, profile, route):
-    # Everything in the row but Play All is a round tinted button (DESIGN.md, "Library toolbar").
+    # Everything in the row but Play All is a round tinted button.
     buttons = open_page(route, profile, "none").evaluate(TEXT_GROUP, BAR2)
     assert {"FilterAltIcon", "SortByAlphaIcon"} <= {b["icon"] for b in buttons}, buttons
     for b in buttons:

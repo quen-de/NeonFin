@@ -1,5 +1,5 @@
 """Player timing: how long Play takes to show a picture, how fast the controls come back, and
-how smoothly frames run while they show, with the skin against vanilla (DESIGN.md, "Player").
+how smoothly frames run while they show, with the skin against vanilla.
 
 usage: python -m harness.player --label NAME [--profiles desktop,phone]
        [--titles direct,hdr,convert] [--pairs 7] [--plugins all]

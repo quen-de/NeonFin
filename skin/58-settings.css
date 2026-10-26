@@ -10,7 +10,7 @@
   background-color: var(--nf-oxblood);
 }
 
-/* Working pages, so no signs: headings in semibold interface type (DESIGN.md, "Settings"). */
+/* Working pages, so no signs: headings in semibold interface type. */
 .userPreferencesPage :is(.sectionTitle, .MuiTypography-h2) {
   font-weight: 600;
 }

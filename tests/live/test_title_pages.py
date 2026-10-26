@@ -206,7 +206,7 @@ ONLY_BACKDROP = ".mainAnimatedPage, .MuiAppBar-root, .backgroundContainer { visi
 
 
 def test_the_backdrop_softens_into_a_blur_toward_the_bottom(open_page, tmp_path):
-    # Sharp at the top, the same image blurred toward the bottom (DESIGN.md, "Title pages").
+    # Sharp at the top, the same image blurred toward the bottom.
     from PIL import Image, ImageStat
 
     page = open_page("movie", "desktop", "none", variant="stripes")

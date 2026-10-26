@@ -1,5 +1,5 @@
 /* Dialogs: solid raised ink with a rim, over the page dimmed in ink. Glass would show nothing
-   through the dim (DESIGN.md, "Elevation & Depth"). The rim is drawn over the dialog's own header and footer. */
+   through the dim. The rim is drawn over the dialog's own header and footer. */
 .dialog.formDialog {
   background-color: var(--nf-ink-2);
   border-radius: var(--nf-radius-menu);

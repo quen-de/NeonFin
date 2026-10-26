@@ -1,4 +1,4 @@
-"""Settings pages: working pages, close to Jellyfin's, with no blue left (DESIGN.md, "Settings")."""
+"""Settings pages: working pages, close to Jellyfin's, with no blue left."""
 
 import pytest
 

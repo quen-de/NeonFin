@@ -7,7 +7,7 @@ import re
 from cssscan import code_mask, declarations, leaf_rules, line_of, selectors
 
 # The only selectors that may carry live glass (a backdrop-filter other than
-# none). Each addition is a decision against the glass budget (DESIGN.md, "Elevation & Depth").
+# none). Each addition is a decision against the glass budget.
 GLASS_ALLOWLIST = frozenset(
     {
         ".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root",
