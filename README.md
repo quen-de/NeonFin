@@ -1,4 +1,9 @@
-# NeonFin
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/header-dark.webp">
+    <img src="docs/brand/header-light.webp" alt="NeonFin" width="560">
+  </picture>
+</h1>
 
 A glass-and-neon web skin for Jellyfin 12, in one stylesheet.
 
