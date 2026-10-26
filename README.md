@@ -5,27 +5,23 @@
   </picture>
 </h1>
 
-A glass-and-neon web skin for Jellyfin 12, in one stylesheet.
+A configurable glass-and-neon web skin for Jellyfin 12.
 
 [![CI](https://github.com/quen-de/NeonFin/actions/workflows/ci.yml/badge.svg)](https://github.com/quen-de/NeonFin/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/quen-de/NeonFin)](https://github.com/quen-de/NeonFin/releases/latest)
 
 ![NeonFin's home page: a lit hero over the rows](docs/screenshots/home.webp)
 
-I built NeonFin to strike a good balance between pure glass and neon themes, which I think was
-missing from the landscape. Performance was benchmarked throughout to keep it close to vanilla
-Jellyfin. I wouldn't have had the time to do it without Claude Code. I'm not a frontend
-developer or a UI/UX designer, but I am a software developer, and the project follows proper
-DevOps practices: every change is tested before it ships.
+NeonFin proposes a balance between pure glass and neon themes, which I think was missing from the landscape. Performance was benchmarked throughout to keep it close to vanilla Jellyfin. 
+
+**⚠️ OBLIGATORY AI DISCLAIMER**
+
+I wouldn't have had the time to do it without Claude Code. I'm not a UI/UX designer, but I am a software developer, and the project follows proper DevOps practices, using a demo server to run tests and benchmarks.
 
 ## Features
 
-- **Neon and glass.** A dark interface lit by one neon accent. Glass where it reads as glass,
-  on the header and its menus over the artwork; cards, title pages and the player stay solid
-  and sharp.
-- **Performance-aware.** Glass and glow cost render time, so every effect has to earn its
-  place: page load, style work and scrolling are measured against plain Jellyfin on the same
-  server and stay within set limits ([how](DEVELOPMENT.md#gates)).
+- **Neon and glass.** A dark interface lit by one neon accent. Glass where it reads as glass, on the header and its menus over the artwork; cards, title pages and the player stay solid and sharp.
+- **Performance-aware.** Glass and glow cost render time, so every effect is deliberate: page load, style work and scrolling are measured against plain Jellyfin on the same server and stay within set limits ([how](DEVELOPMENT.md#gates)).
 - **Your colours.** Four ready palettes (Cyan neon, Amber, Violet, Acid green), or your own:
   a picker page previews it and checks that text stays readable.
 - **Works with popular plugins**, each optional, and complete without them:
@@ -109,8 +105,7 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 - Jellyfin 12, tested on `jellyfin/jellyfin:12.2.20261005-225228`, in the modern layout.
 - Chrome is tested on every change (Edge shares its engine), at desktop and phone sizes;
   Firefox and Safari are checked at each release. On phones the targets are Chrome on
-  Android and the Jellyfin Android app, which runs the web client; neither is tested on a
-  device.
+  Android and the Jellyfin Android app, which runs the web client.
 - Plugins, each optional:
 
 | Plugin | Tested version | Styled |
