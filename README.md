@@ -158,7 +158,7 @@ A stylesheet has no compiler to catch its mistakes, and Jellyfin's web client of
 slow another down or break a plugin's layout. Screenshots alone do not show that, so every change is checked on real pages. A harness built on pytest and Playwright opens a Jellyfin
 server in Chrome with the local build injected, and compares each page with plain Jellyfin: the work it takes to render and scroll, whether text keeps its contrast, whether any of Jellyfin's default blue is left, and whether glass stays where it belongs.
 
-It is Python because that is what I work with, and because the build then needs nothing beyond Python's standard library: no Node toolchain to produce one CSS file. The
+It is Python because that is what I work with. The harness runs on Playwright and Pillow, while the build itself uses only Python's standard library, so producing one CSS file needs no Node toolchain. The
 [demo server](DEVELOPMENT.md#demo-server) runs Jellyfin with the plugins and a library of open movies on your own machine, so you can test against the same pages the screenshots show.
 [DEVELOPMENT.md](DEVELOPMENT.md) has the rest.
 
