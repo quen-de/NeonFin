@@ -17,7 +17,7 @@ import tempfile
 import urllib.request
 from urllib.parse import urlsplit
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 from playwright.sync_api import sync_playwright
 
 import build
@@ -27,6 +27,7 @@ from harness.profiles import PROFILES, ROUTES
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SHOTS = ROOT / "docs" / "screenshots"
 PREVIEW = ROOT / "docs" / "social-preview.png"
+LOGO = ROOT / "docs" / "brand" / "header-dark.webp"
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
 DEMO_NAME = "Demo"  # the name demo/setup.py gives the server
 ROUTE = {r.name: r for r in ROUTES}
@@ -98,6 +99,30 @@ def webp(img: Image.Image, path: pathlib.Path, width: int) -> None:
     raise ShotError(f"{path.name} stays over {MAX_BYTES:,} bytes")
 
 
+def social_preview(home: Image.Image) -> Image.Image:
+    """GitHub's 1280x640 card: the logo over the home page, as a window rising from the bottom edge."""
+    w, h, radius, fade = 1280, 640, 14, 100
+    out = Image.new("RGB", (w, h), GROUND)
+    win = fit(home, 920)
+    x, top = (w - win.width) // 2, 206
+    box = (x, top, x + win.width - 1, h + radius)
+    shadow = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(shadow).rounded_rectangle(box, radius, fill=200)
+    out.paste((0, 0, 0), (0, 0, w, h), shadow.filter(ImageFilter.GaussianBlur(28)))
+    mask = Image.new("L", win.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, win.width - 1, win.height + radius), radius, fill=255)
+    out.paste(win, (x, top), mask)
+    ImageDraw.Draw(out, "RGBA").rounded_rectangle(box, radius, outline=(255, 255, 255, 40))
+    # Sink the window's lower edge into the ground so the logo leads.
+    ramp = Image.new("L", (w, h), 0)
+    for i in range(fade):
+        ImageDraw.Draw(ramp).line((0, h - fade + i, w, h - fade + i), fill=round(255 * (i / fade) ** 2))
+    out.paste(GROUND, (0, 0, w, h), ramp)
+    logo = fit(Image.open(LOGO), 500)
+    out.paste(logo, ((w - logo.width) // 2, 8), logo)
+    return out
+
+
 class Camera:
     def __init__(self, browser, cfg):
         self.browser, self.cfg, self.states = browser, cfg, {}
@@ -135,7 +160,7 @@ def readme_shots(cam: Camera, css: str, tmp: pathlib.Path) -> None:
     presets = [fit(shot("home", sheet=css + (ROOT / "palettes" / f"{p}.css").read_text()), 720) for p in PRESETS]
     webp(grid(presets), SHOTS / "palettes.webp", 1456)
     webp(shot("osd"), SHOTS / "player.webp", 1440)
-    home.crop((0, 0, 1440, 720)).resize((1280, 640), Image.LANCZOS).save(PREVIEW, optimize=True)
+    social_preview(home).save(PREVIEW, optimize=True)
 
 
 def engine_check(cam: Camera, css: str, out: pathlib.Path, engine: str) -> int:

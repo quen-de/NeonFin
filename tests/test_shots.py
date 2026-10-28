@@ -46,3 +46,10 @@ def test_webp_refuses_an_image_it_cannot_fit(tmp_path, monkeypatch):
     monkeypatch.setattr(shots, "MAX_BYTES", 100)
     with pytest.raises(shots.ShotError, match="stays over"):
         shots.webp(Image.effect_noise((400, 300), 64).convert("RGB"), tmp_path / "x.webp", 400)
+
+
+def test_social_preview_sets_the_page_under_the_logo_at_github_size():
+    out = shots.social_preview(Image.new("RGB", (1440, 900), (0, 255, 0)))
+    assert out.size == (1280, 640) and out.mode == "RGB"
+    assert out.getpixel((4, 4)) == shots.GROUND and out.getpixel((640, 400)) == (0, 255, 0)
+    assert out.getpixel((640, 100)) != (0, 255, 0)
