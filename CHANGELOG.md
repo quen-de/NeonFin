@@ -19,9 +19,3 @@ or plugins. A patch fixes what is already styled.
   page that checks readability and writes the block to paste.
 - Solid surfaces and still motion when the system asks for less transparency, more contrast,
   forced colours or less motion.
-
-### Before 1.0
-
-NeonFin was developed in private from October 2026, measured page by page against plain
-Jellyfin on a real server with a browser harness, and released once it covered every page
-above.
