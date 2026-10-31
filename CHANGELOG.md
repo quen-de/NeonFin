@@ -15,6 +15,8 @@ or plugins. A patch fixes what is already styled.
   scroll sideways.
 - A custom tab, which Jellyfin draws without an icon, takes a plain tab icon in the header and
   the drawer.
+- The trailer volume control Media Bar Enhanced 3.11 added beside its mute button is tinted
+  and filled in the accent, instead of blurred and Jellyfin blue.
 
 ## [1.0.0] - 2026-10-25
 

@@ -122,6 +122,29 @@
   color: var(--nf-text);
 }
 
+/* The trailer's volume opens beside its button: tinted like the counter, not blurred, and
+   filled in the accent like the progress bar. */
+.jellyfin-v12 #slides-container .media-bar-volume-wrap {
+  background-color: color-mix(in srgb, var(--nf-ink-2) 64%, transparent);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.jellyfin-v12 #slides-container .media-bar-volume-slider,
+.jellyfin-v12 #slides-container .media-bar-volume-slider:hover {
+  background: linear-gradient(to right, var(--nf-neon) var(--volume-percent, 40%), color-mix(in srgb, var(--nf-light) 28%, transparent) var(--volume-percent, 40%));
+}
+
+.jellyfin-v12 #slides-container .media-bar-volume-slider::-webkit-slider-thumb {
+  background: var(--nf-light);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 80%, transparent), 0 0 6px var(--nf-neon);
+}
+
+.jellyfin-v12 #slides-container .media-bar-volume-slider::-moz-range-thumb {
+  background: var(--nf-light);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--nf-shade) 80%, transparent), 0 0 6px var(--nf-neon);
+}
+
 /* A long details line wraps between its items, never inside one: the interface face is wider
    than the plugin's narrow one. */
 .jellyfin-v12 #slides-container .misc-info {
