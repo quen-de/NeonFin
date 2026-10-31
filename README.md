@@ -52,7 +52,7 @@ server or just for yourself.
 @import url("https://cdn.jsdelivr.net/gh/quen-de/NeonFin@1/dist/neonfin.css");
 ```
 
-To stay on this exact version instead, use `@v1.0.0` in place of `@1`.
+To stay on this exact version instead, use `@v1.1.0` in place of `@1`.
 
 **For everyone**, with an administrator account:
 
@@ -141,7 +141,7 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 
 - With `@1`, there is nothing to do: each 1.x release reaches you on its own, though jsDelivr
   can keep serving the previous one for a while after a release.
-- With a pinned version such as `@v1.0.0`, change the version in each line, or paste the new
+- With a pinned version such as `@v1.1.0`, change the version in each line, or paste the new
   file.
 
 ## Uninstall

@@ -6,6 +6,8 @@ or plugins. A patch fixes what is already styled.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-31
+
 ### Added
 
 - A row with more cards than the screen holds fades out at the screen's edge, a hint that it
