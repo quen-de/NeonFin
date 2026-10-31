@@ -181,3 +181,10 @@ def test_the_demo_searches_a_term_its_library_answers(tmp_path, monkeypatch):
     setup.write_config()
     conf = json.loads((tmp_path / "config.json").read_text())
     assert conf["search_term"] == "in" and conf["volatile"]
+
+
+def test_the_calendar_tab_is_added_once_beside_any_other_tab():
+    other = {"Title": "Requests", "ContentHtml": "<div></div>"}
+    once = setup.with_calendar_tab({"Tabs": [other]})
+    assert setup.with_calendar_tab(once) == once
+    assert once["Tabs"] == [other, setup.CALENDAR_TAB]

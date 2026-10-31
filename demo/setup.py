@@ -39,6 +39,9 @@ FFMPEG = "/usr/lib/jellyfin-ffmpeg/ffmpeg"
 OLDEST_ABI = (10, 11)
 SEARCH_TERM = "in"
 LIBRARIES = (("Movies", "movies", "/media/Movies"), ("Shows", "tvshows", "/media/Shows"))
+# Jellyfin Enhanced's calendar as a Custom Tabs tab, the way its documentation sets it up: a section
+# Jellyfin draws no icon for.
+CALENDAR_TAB = {"Title": "Calendar", "ContentHtml": '<div class="jellyfinenhanced calendar"></div>'}
 HDR10 = (
     "hdr10=1:repeat-headers=1:colorprim=bt2020:transfer=smpte2084:colormatrix=bt2020nc"
     ":master-display=G(13250,34500)B(7500,3000)R(34000,16000)WP(15635,16450)L(10000000,1):max-cll=1000,400:keyint=600"
@@ -332,6 +335,23 @@ def not_active(admin: Api, plan: dict, skipped: set[str]) -> list[str]:
     return [f"{n}: {status.get(n) or 'not installed'}" for n in names if status.get(n) != "Active"]
 
 
+def with_calendar_tab(conf: dict) -> dict:
+    """Custom Tabs' configuration with the calendar tab, once, after any other tab."""
+    others = [t for t in conf.get("Tabs") or [] if t.get("Title") != CALENDAR_TAB["Title"]]
+    return {**conf, "Tabs": [*others, CALENDAR_TAB]}
+
+
+def ensure_calendar_tab(admin: Api) -> None:
+    ids = {p["Name"]: p["Id"] for p in admin.call("GET", "/Plugins")}
+    if not {"Custom Tabs", "Jellyfin Enhanced"} <= ids.keys():
+        return
+    tabs = f"/Plugins/{ids['Custom Tabs']}/Configuration"
+    admin.call("POST", tabs, with_calendar_tab(admin.call("GET", tabs)))
+    enhanced = f"/Plugins/{ids['Jellyfin Enhanced']}/Configuration"
+    flags = {"CalendarPageEnabled": True, "CalendarUseCustomTabs": True, "CalendarUsePluginPages": True}
+    admin.call("POST", enhanced, {**admin.call("GET", enhanced), **flags})
+
+
 def ensure_libraries(admin: Api) -> None:
     have = {f["Name"] for f in admin.call("GET", "/Library/VirtualFolders")}
     for name, kind, path in LIBRARIES:
@@ -422,6 +442,7 @@ def main(argv: list[str] | None = None) -> int:
         idle = not_active(admin, plan, {p["name"] for p in plan["plugins"] if any(s.startswith(p["name"] + " ") for s in skipped)})
         if idle:
             raise SetupError("plugins the server did not load: " + "; ".join(idle))
+        ensure_calendar_tab(admin)
         ensure_libraries(admin)
         viewer, uid = sign_in(base, VIEWER, creds["JELLYFIN_THEME_PASSWORD"])
         missing = wait_for_library(viewer, uid, library)

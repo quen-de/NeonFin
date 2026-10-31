@@ -76,3 +76,35 @@ def test_phone_header_stays_solid_at_tablet_width(open_page, style):
     page = open_page("home", "phone", "none", viewport=(1024, 768))
     assert style(page, NAV, "backdrop-filter")["backdrop-filter"] == "none"
     assert checks.glass_elements(page) == []
+
+
+NAV_ICONS = """([items, native]) => [...document.querySelectorAll(items)].map((a) => {
+  const walk = document.createTreeWalker(a, NodeFilter.SHOW_TEXT), range = document.createRange();
+  let label; while ((label = walk.nextNode()) && !label.textContent.trim());
+  range.selectNodeContents(label); const before = getComputedStyle(a, '::before');
+  return { text: a.textContent.trim(), href: a.getAttribute('href'), own: !!a.querySelector(native),
+    label: range.getBoundingClientRect().left - a.getBoundingClientRect().left,
+    mask: before.maskImage || before.webkitMaskImage || 'none', width: parseFloat(before.width) || 0 }; })"""
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_a_section_jellyfin_draws_no_icon_for_takes_a_plain_tab(open_page, profile):
+    # Jellyfin draws icons only for its own sections: a custom tab comes without one.
+    page = open_page("home", profile, "all", variant="nav-icons")
+    if profile == "phone":
+        page.locator(".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root").first.click()
+        page.wait_for_selector(".MuiDrawer-paper", state="visible")
+        items, native = ".MuiDrawer-paper .MuiListItemButton-root", ".MuiListItemIcon-root"
+    else:
+        items, native = f"{NAV} > .MuiButton-root", ".MuiButton-startIcon"
+    got = page.evaluate(NAV_ICONS, [items, native])
+    if profile == "phone":
+        page.keyboard.press("Escape")
+    bare = [i for i in got if not i["own"]]
+    if not bare:
+        pytest.skip("no custom tab on this server")
+    for item in bare:
+        assert "svg" in item["mask"] and item["width"] >= 18, item
+    if profile == "phone":
+        labels = {round(i["label"]) for i in got if i["href"] != "#/"}  # the server's name has a logo of its own
+        assert max(labels) - min(labels) <= 1, got  # every label in one column

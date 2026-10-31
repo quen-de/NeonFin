@@ -126,7 +126,7 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 | File Transformation | 3.0.2.0 | Required by the IAmParadox plugins |
 | Plugin Pages | 3.0.2.0 | Hosts Jellyfin Enhanced's calendar |
 | Home Screen Sections | 3.0.3.0 | Its rows and Discover cards |
-| Custom Tabs | 0.3.2.0 | Works alongside; nothing of its own to style |
+| Custom Tabs | 0.3.2.0 | Its tabs, which take a plain icon |
 | Media Bar Enhanced | 3.10.0.0 | The hero: slides, dots or counter, buttons |
 | Jellyfin Enhanced | 12.13.0.0 | Its panel, calendar, flags, random pick and Seerr search |
 

@@ -13,6 +13,8 @@ or plugins. A patch fixes what is already styled.
 - Links that plugins add to the phone drawer line up with Jellyfin's own and stay inside it:
   Jellyfin Enhanced's no longer clip at its edge, and Media Bar Enhanced's no longer make it
   scroll sideways.
+- A custom tab, which Jellyfin draws without an icon, takes a plain tab icon in the header and
+  the drawer.
 
 ## [1.0.0] - 2026-10-25
 

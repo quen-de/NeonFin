@@ -82,6 +82,27 @@
   box-shadow: var(--nf-selected-edge);
 }
 
+/* Jellyfin draws icons only for its own sections: a custom tab comes without one, and takes a
+   plain tab in its place, in the header and in the drawer. */
+.MuiAppBar-root > .MuiToolbar-root:first-child > .MuiStack-root > .MuiButton-root:not(:has(.MuiButton-startIcon))::before,
+.MuiDrawer-paper .MuiListItemButton-root:not(:has(.MuiListItemIcon-root))::before {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0 8px 0 -4px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 2v4H5v8h14V6z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 2v4H5v8h14V6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* In the drawer it fills the icon column, as wide as Jellyfin's icons are. */
+.MuiDrawer-paper .MuiListItemButton-root:not(:has(.MuiListItemIcon-root))::before {
+  width: 1.5em;
+  height: 1.5em;
+  margin: 0 calc(36px - 1.5em) 0 0;
+}
+
 /* The avatar sits outside the capsules. */
 .MuiAppBar-root > .MuiToolbar-root:first-child > .MuiBox-root:last-child .MuiIconButton-root {
   padding: 4px;
