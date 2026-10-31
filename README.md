@@ -123,19 +123,19 @@ lighter ink or chrome, or a darker paper, can cost that; the picker shows where.
 
 | Plugin | Tested version | Styled |
 |---|---|---|
-| File Transformation | 3.0.2.0 | Required by the IAmParadox plugins |
-| Plugin Pages | 3.0.2.0 | Hosts Jellyfin Enhanced's calendar |
-| Home Screen Sections | 3.0.3.0 | Its rows and Discover cards |
-| Custom Tabs | 0.3.2.0 | Its tabs, which take a plain icon |
-| Media Bar Enhanced | 3.10.0.0 | The hero: slides, dots or counter, buttons |
-| Jellyfin Enhanced | 12.13.0.0 | Its panel, calendar, flags, random pick and Seerr search |
+| File Transformation | 3.0.3.0 | Required by the IAmParadox plugins |
+| Plugin Pages | 3.0.3.0 | Hosts Jellyfin Enhanced's calendar |
+| Home Screen Sections | 3.0.4.0 | Its rows and Discover cards |
+| Custom Tabs | 0.3.3.0 | Its tabs, which take a plain icon |
+| Media Bar Enhanced | 3.11.1.0 | The hero: slides, dots or counter, buttons |
+| Jellyfin Enhanced | 12.14.0.0 | Its panel, calendar, flags, random pick and Seerr search |
 
 ## Known limitations
 
 - The legacy layout is not styled; use the modern one (the default).
 - Media Bar Enhanced's stylesheet imports a web font from Google. The skin sets the hero in its own face, so the font is never downloaded, but the import still is. The original Media Bar plugin is not supported for now (its slider was broken, haven't taken the time to propose an upstream PR to fix).
 - Seerr's surfaces in Jellyfin Enhanced are styled (verified on my personal server) but not on the demo server, so they are checked less often.
-- Media Bar Enhanced has no Jellyfin 12 build yet: its 3.10.0.0 build targets Jellyfin 10.11. It loads on Jellyfin 12.2, and NeonFin was tested with it there.
+- Media Bar Enhanced has no Jellyfin 12 build yet: its builds target Jellyfin 10.11. They load on Jellyfin 12.2, and NeonFin was tested with them there.
 
 ## Update
 
