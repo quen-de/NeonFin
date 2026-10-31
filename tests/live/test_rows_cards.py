@@ -369,3 +369,48 @@ def test_a_my_media_tile_without_artwork_keeps_its_name(open_page):
     if got is None:
         pytest.skip("no My Media row on this user's home")
     assert not got[0]["art"] and got[0]["h"] > 10, got[0]
+
+
+# Each card row's cards past its right edge, and the fade the skin draws there.
+ROW_FADE = """() => [...document.querySelectorAll('.emby-scroller, .itemsContainer.scrollX')]
+  .filter((e) => e.offsetParent && e.querySelector('.card')).map((e) => {
+    const cards = e.querySelectorAll('.card'), last = cards[cards.length - 1].getBoundingClientRect();
+    const cs = getComputedStyle(e);
+    return { hidden: Math.round(last.right - Math.min(e.getBoundingClientRect().right, innerWidth)),
+      fade: parseFloat(cs.getPropertyValue('--nf-row-more')) || 0, mask: cs.maskImage || cs.webkitMaskImage }; })"""
+# Desktop rows move by their buttons, phone rows by touch.
+TO_THE_END = """async () => {
+  for (const e of document.querySelectorAll('.emby-scroller, .itemsContainer.scrollX')) {
+    e.scrollLeft = e.scrollWidth;
+    const next = e.parentElement.querySelector('.emby-scrollbuttons [data-direction="right"]');
+    for (let i = 0; next && !next.disabled && i < 8; i++) { next.click(); await new Promise((r) => setTimeout(r, 600)); }
+  }
+  await new Promise((r) => setTimeout(r, 600)); }"""
+
+
+@pytest.mark.parametrize(
+    "route, profile, media",
+    [
+        ("home", "desktop", ()),
+        ("home", "phone", ()),
+        ("movie", "phone", ()),
+        ("home", "phone", (("prefers-reduced-motion", "reduce"),)),
+    ],
+)
+def test_a_row_with_more_to_its_right_fades_out_at_the_edge_until_its_end(open_page, route, profile, media):
+    page = open_page(route, profile, "all", media, variant="row-fade")
+    page.wait_for_timeout(600)
+    rows = page.evaluate(ROW_FADE)
+    assert any(r["hidden"] > 40 for r in rows), rows
+    assert all(r["fade"] >= 24 and r["mask"] != "none" for r in rows if r["hidden"] > 40), rows
+    assert all(r["fade"] == 0 for r in rows if r["hidden"] <= 1), rows
+    page.evaluate(TO_THE_END)
+    assert all(r["fade"] == 0 for r in page.evaluate(ROW_FADE)), rows
+
+
+@pytest.mark.parametrize("profile", ["desktop", "phone"])
+def test_more_contrast_keeps_every_row_unfaded(open_page, profile):
+    page = open_page("home", profile, "all", (("prefers-contrast", "more"),), variant="row-fade")
+    page.wait_for_timeout(600)
+    rows = page.evaluate(ROW_FADE)
+    assert any(r["hidden"] > 40 for r in rows) and all(r["fade"] == 0 for r in rows), rows

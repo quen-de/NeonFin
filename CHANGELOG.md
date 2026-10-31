@@ -6,6 +6,12 @@ or plugins. A patch fixes what is already styled.
 
 ## [Unreleased]
 
+### Added
+
+- A row with more cards than the screen holds fades out at the screen's edge, a hint that it
+  scrolls on; the fade lifts at the row's end. On phones it needs scroll-driven animations
+  (Chrome, the Android app, Safari 26), so Firefox on a phone shows the row without it.
+
 ### Fixed
 
 - On a short phone, Media Bar Enhanced's progress bar no longer sits against the Play button,

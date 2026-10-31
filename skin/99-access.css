@@ -25,6 +25,12 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+
+  /* Rows end sharp at the screen's edge, cards at full contrast. */
+  .emby-scroller,
+  .itemsContainer.scrollX {
+    --nf-row-fade: 0px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

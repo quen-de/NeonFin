@@ -92,6 +92,50 @@
   padding-bottom: 10px;
 }
 
+/* A row with more cards than the screen holds fades out at the screen's edge, a hint that it
+   goes on; the fade lifts at the row's end. Desktop rows move by their buttons, so the next
+   one tells; phones scroll by touch, so the scroll position does. */
+@property --nf-row-more {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes nf-row-more {
+  from {
+    --nf-row-more: var(--nf-row-fade);
+  }
+
+  to {
+    --nf-row-more: 0px;
+  }
+}
+
+.emby-scroller,
+.itemsContainer.scrollX {
+  --nf-row-fade: clamp(32px, 6vw, 72px);
+}
+
+.emby-scroller-container:has(> .emby-scrollbuttons > [data-direction="right"]:not([disabled], .hide)) > .emby-scroller {
+  --nf-row-more: var(--nf-row-fade);
+}
+
+.emby-scroller-container:has(> .emby-scrollbuttons > [data-direction="right"]:not(.hide)) > .emby-scroller {
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 var(--nf-row-more));
+  mask-image: linear-gradient(to left, transparent, #000 var(--nf-row-more));
+  transition: --nf-row-more var(--nf-fast) var(--nf-ease);
+}
+
+@supports (animation-timeline: scroll()) {
+  .layout-mobile :is(.emby-scroller, .itemsContainer.scrollX) {
+    -webkit-mask-image: linear-gradient(to left, transparent, #000 var(--nf-row-more));
+    mask-image: linear-gradient(to left, transparent, #000 var(--nf-row-more));
+    animation: nf-row-more linear both;
+    animation-timeline: scroll(self inline);
+    animation-range: calc(100% - var(--nf-row-fade)) 100%;
+  }
+}
+
 .emby-scrollbuttons-button {
   width: 36px;
   height: 36px;
