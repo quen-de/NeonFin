@@ -155,6 +155,33 @@
   ) !important;
 }
 
+/* Phones held upright space the details, the dots and the buttons in vh, so on a short screen
+   the progress bar lands on the buttons. Everything above them rises together to keep the bar
+   24px clear. Its 16:9 and 4:3 layouts place these otherwise. */
+@media (max-width: 767px) and (orientation: portrait) {
+  body:not(.media-bar-mobile-16-9, .media-bar-mobile-4-3) #slides-container :is(.logo-container, .genre, .plot-container, .dots-container) {
+    translate: 0 min(0px, 5vh - 54px);
+  }
+
+  /* It places the genres one row (20px) of details down. The interface face wraps the details
+     sooner, so a wrapped line grows from its middle, half towards the title, and the genres keep
+     6px below it. */
+  body:not(.media-bar-mobile-16-9, .media-bar-mobile-4-3) #slides-container .info-container {
+    anchor-name: --nf-details;
+    translate: 0 calc(min(0px, 5vh - 54px) + (20px - 100%) / 2);
+  }
+
+  body:not(.media-bar-mobile-16-9, .media-bar-mobile-4-3) #slides-container .genre {
+    top: max(calc(50% + 15vh), anchor(--nf-details bottom) - anchor-size(--nf-details height) / 2 + 16px);
+  }
+}
+
+@media (max-width: 400px) and (orientation: portrait) {
+  body:not(.media-bar-mobile-16-9, .media-bar-mobile-4-3) #slides-container .genre {
+    top: max(calc(50% + 16vh), anchor(--nf-details bottom) - anchor-size(--nf-details height) / 2 + 16px);
+  }
+}
+
 /* Play is a tube: a light focus ring, not one lost in its glow. */
 #slides-container .play-button:focus-visible {
   outline-color: var(--nf-light) !important;

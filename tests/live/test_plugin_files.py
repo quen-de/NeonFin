@@ -401,3 +401,41 @@ def test_the_enhanced_counter_and_progress_sit_centre_screen(open_page, profile,
     hero_is(page)
     got = page.evaluate(CENTRE)
     assert got and got["centre"] == pytest.approx(got["vw"] / 2, abs=2), got
+
+
+HERO_GAPS = """() => { const slide = document.querySelector('#slides-container .slide.active');
+  const box = (e) => e.getBoundingClientRect(), dots = box(document.querySelector('#slides-container .dots-container'));
+  const bar = box(document.querySelector('#slides-container .media-bar-progress-bar'));
+  return { bar: box(slide.querySelector('.button-container')).top - bar.bottom,
+    details: dots.top - box(slide.querySelector('.genre')).bottom }; }"""
+
+
+@pytest.mark.parametrize("viewport", [None, (412, 780), (360, 680)])
+def test_the_phone_hero_keeps_its_progress_bar_clear_of_the_buttons(open_page, viewport):
+    # The plugin spaces the details, the dots and the buttons in vh: on a short phone the bar
+    # lands on the buttons. Everything above them rises instead, together.
+    page = open_page("home", "phone", "all", viewport=viewport)
+    hero_is(page)
+    gaps = page.evaluate(HERO_GAPS)
+    assert 20 <= gaps["bar"] <= 28 and gaps["details"] >= 4, gaps
+
+
+HERO_STACK = """(extra) => { const slide = document.querySelector('#slides-container .slide.active');
+  for (const text of extra) { const item = document.createElement('div'); item.className = 'runTime'; item.textContent = text;
+    slide.querySelector('.misc-info').append(item); }
+  const box = (e) => e.getBoundingClientRect(), info = box(slide.querySelector('.info-container'));
+  const genre = box(slide.querySelector('.genre')), logo = slide.querySelector('.logo-container img');
+  const dot = document.querySelector('#slides-container :is(.dot, .slide-counter)');
+  return { height: info.height, title: logo ? info.top - box(logo).bottom : null, genres: genre.top - info.bottom,
+    dots: box(dot).top - genre.bottom }; }"""
+
+
+@pytest.mark.parametrize("viewport, extra", [((360, 680), []), ((412, 915), ["2h 38m", "Dolby Vision", "Ends at 11:59 PM", "4K"])])
+def test_a_wrapped_phone_details_line_keeps_clear_of_the_title_genres_and_dots(open_page, viewport, extra):
+    # The plugin places each line for one row of details. The interface face wraps them sooner,
+    # on a narrow phone already, and a long line wraps on any.
+    page = open_page("home", "phone", "all", viewport=viewport, variant="wrapped-details")
+    hero_is(page)
+    got = page.evaluate(HERO_STACK, extra)
+    assert got["height"] > 30, got  # it wraps
+    assert got["genres"] >= 4 and got["dots"] >= 4 and (got["title"] is None or got["title"] >= 0), got

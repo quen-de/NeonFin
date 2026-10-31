@@ -6,6 +6,11 @@ or plugins. A patch fixes what is already styled.
 
 ## [Unreleased]
 
+### Fixed
+
+- On a short phone, Media Bar Enhanced's progress bar no longer sits against the Play button,
+  and a details line that wraps no longer runs into the genres.
+
 ## [1.0.0] - 2026-10-25
 
 ### Added
