@@ -10,6 +10,9 @@ or plugins. A patch fixes what is already styled.
 
 - On a short phone, Media Bar Enhanced's progress bar no longer sits against the Play button,
   and a details line that wraps no longer runs into the genres.
+- Links that plugins add to the phone drawer line up with Jellyfin's own and stay inside it:
+  Jellyfin Enhanced's no longer clip at its edge, and Media Bar Enhanced's no longer make it
+  scroll sideways.
 
 ## [1.0.0] - 2026-10-25
 

@@ -116,8 +116,27 @@
 }
 
 .MuiDrawer-paper .MuiListItemButton-root {
+  box-sizing: border-box;
+  max-width: calc(100% - 16px);
   margin: 2px 8px;
   border-radius: 999px;
+}
+
+/* Plugins add links of their own. Some are written a full width plus padding, which would make
+   the drawer scroll sideways: the rule above keeps them inside. Others use the legacy sidebar's
+   markup, indented past Jellyfin's items and flush with the drawer's edge, under !important
+   flags: they line up with Jellyfin's items instead. */
+.MuiDrawer-paper .navMenuOption {
+  box-sizing: border-box;
+  max-width: calc(100% - 16px);
+  margin: 2px 8px !important;
+  padding: 8px 16px !important;
+  border-radius: 999px !important;
+}
+
+.MuiDrawer-paper .navMenuOptionIcon {
+  min-width: 36px;
+  margin-right: 0;
 }
 
 .MuiDrawer-paper .MuiListItemButton-root.Mui-selected {

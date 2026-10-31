@@ -420,6 +420,35 @@ def test_the_phone_hero_keeps_its_progress_bar_clear_of_the_buttons(open_page, v
     assert 20 <= gaps["bar"] <= 28 and gaps["details"] >= 4, gaps
 
 
+DRAWER_FIT = """() => { const paper = document.querySelector('.MuiDrawer-paper'), edge = paper.getBoundingClientRect().right;
+  const glyphs = (e) => { const r = document.createRange(); r.selectNodeContents(e); return r.getBoundingClientRect(); };
+  const native = paper.querySelector('.Mui-selected'), link = document.getElementById('jellyfinEnhancedSettingsLink');
+  const texts = [...paper.querySelectorAll('.MuiListItemText-root, .navMenuOptionText')].filter((e) => e.offsetParent);
+  return { sideways: paper.scrollWidth - paper.clientWidth,
+    tight: texts.filter((e) => glyphs(e).right > edge - 16).map((e) => e.textContent.trim()),
+    icon: link.querySelector('.navMenuOptionIcon').getBoundingClientRect().left
+      - native.querySelector('.MuiListItemIcon-root').getBoundingClientRect().left,
+    text: glyphs(link.querySelector('.navMenuOptionText')).left - glyphs(native.querySelector('.MuiListItemText-root')).left }; }"""
+
+
+@pytest.mark.parametrize("plugin_state", ["all", "without:media-bar-enhanced"])
+def test_enhanced_drawer_links_line_up_with_jellyfins_and_fit_the_drawer(open_page, plugin_state):
+    # Jellyfin Enhanced adds its links to the phone drawer in the legacy sidebar's markup. The
+    # drawer is as wide as its widest entry: without Media Bar's link that is the Enhanced Panel.
+    page = open_page("home", "phone", plugin_state, variant="drawer-fit")
+    page.locator(".MuiAppBar-root > .MuiToolbar-root:first-child > .MuiIconButton-root").first.click()
+    page.wait_for_selector(".MuiDrawer-paper", state="visible")
+    # The plugin debounces on Date, which the harness holds still.
+    page.evaluate("() => window.__harnessAdvanceClock(1000)")
+    if not page.wait_for_selector("#jellyfinEnhancedSettingsLink", state="attached", timeout=5_000):
+        pytest.skip("no Jellyfin Enhanced link in the drawer")
+    page.wait_for_timeout(300)
+    fit = page.evaluate(DRAWER_FIT)
+    page.keyboard.press("Escape")
+    assert fit["sideways"] <= 0 and fit["tight"] == [], fit
+    assert abs(fit["icon"]) <= 2 and abs(fit["text"]) <= 2, fit
+
+
 HERO_STACK = """(extra) => { const slide = document.querySelector('#slides-container .slide.active');
   for (const text of extra) { const item = document.createElement('div'); item.className = 'runTime'; item.textContent = text;
     slide.querySelector('.misc-info').append(item); }
