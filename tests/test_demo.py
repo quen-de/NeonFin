@@ -1,4 +1,4 @@
-"""The demo server's definition: licences, pins, and what stays on this machine."""
+"""The demo server's definition: licences, the server pin, and what stays on this machine."""
 
 import json
 import pathlib
@@ -27,12 +27,12 @@ def test_every_clip_plays_well_past_ten_seconds():
     assert all(r >= 60 for r in runtimes), runtimes
 
 
-def test_every_plugin_is_pinned_to_a_repository_it_names():
+def test_every_plugin_comes_from_a_repository_it_names():
     plan = plugin_plan()
     repos = {r["name"] for r in plan["repositories"]}
     assert all(r["url"].startswith("https://") for r in plan["repositories"])
     for p in plan["plugins"]:
-        assert re.fullmatch(r"\d+\.\d+\.\d+\.\d+", p["version"]) and p["repository"] in repos and p["styled"], p
+        assert p["repository"] in repos and p["styled"], p
 
 
 def test_the_demo_server_is_pinned_and_reachable_from_this_machine_only():

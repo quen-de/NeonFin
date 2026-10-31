@@ -295,8 +295,20 @@ def ensure_key(admin: Api) -> str:
     return key
 
 
+def newest_build(package: dict, server: str) -> dict | None:
+    """The package's newest build that fits this server, or None."""
+    fits = [v for v in package.get("versions", []) if abi_ok(v["targetAbi"], server)]
+    return max(fits, key=lambda v: plugin_version(v["version"]), default=None)
+
+
+def plugin_version(v: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in re.findall(r"\d+", v))
+
+
 def ensure_plugins(admin: Api, plan: dict, server: str) -> tuple[list[str], list[str]]:
-    """Install each pinned plugin: (installed now, skipped with the reason)."""
+    """Bring each plugin to its newest build for this server: (installed now, names skipped for
+    want of one). One the server already has at that build or later is left alone, so a rerun never
+    installs an older build beside the one Jellyfin updated to."""
     repos = admin.call("GET", "/Repositories")
     have = {r["Url"] for r in repos}
     new = [{"Name": r["name"], "Url": r["url"], "Enabled": True} for r in plan["repositories"] if r["url"] not in have]
@@ -306,16 +318,16 @@ def ensure_plugins(admin: Api, plan: dict, server: str) -> tuple[list[str], list
     packages = {p["name"]: p for p in admin.call("GET", "/Packages")}
     done, skipped = [], []
     for p in plan["plugins"]:
-        if installed.get(p["name"]) == p["version"]:
-            continue
         pkg = packages.get(p["name"]) or {}
-        fit = next((v for v in pkg.get("versions", []) if v["version"] == p["version"] and abi_ok(v["targetAbi"], server)), None)
-        if fit is None:
-            skipped.append(f"{p['name']} {p['version']}: no build for Jellyfin {server}")
+        build = newest_build(pkg, server)
+        if build is None:
+            skipped.append(p["name"])
             continue
-        q = urllib.parse.urlencode({"assemblyGuid": pkg["guid"], "version": p["version"], "repositoryUrl": fit["repositoryUrl"]})
+        if p["name"] in installed and plugin_version(installed[p["name"]]) >= plugin_version(build["version"]):
+            continue
+        q = urllib.parse.urlencode({"assemblyGuid": pkg["guid"], "version": build["version"], "repositoryUrl": build["repositoryUrl"]})
         admin.call("POST", f"/Packages/Installed/{urllib.parse.quote(p['name'])}?{q}")
-        done.append(f"{p['name']} {p['version']}")
+        done.append(f"{p['name']} {build['version']}")
     return done, skipped
 
 
@@ -329,7 +341,7 @@ def wrong_abis(server: str) -> list[str]:
 
 
 def not_active(admin: Api, plan: dict, skipped: set[str]) -> list[str]:
-    """Each pinned plugin, other than the skipped ones, that the server has not loaded."""
+    """Each plugin of the plan, other than the skipped ones, that the server has not loaded."""
     status = {p["Name"]: p.get("Status") for p in admin.call("GET", "/Plugins")}
     names = [p["name"] for p in plan["plugins"] if p["name"] not in skipped]
     return [f"{n}: {status.get(n) or 'not installed'}" for n in names if status.get(n) != "Active"]
@@ -439,7 +451,7 @@ def main(argv: list[str] | None = None) -> int:
         bad = wrong_abis(server)
         if bad:
             raise SetupError("plugin builds for another Jellyfin: " + "; ".join(bad))
-        idle = not_active(admin, plan, {p["name"] for p in plan["plugins"] if any(s.startswith(p["name"] + " ") for s in skipped)})
+        idle = not_active(admin, plan, set(skipped))
         if idle:
             raise SetupError("plugins the server did not load: " + "; ".join(idle))
         ensure_calendar_tab(admin)
@@ -458,8 +470,8 @@ def main(argv: list[str] | None = None) -> int:
     except (SetupError, subprocess.CalledProcessError, OSError) as e:
         print(f"setup: {e}", file=sys.stderr)
         return 1
-    for s in skipped:
-        print(f"skipped {s}")
+    for name in skipped:
+        print(f"skipped {name}: no build for Jellyfin {server}")
     for m in missing:
         print(f"no artwork yet: {m}")
     print("demo ready on " + base + ". Use it: ( set -a; . demo/.env; set +a; <command> )")

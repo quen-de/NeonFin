@@ -86,7 +86,7 @@ class Plugins:
         return self.rows
 
 
-def test_a_pinned_plugin_that_did_not_load_is_named():
+def test_a_plugin_that_did_not_load_is_named():
     admin = Plugins([{"Name": "A", "Status": "Active"}, {"Name": "B", "Status": "NotSupported"}])
     plan = {"plugins": [{"name": "A"}, {"name": "B"}, {"name": "C"}, {"name": "D"}]}
     assert setup.not_active(admin, plan, skipped={"D"}) == ["B: NotSupported", "C: not installed"]
@@ -188,3 +188,43 @@ def test_the_calendar_tab_is_added_once_beside_any_other_tab():
     once = setup.with_calendar_tab({"Tabs": [other]})
     assert setup.with_calendar_tab(once) == once
     assert once["Tabs"] == [other, setup.CALENDAR_TAB]
+
+
+def test_a_plugin_installs_as_its_newest_build_for_this_server():
+    builds = [
+        {"version": "3.9.0.0", "targetAbi": "12.2.0.0"},
+        {"version": "3.11.1.0", "targetAbi": "12.2.0.0"},
+        {"version": "3.12.0.0", "targetAbi": "12.3.0.0"},
+        {"version": "3.10.0.0", "targetAbi": "10.11.0.0"},
+    ]
+    assert setup.newest_build({"versions": builds}, "12.2.1")["version"] == "3.11.1.0"
+    assert setup.newest_build({"versions": [{"version": "1.0.0.0", "targetAbi": "10.10.0.0"}]}, "12.2.1") is None
+    assert setup.newest_build({}, "12.2.1") is None
+
+
+class Catalogue:
+    """A server with plugins installed and a catalogue of builds, recording what setup installs."""
+
+    def __init__(self, installed, builds):
+        self.installed, self.builds, self.posted = installed, builds, []
+
+    def call(self, method, path, body=None):
+        if path == "/Repositories":
+            return [] if method == "GET" else None
+        if path == "/Plugins":
+            return [{"Name": n, "Version": v} for n, v in self.installed.items()]
+        if path == "/Packages":
+            return [{"name": n, "guid": n, "versions": vs} for n, vs in self.builds.items()]
+        self.posted.append(path)
+
+
+def test_setup_brings_each_plugin_to_its_newest_build_and_never_back():
+    fits = lambda *vs: [{"version": v, "targetAbi": "12.2.0.0", "repositoryUrl": "https://r"} for v in vs]  # noqa: E731
+    admin = Catalogue(
+        installed={"Ahead": "2.1.0.0", "Behind": "1.0.0.0"},
+        builds={"Ahead": fits("2.0.0.0"), "Behind": fits("1.0.0.0", "1.2.0.0"), "Missing": fits("0.3.3.0"), "Old": []},
+    )
+    plan = {"repositories": [], "plugins": [{"name": n} for n in ("Ahead", "Behind", "Missing", "Old")]}
+    done, skipped = setup.ensure_plugins(admin, plan, "12.2.1")
+    assert done == ["Behind 1.2.0.0", "Missing 0.3.3.0"] and skipped == ["Old"]
+    assert [p.split("?")[0] for p in admin.posted] == ["/Packages/Installed/Behind", "/Packages/Installed/Missing"]

@@ -123,7 +123,9 @@ session-wide browser blocks the browsers the offline tests start for themselves.
 ## Demo server
 
 `uv run python demo/setup.py` brings up Jellyfin 12 in Docker on `127.0.0.1:8096`, with the
-supported plugins and a library of Blender open movies (stand-in clips, TMDB metadata). It
+supported plugins at their newest builds for that server and a library of Blender open movies
+(stand-in clips, TMDB metadata). Jellyfin keeps the plugins updated from then on, and a rerun
+brings any that fell behind up to date without ever going back to an older build. It
 writes the accounts' random passwords and an API key to `demo/.env` and the harness's items to
 `demo/config.json`, both gitignored. Run anything against it in a subshell:
 
@@ -145,7 +147,8 @@ commits; everything else builds into `build/`.
 1. Set `version` in `pyproject.toml`. Move the entries under `## [Unreleased]` in
    `CHANGELOG.md` to a new `## [X.Y.Z] - YYYY-MM-DD` section, and put the version in the
    README's pinned example (`@vX.Y.Z`). A new major version also changes the README's `@1`
-   imports to its own number.
+   imports to its own number. Once the live tests pass on the demo server, set the README's
+   tested plugin versions to the ones it runs.
 2. `uv run python build.py --release` writes `dist/neonfin.css`. It refuses a version with no
    CHANGELOG entries.
 3. Check the other engines on the demo server, since the README says Firefox and Safari are
