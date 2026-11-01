@@ -19,9 +19,18 @@ from harness.profiles import PROFILES, ROUTES
 ROUTE = {r.name: r for r in ROUTES}
 # Enough for any test's pages at once (two at most) and a file's worth of reuse.
 OPEN_PAGES = 12
-STYLE_JS = """([sel, props, pseudo]) => {
+# A style is read once the element's own transitions end: one caught midway, such as a hero dot
+# fading in as its slide comes up, is neither its old value nor its new one. Endless animations
+# are not waited on, and no wait runs past 3 s.
+STYLE_JS = """async ([sel, props, pseudo]) => {
   const el = document.querySelector(sel);
   if (!el) return null;
+  const running = el.getAnimations({ subtree: true })
+    .filter((a) => a.effect && a.effect.target === el && a.effect.getComputedTiming().endTime !== Infinity);
+  await Promise.race([
+    Promise.all(running.map((a) => a.finished.catch(() => {}))),
+    new Promise((done) => setTimeout(done, 3000)),
+  ]);
   const cs = getComputedStyle(el, pseudo);
   const out = {};
   for (const p of props) out[p] = cs.getPropertyValue(p);
