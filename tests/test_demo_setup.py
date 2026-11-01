@@ -228,3 +228,24 @@ def test_setup_brings_each_plugin_to_its_newest_build_and_never_back():
     done, skipped = setup.ensure_plugins(admin, plan, "12.2.1")
     assert done == ["Behind 1.2.0.0", "Missing 0.3.3.0"] and skipped == ["Old"]
     assert [p.split("?")[0] for p in admin.posted] == ["/Packages/Installed/Behind", "/Packages/Installed/Missing"]
+
+
+def test_of_one_version_the_build_for_the_latest_jellyfin_that_fits_wins():
+    builds = [{"version": "3.0.3.0", "targetAbi": abi} for abi in ("10.11.11.0", "12.2.0.0", "12.4.0.0", "12.5.0.0")]
+    assert setup.newest_build({"versions": builds}, "12.4.0")["targetAbi"] == "12.4.0.0"
+
+
+def test_setup_replaces_a_build_made_for_an_earlier_jellyfin_under_the_same_version():
+    builds = lambda v: [{"version": v, "targetAbi": abi, "repositoryUrl": "https://r"} for abi in ("12.2.0.0", "12.4.0.0")]  # noqa: E731
+    admin = Catalogue(installed={"Tabs": "0.3.3.0", "Pages": "3.0.3.0"}, builds={"Tabs": builds("0.3.3.0"), "Pages": builds("3.0.3.0")})
+    plan = {"repositories": [], "plugins": [{"name": "Tabs"}, {"name": "Pages"}]}
+    abis = {("Tabs", "0.3.3.0"): "12.2.0.0", ("Pages", "3.0.3.0"): "12.4.0.0"}
+    done, _ = setup.ensure_plugins(admin, plan, "12.4.0", abis)
+    assert done == ["Tabs 0.3.3.0"]
+
+
+def test_installed_builds_are_read_with_the_jellyfin_they_target(tmp_path):
+    build = tmp_path / "config" / "plugins" / "Custom Tabs_0.3.3.0"
+    build.mkdir(parents=True)
+    (build / "meta.json").write_text(json.dumps({"name": "Custom Tabs", "version": "0.3.3.0", "targetAbi": "12.2.0.0"}))
+    assert setup.installed_abis(tmp_path) == {("Custom Tabs", "0.3.3.0"): "12.2.0.0"}

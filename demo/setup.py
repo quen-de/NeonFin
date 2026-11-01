@@ -296,19 +296,37 @@ def ensure_key(admin: Api) -> str:
 
 
 def newest_build(package: dict, server: str) -> dict | None:
-    """The package's newest build that fits this server, or None."""
+    """The package's newest build that fits this server, or None. Of one version, the build for
+    the latest Jellyfin wins: some repositories ship each version once per Jellyfin release."""
     fits = [v for v in package.get("versions", []) if abi_ok(v["targetAbi"], server)]
-    return max(fits, key=lambda v: plugin_version(v["version"]), default=None)
+    return max(fits, key=lambda v: build_key(v["version"], v["targetAbi"]), default=None)
 
 
 def plugin_version(v: str) -> tuple[int, ...]:
     return tuple(int(x) for x in re.findall(r"\d+", v))
 
 
-def ensure_plugins(admin: Api, plan: dict, server: str) -> tuple[list[str], list[str]]:
+def build_key(version: str, abi: str) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    return plugin_version(version), plugin_version(abi)
+
+
+def installed_abis(data: pathlib.Path = DATA) -> dict[tuple[str, str], str]:
+    """The Jellyfin each installed build targets, by plugin name and version, from the meta.json
+    Jellyfin keeps beside it. The server's API does not say."""
+    abis = {}
+    for meta in data.glob("config/**/plugins/*/meta.json"):
+        m = json.loads(meta.read_text())
+        abis[(m.get("name"), m.get("version"))] = m.get("targetAbi", "")
+    return abis
+
+
+def ensure_plugins(admin: Api, plan: dict, server: str, abis: dict | None = None) -> tuple[list[str], list[str]]:
     """Bring each plugin to its newest build for this server: (installed now, names skipped for
     want of one). One the server already has at that build or later is left alone, so a rerun never
-    installs an older build beside the one Jellyfin updated to."""
+    installs an older build beside the one Jellyfin updated to. A build for an earlier Jellyfin
+    under the same version is replaced, since Jellyfin's own updates go by version alone: `abis`
+    names the Jellyfin each installed build targets."""
+    abis = abis or {}
     repos = admin.call("GET", "/Repositories")
     have = {r["Url"] for r in repos}
     new = [{"Name": r["name"], "Url": r["url"], "Enabled": True} for r in plan["repositories"] if r["url"] not in have]
@@ -323,8 +341,11 @@ def ensure_plugins(admin: Api, plan: dict, server: str) -> tuple[list[str], list
         if build is None:
             skipped.append(p["name"])
             continue
-        if p["name"] in installed and plugin_version(installed[p["name"]]) >= plugin_version(build["version"]):
-            continue
+        if p["name"] in installed:
+            version = installed[p["name"]]
+            abi = abis.get((p["name"], version), build["targetAbi"])
+            if build_key(version, abi) >= build_key(build["version"], build["targetAbi"]):
+                continue
         q = urllib.parse.urlencode({"assemblyGuid": pkg["guid"], "version": build["version"], "repositoryUrl": build["repositoryUrl"]})
         admin.call("POST", f"/Packages/Installed/{urllib.parse.quote(p['name'])}?{q}")
         done.append(f"{p['name']} {build['version']}")
@@ -441,7 +462,7 @@ def main(argv: list[str] | None = None) -> int:
         creds["JELLYFIN_API_KEY"] = ensure_key(admin)
         write_env(creds, ENV_FILE)
         server = admin.call("GET", "/System/Info")["Version"]
-        done, skipped = ensure_plugins(admin, plan, server)
+        done, skipped = ensure_plugins(admin, plan, server, installed_abis())
         if done:
             print("installed " + ", ".join(done) + "; restarting", flush=True)
             admin.call("POST", "/System/Restart")
